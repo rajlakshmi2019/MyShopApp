@@ -513,19 +513,18 @@ function createExchangeCardChip(className, color, label) {
 
 function populateRateFields(metal, exchangeCard, weightInput,
   sellRateInput, sellPercentagePurityInput, purchaseRateInput, purchasePercentagePurityInput) {
+    let tabIndex = getTabIndexFromId(exchangeCard.parentElement.id);
+    let metaData = getMetaData(tabIndex);
+    let todaysRate = metaData == null || metaData.sellingRate == null ||
+      metaData.sellingRate[metal] == null ? Dao.getTodaysRate()[metal] : metaData.sellingRate[metal];
 
-  let tabIndex = getTabIndexFromId(exchangeCard.parentElement.id);
-  let metaData = getMetaData(tabIndex);
-  let todaysRate = metaData == null || metaData.sellingRate == null ||
-    metaData.sellingRate[metal] == null ? Dao.getTodaysRate()[metal] : metaData.sellingRate[metal];
-
-  weightInput.value = "0.00"
-  sellRateInput.value = todaysRate;
-  sellPercentagePurityInput.value = "0.00";
-  purchaseRateInput.value = metaData == null || metaData.sellingRate == null ||
-    metaData.purchaseRate[metal] == null ? ShopCalculator.calculateMetalPurchaseRate(
-      Number(todaysRate), Dao.getPurchaseRateDiff()[metal]) : metaData.purchaseRate[metal];
-  purchasePercentagePurityInput.value = "0.00";
+    weightInput.value = "0.00"
+    sellRateInput.value = todaysRate;
+    sellPercentagePurityInput.value = "0.00";
+    purchaseRateInput.value = metaData == null || metaData.sellingRate == null ||
+      metaData.purchaseRate[metal] == null ? ShopCalculator.calculateMetalPurchaseRate(
+        Number(todaysRate), Dao.getPurchaseRateDiff()[metal]) : metaData.purchaseRate[metal];
+    purchasePercentagePurityInput.value = "0.00";
 }
 
 function updatePurchasePrice(purchasePriceLabel, weight, metalRate, purityPercentage) {
