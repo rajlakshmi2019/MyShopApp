@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <title>Gold Sell Form</title>
+    <link rel="stylesheet" href="../css/app.css">
+    <link rel="stylesheet" href="../css/done.css">
+    <link rel="stylesheet" href="../css/tray.css">
+  </head>
+  <body>
+    <div class="form-container">
+      <p class="form-title gold-color">Make Your Sale </p>
+      <br>
+      <div class="form-content">
+        <div class="wrapper-div lower-margin">
+          <div class="input-header gold-color">
+            Name/Phone No.
+          </div>
+          <input type="text" size="13" class="input-text" id="set-name" value="New Set">
+        </div>
+        <div class="wrapper-div half-width float-left">
+          <div class="input-header gold-color">
+            Gold per gram
+          </div>
+          <input type="text" size="12" class="input-text rupee-background" id="gold-rate-main">
+        </div>
+        <div class="wrapper-div half-width float-right">
+          <div class="input-header silver-color align-right">
+            Silver per gram
+          </div>
+          <input type="text" size="12" class="input-text rupee-background float-right" id="silver-rate-main">
+        </div>
+        <button class="collapsible collapsible-main" id="gold-btn">
+          Gold
+          <span class="collapsible-state">+</span>
+        </button>
+        <div class="content" id="gold-content">
+        </div>
+        <button class="collapsible collapsible-main" id="silver-btn">
+          Silver
+          <span class="collapsible-state">+</span>
+        </button>
+        <div class="content" id="silver-content">
+        </div>
+      </div>
+    </div>
+    <div class="form-submit-div">
+      <a class="form-submit">
+        <div class="done-button">
+          <div class="done-check-left"></div>
+          <div class="done-check-right"></div>
+        </div>
+        <div class='done-button-text'>
+          <span>Done</span>
+        </div>
+      </a>
+    </div>
+  </body>
+  <script>
+    require('./../renderers/goldSellFormRenderer.js');
+  </script>
+</html>

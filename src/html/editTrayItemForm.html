@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Tray Item Edit Form</title>
+    <link rel="stylesheet" href="../css/app.css">
+    <link rel="stylesheet" href="../css/tray.css">
+    <link rel="stylesheet" href="../css/done.css">
+  </head>
+  <body>
+    <div class="form-div">
+       <div class="input-header item-header"></div>
+       <div class="split-seventy float-left">
+          <div class="input-box split-forty float-left rate-per-gram">
+             <div class="input-header">Rate per gram</div>
+             <input type="text" class="input-text rupee-background">
+          </div>
+          <div class="input-box split-half float-left making-per-gram">
+             <div class="input-header">Making Charge per gram</div>
+             <input type="text" class="input-text rupee-background">
+          </div>
+          <div class="input-box split-half float-left minimum-making">
+             <div class="input-header">Minimum Making Charge</div>
+             <input type="text" class="input-text rupee-background">
+          </div>
+       </div>
+       <div class="split-thirty float-left">
+          <div class="input-box float-right">
+             <div class="input-header">Weight In Grams</div>
+             <textarea class="input-text input-weights" rows="5" cols="20"></textarea>
+          </div>
+       </div>
+    </div>
+    <div class="form-submit-div">
+      <a class="form-submit">
+        <div class="done-button">
+          <div class="done-check-left"></div>
+          <div class="done-check-right"></div>
+        </div>
+        <div class='done-button-text'>
+          <span>Done</span>
+        </div>
+      </a>
+    </div>
+  </body>
+  <script type="text/javascript">
+    require('./../renderers/editTrayItemFormRenderer.js');
+  </script>
+</html>

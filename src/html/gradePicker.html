@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Pick a grade</title>
+    <link rel="stylesheet" href="../css/app.css">
+    <link rel="stylesheet" href="../css/body.css">
+    <link rel="stylesheet" href="../css/tray.css">
+    <link rel="stylesheet" href="../css/done.css">
+  </head>
+  <body>
+    <div id="grade-picker-div">
+      <h1 class="big-header-margin">Select a pricing grade</h1>
+      <div id="grades-form">
+        <input type="radio" name="grades" id="grade-a" value="A"> Grade A&nbsp;&nbsp;&nbsp;&nbsp;
+        <input type="radio" name="grades" id="grade-b" value="B"> Grade B <br><br>
+        <input type="radio" name="grades" id="grade-c" value="C"> Grade C&nbsp;&nbsp;&nbsp;&nbsp;
+        <input type="radio" name="grades" id="grade-d" value="D"> Grade D
+      </div>
+    </div>
+    <div class="form-submit-div">
+      <a class="form-submit">
+        <div class="done-button">
+          <div class="done-check-left"></div>
+          <div class="done-check-right"></div>
+        </div>
+        <div class='done-button-text'>
+          <span>Done</span>
+        </div>
+      </a>
+    </div>
+  </body>
+  <script type="text/javascript">
+    require('./../renderers/gradePickerRenderer.js');
+  </script>
+</html>

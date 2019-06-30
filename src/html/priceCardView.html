@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <link rel="stylesheet" href="../css/app.css">
+    <link rel="stylesheet" href="../css/tray.css">
+    <link rel="stylesheet" href="../css/done.css">
+  </head>
+  <body>
+    <div class="main-div">
+      <h2 class="item-label float-left" id="item-name-label"></h2>
+      <h1 class="number-font align-right" id="weight-label"></h1>
+      <div class="price-table">
+        <h3 class="float-left">Selling Price</h3>
+        <h3 class="align-right" id="metal-selling-price"></h3>
+        <div class="table-top-label">
+          <h3 class="align-right" id="minimum-making-label"></h3>
+        </div>
+        <table class="upper-margin">
+          <tr>
+            <th>A</th>
+            <th><label class="number-font large-font making-charge" id="making-per-gram-a"></label></th>
+            <th><label class="number-font" id="making-charge-a"></label></th>
+            <th><label class="number-font large-font money-green" id="item-price-a"></label></th>
+            <th><label class="number-font money-green" id="profit-at-price-a">+ ₹ 5,215</label></th>
+          </tr>
+          <tr>
+            <th>B</th>
+            <th><label class="number-font large-font making-charge" id="making-per-gram-b"></label></th>
+            <th><label class="number-font" id="making-charge-b"></label></th>
+            <th><label class="number-font large-font money-green" id="item-price-b"></label></th>
+            <th><label class="number-font money-green" id="profit-at-price-b"></label></th>
+          </tr>
+          <tr>
+            <th>C</th>
+            <th><label class="number-font large-font making-charge" id="making-per-gram-c"></label></th>
+            <th><label class="number-font" id="making-charge-c"></label></th>
+            <th><label class="number-font large-font money-green" id="item-price-c"></label></th>
+            <th><label class="number-font money-green" id="profit-at-price-c"></label></th>
+          </tr>
+          <tr>
+            <th>D</th>
+            <th><label class="number-font large-font making-charge" id="making-per-gram-d"></label></th>
+            <th><label class="number-font" id="making-charge-d"></label></th>
+            <th><label class="number-font large-font money-green" id="item-price-d"></label></th>
+            <th><label class="number-font money-green" id="profit-at-price-d"></label></th>
+          </tr>
+        </table>
+      </div>
+      <div class="cost-price">
+        <h3 class="float-left">Cost Price</h3>
+        <h2 class="number-font red-color align-right" id="cost-price-label"></h2>
+        <div class="number-font align-right" id="metal-cost-price"></div>
+        <div class="number-font align-right" id="item-westage"></div>
+      </div>
+    </div>
+    <div class="form-submit-div">
+      <a class="form-submit">
+        <div class="done-button">
+          <div class="done-check-left"></div>
+          <div class="done-check-right"></div>
+        </div>
+        <div class='done-button-text'>
+          <span>Done</span>
+        </div>
+      </a>
+    </div>
+  </body>
+  <script>
+    require('./../renderers/priceCardViewRenderer.js');
+  </script>
+</html>

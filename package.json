@@ -1,0 +1,19 @@
+{
+  "name": "munshi",
+  "version": "1.0.0",
+  "description": "utility app for dukaan",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/ayushkumar52/munshi/"
+  },
+  "author": "kumar",
+  "license": "MIT",
+  "dependencies": {
+    "csvtojson": "^2.0.8",
+    "electron": "^5.0.1"
+  }
+}

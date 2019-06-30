@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Gold Exchange Form</title>
+    <link rel="stylesheet" href="../css/app.css">
+    <link rel="stylesheet" href="../css/done.css">
+    <link rel="stylesheet" href="../css/tray.css">
+  </head>
+  <body>
+    <div class="form-container">
+      <p class="form-title gold-color">Make Your Purchase </p>
+      <br>
+      <div class="form-content">
+        <div class="wrapper-div lower-margin">
+          <div class="input-header gold-color">
+            Name/Phone No.
+          </div>
+          <input type="text" size="17" class="input-text" id="set-name" value="New Set">
+        </div>
+        <div class="wrapper-div lower-margin">
+          <div class="wrapper-div half-width float-left">
+            <div class="input-header gold-color">
+              Gold Purchase Rate (/g)
+            </div>
+            <input type="text" size="16" class="input-text rupee-background" id="gold-rate-purchase">
+          </div>
+          <div class="wrapper-div half-width float-right">
+            <div class="input-header gold-color align-right">
+              Gold Selling Rate (/g)
+            </div>
+            <input type="text" size="16" class="input-text rupee-background float-right" id="gold-rate-sell">
+          </div>
+        </div>
+        <div class="wrapper-div lower-margin">
+          <div class="wrapper-div half-width float-left">
+            <div class="input-header silver-color">
+              Silver Purchase Rate (/g)
+            </div>
+            <input type="text" size="16" class="input-text rupee-background" id="silver-rate-purchase">
+          </div>
+          <div class="wrapper-div half-width float-right">
+            <div class="input-header silver-color align-right">
+              Silver Selling Rate (/g)
+            </div>
+            <input type="text" size="16" class="input-text rupee-background float-right" id="silver-rate-sell">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="form-submit-div">
+      <a class="form-submit">
+        <div class="done-button">
+          <div class="done-check-left"></div>
+          <div class="done-check-right"></div>
+        </div>
+        <div class='done-button-text'>
+          <span>Done</span>
+        </div>
+      </a>
+    </div>
+  </body>
+  <script>
+    require('./../renderers/goldExchangeFormRenderer.js');
+  </script>
+</html>

@@ -1,0 +1,92 @@
+.form-submit-div {
+  margin: 5px 25px;
+}
+
+.form-submit {
+  float: right;
+  width: 15px;
+  height: 15px;
+  padding: 16px;
+  margin: 20px 0;
+  border-radius: 100px;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0px 0px 0px 3px white;
+  -webkit-animation: pop .8s;
+  transition-property: width;
+  transition-duration: .2s,.2s;
+  -webkit-transition-timing-function: cubic-bezier(0.38, -0.35, 0.265, 1.15);
+}
+
+.form-submit:hover {
+  width: 80px;
+  box-shadow: 0px 0px 0px 3px #48DB48;
+}
+
+.form-submit:hover > .done-button-text {
+  top: 0;
+  opacity: 1;
+  transition-property: top,opacity;
+  transition-duration: 0.3s;
+  transition-delay: .1s;
+}
+
+.done-button-text {
+  margin-left: 35px;
+  top: 7px;
+  opacity: 0;
+  position: relative;
+}
+
+.done-button-text span {
+  color: #48DB48;
+  text-transform: uppercase;
+  font-weight: normal;
+  font-size: 20px;
+  font-family: "Courier New", Courier, monospace;
+}
+
+.done-button {
+  position: relative;
+  right: 8px;
+  bottom: 5px;
+  margin-right: 10px;
+}
+
+.done-check-left {
+  background: #48DB48;
+  width: 8px;
+  height: 14px;
+  transform: rotate(-30deg);
+  position: absolute;
+  left: 3px;
+  top: 10px;
+  border-top-right-radius: 30px;
+  border-top-left-radius: 30px;
+  border-bottom-right-radius: 20px;
+}
+
+.done-check-right {
+  background: #48DB48;
+  width: 8px;
+  height: 25px;
+  transform: rotate(60deg);
+  position: absolute;
+  left: 16px;
+  border-top-right-radius: 30px;
+  border-top-left-radius: 30px;
+  border-bottom-left-radius: 20px;
+}
+
+/* Animations */
+@keyframes pop {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

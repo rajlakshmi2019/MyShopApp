@@ -1,0 +1,476 @@
+/* tray window styling */
+h1, h2, h3, h4 {
+  padding: 0px;
+  margin: 0px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 2px solid #1EB4FF;
+}
+
+th, td {
+  padding: 6px;
+  vertical-align: bottom;
+  border: 2px solid #1EB4FF;
+}
+
+input[type="radio"]
+{
+  cursor: pointer;
+}
+
+/* Tab window styles */
+.tabs-window {
+  width: 100%;
+  height: 100%;
+}
+
+.tab-buttons-container {
+  float: left;
+  width: 100%;
+  border: none;
+  overflow: hidden;
+  background-color: #23272D;
+}
+
+.tab-button {
+  color: #595F68;
+  float: left;
+  margin: 1px 0 0;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  border: 1px solid #1A1E23;
+}
+
+.tab-button:hover {
+  color: #ADB2BA;
+}
+
+.tab-button-selected {
+  border: 1px solid #363A42;
+  background-color: #363A42;
+  color: #DEE4ED;
+}
+
+.tab-button-selected:hover {
+  color: #DEE4ED;
+}
+
+.select-tab {
+  background-color: inherit;
+  color: inherit;
+  width: 150px;
+  border: none;
+  outline:none;
+  text-align: center;
+  vertical-align: middle;
+  float: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  padding: 8px 0 7px 15px;
+}
+
+.close-tab {
+  background-color: inherit;
+  color: inherit;
+  font-size: 20px;
+  border: none;
+  outline:none;
+  float: left;
+  margin: 5px 5px 0 0;
+}
+
+.close-tab:hover {
+  color: #F78940;
+}
+
+.tab-contents-container {
+  width: 100%;
+  height: 100%;
+  padding-top: 50px;
+  overflow: auto;
+}
+
+.tab-content {
+  padding-bottom: 100px;
+  background-color: inherit;
+  display: none;
+  overflow: hidden;
+}
+
+.tab-content-selected {
+  display: block;
+}
+
+.tray-controls-container {
+  overflow: hidden;
+  margin: 0 20px;
+  padding: 0 20px;
+}
+
+.tray-window-button {
+  color: inherit;
+  background-color: inherit;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  border-radius: 4px;
+  width: 30px;
+  height: 30px;
+  margin: 5px;
+}
+
+.controller-button {
+  width: 50px;
+  height: 50px;
+  border-radius: 100px;
+  margin-right: 20px;
+  background-position: center;
+  background-size: 45px 45px;
+  background-repeat: no-repeat;
+  box-shadow: 0 2px 4px 0 #FFDF00;
+}
+
+.add-more-items-button {
+  background-image: url('../resource/round_add_white_36.png');
+}
+
+.change-price-grade-button {
+  background-size: 34px 34px;
+  background-image: url('../resource/round_create_36.png');
+}
+
+.switch-tray-button {
+  background-size: 42px 42px;
+  background-image: url('../resource/switch_tray_white_36.png');
+}
+
+.proceed-button {
+  background-image: url('../resource/round_play_arrow_36.png');
+}
+
+.back-button {
+  background-image: url('../resource/back_play_arrow_36.png');
+}
+
+.top-display {
+  overflow: hidden;
+  vertical-align: baseline;
+}
+
+.total-price-display {
+  width: 45%;
+  font-size: 40px;
+  vertical-align: baseline;
+}
+
+.tray-container {
+  overflow: hidden;
+}
+
+.price-card-box {
+  margin: 20px;
+  padding-left: 20px;
+  overflow: auto;
+}
+
+.price-card {
+  float: left;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 0;
+  margin: 20px 20px 20px 0;
+  width: 190px;
+  height: 120px;
+  color: inherit;
+  background-color: inherit;
+}
+
+.price-card-selected {
+  color: white !important;
+  background-color: #0079A5;
+  box-shadow: 0 4px 8px 0 white !important;
+}
+
+.price-card-selected > *{
+  color: white !important;
+}
+
+.price-card-box-buttons-container {
+  color: inherit;
+  width: 40px;
+  margin: 20px;
+  overflow: hidden;
+}
+
+.price-table {
+  margin: 50px 20px;
+}
+
+.cost-price {
+  margin: 0 20px 20px;
+}
+
+.number-font {
+  padding: 5px 10px;
+  font-weight: bold;
+  font-family: Old Standard TT;
+}
+
+.big-header-margin {
+  margin-bottom: 25px;
+}
+
+.bold-font {
+  font-weight: bold;
+}
+
+.large-font {
+  font-size: 20px;
+}
+
+.xx-large-font {
+  font-size: 45px;
+}
+
+.cost {
+  font: 13px;
+  color: red;
+}
+
+.item-label {
+  margin: 10px 10px 0;
+}
+
+.table-top-label {
+  margin: 10px 0;
+}
+
+.making-charge {
+  color: #FFA500;
+}
+
+.metal-price {
+  color: #1EFCFC;
+}
+
+.align-right {
+  text-align: right;
+}
+
+.align-center {
+  text-align: center;
+}
+
+.align-bottom {
+  vertical-align: bottom;
+}
+
+.padding-top-fifteen {
+  padding-top: 20px;
+}
+
+.money-green {
+  color: #48DB48;
+}
+
+.money-green-background {
+  background-color: #48DB48;
+}
+
+.red-color {
+  color: red;
+}
+
+.red-color-background {
+  background-color: red;
+}
+
+.float-left {
+  float: left;
+}
+
+.float-right {
+  float: right;
+}
+
+.gold-inner-shadow {
+  box-shadow: inset 0 0 8px #FFDF00;
+}
+
+.silver-inner-shadow {
+  box-shadow: inset 0 0 8px #DDDDDD;
+}
+
+.others-inner-shadow {
+  box-shadow: inset 0 0 8px #9CBBED;
+}
+
+.gold-outer-shadow {
+  box-shadow: 0 4px 8px 0 #FFDF00;
+}
+
+.gold-color {
+  color: #FFDF00;
+}
+
+.silver-outer-shadow {
+  box-shadow: 0 4px 8px 0 #DDDDDD;
+}
+
+.silver-color {
+  color: #DDDDDD;
+}
+
+.others-outer-shadow {
+  box-shadow: 0 4px 8px 0 #9CBBED;
+}
+
+.others-color {
+  color: #9CBBED;
+}
+
+.add-item-button {
+  background-image: url('../resource/add-item-white.png');
+  background-position: 6px;
+  background-repeat: no-repeat;
+}
+
+.edit-item-button {
+  background-image: url('../resource/edit-item-white.png');
+  background-position: 6px;
+  background-repeat: no-repeat;
+}
+
+.remove-item-button {
+  background-image: url('../resource/remove-item-white.png');
+  background-position: 6px;
+  background-repeat: no-repeat;
+}
+
+.down-arrow-button {
+  background-image: url('../resource/down-arrow-12.png');
+  background-position: 6px;
+  background-repeat: no-repeat;
+}
+
+/* exchange tray styles */
+
+.exchange-window-container {
+  background-color: inherit;
+  width: calc(50% - 5px);
+  overflow: hidden;
+}
+
+.exchange-window {
+  background-color: inherit;
+  overflow: hidden;
+  font-size: 20px;
+  margin: 20px;
+  padding-top: 20px;
+}
+
+.exchange-card {
+  padding: 10px;
+  margin: 0 20px 20px;
+  overflow: hidden;
+}
+
+.exchange-card-chip {
+  width: calc(50% - 45px);
+  border-radius: 4px;
+  margin: 10px;
+  padding: 10px;
+  color: #363A42;
+  font-size: 16px;
+  overflow: hidden;
+}
+
+.chip-header {
+  margin-bottom: 0;
+}
+
+.exchange-card-close-button {
+  line-height: .6em;
+  cursor: pointer;
+}
+
+.weight-input-box {
+  margin: 0 10px;
+}
+
+.sixty-width {
+  width: calc(60% - 5px);
+}
+
+.forty-width {
+  width: calc(40% - 5px);
+}
+
+/* net window display styles */
+
+.net-windows-wrapper {
+  overflow: hidden;
+  margin: 20px;
+}
+
+.net-window-div {
+  background-color: inherit;
+  overflow: hidden;
+  margin-bottom: 25px;
+  padding: 20px;
+}
+
+.half-width {
+  width: calc(50% - 13px);
+}
+
+.table-data-div {
+  text-align: center;
+  font-weight: bold;
+}
+
+.table-header-color {
+  color: #1EFCFC;
+}
+
+.table-border-color {
+  color: #1EB4FF;
+}
+
+.discount-chart-button {
+  margin: 20px 0 10px;
+  width: 200px;
+  padding: 5px 0;
+  border-bottom: 2px solid #1EB4FF;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.discount-chart-state {
+  font-weight: normal;
+}
+
+.discount-chart-content {
+  width: 200px;
+  display: none;
+}
+
+hr.breakup-divide {
+  border: 1px solid #1EB4FF;
+  width: 200px;
+}
+
+/* Tray container display styles */
+
+.full-tray-container {
+  display: none;
+}
+
+.full-tray-container-selected {
+  display: block;
+}
