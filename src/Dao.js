@@ -1,4 +1,5 @@
 const fs = require('fs');
+const os = require('os');
 const readline = require('readline');
 const csv = require('csvtojson');
 const AppConfigs = require('./AppConfigs.js');
@@ -44,6 +45,20 @@ let persistTransactionEntries = function(transactionDate, transactionEntries, ca
   let reverseDateText = formatDateReverse(transactionDate);
   let datedFilePath = process.env.BASE_DATA_DIR + reverseDateText.slice(0, -2) + '/';
   writeTransactionToFile(datedFilePath, 'transactions_' + reverseDateText + '.csv', transaction, (err) => {});
+}
+
+let savePDF = function(pdf, filedir, filename) {
+  let filepath = process.env.BASE_DATA_DIR + filedir;
+
+  // check if file exists
+  if (!fs.existsSync(filepath)) {
+    fs.mkdirSync(filepath);
+  }
+
+  // write to file
+  fs.writeFile(filepath + filename, pdf, (error) => {
+    if (error) return console.log(error.message);
+  });
 }
 
 let getTodaysRate = function() {
@@ -108,6 +123,7 @@ function writeTransactionToFile(filepath, filename, transaction, errorCallback) 
 module.exports = {
   loadAppConfigs,
   persistTransactionEntries,
+  savePDF,
   getTodaysRate,
   getTodaysGoldRate,
   getTodaysSilverRate,

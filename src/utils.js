@@ -40,6 +40,8 @@ function addTableHeader(table, headers) {
     thElement.textContent = headers[i];
     trElement.appendChild(thElement);
   }
+
+  return trElement;
 }
 
 function addTableData(table, tableDataElements) {
@@ -133,13 +135,19 @@ function generateTransactionId(date) {
 
 function formatDate(date) {
   return getTwoDigitInteger(date.getDate()) + "-"
-    + getTwoDigitInteger(date.getMonth()) + "-"
+    + getTwoDigitInteger(date.getMonth() + 1) + "-"
+    + date.getFullYear();
+}
+
+function formatDateSlash(date) {
+  return getTwoDigitInteger(date.getDate()) + "/"
+    + getTwoDigitInteger(date.getMonth() + 1) + "/"
     + date.getFullYear();
 }
 
 function formatDateReverse(date) {
   return "" + date.getFullYear()
-    + getTwoDigitInteger(date.getMonth())
+    + getTwoDigitInteger(date.getMonth() + 1)
     + getTwoDigitInteger(date.getDate());
 }
 
@@ -173,6 +181,7 @@ module.exports = {
   getFromDesiRupeeNumber,
   generateTransactionId,
   formatDate,
+  formatDateSlash,
   formatDateReverse,
   consolidateEntries
 }

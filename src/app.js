@@ -97,6 +97,22 @@ ipcMain.on('update:selected:grade', (event, grade) => {
   windowFactory.getGradePickerWindow().close();
 });
 
+ipcMain.on('bill:create', (event, entries) => {
+  windowFactory.createBillWindow(entries);
+});
+
+ipcMain.on('save:pdf', (event, configs) => {
+  windowFactory.getBillWindow().webContents.printToPDF({
+    marginsType: 2,
+    pageSize:"A5"
+  }, (error, data) => {
+    if(error) return console.log(error.message);
+
+    // save to pdf file
+    Dao.savePDF(data, configs.bill_date_reverse.slice(0, -2) + '/', configs.id + ".pdf");
+  });
+});
+
 /** Helper Methods **/
 function addFirstTrayTab() {
   let mainWindow = windowFactory.getMainWindow();

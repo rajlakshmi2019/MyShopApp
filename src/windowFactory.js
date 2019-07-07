@@ -2,7 +2,7 @@ const url = require('url');
 const path = require('path');
 const {app, BrowserWindow, Menu} = require('electron');
 
-let mainWindow, goldSellForm, goldExchangeForm, editTrayItemForm, priceCardView, gradePickerWindow;
+let mainWindow, goldSellForm, goldExchangeForm, editTrayItemForm, priceCardView, gradePickerWindow, billWindow;
 
 function createMainWindow() {
   mainWindow = new BrowserWindow({backgroundColor:'#363A42', webPreferences: {nodeIntegration: true}});
@@ -155,6 +155,29 @@ function getGradePickerWindow() {
   return gradePickerWindow;
 }
 
+function createBillWindow(entries) {
+  billWindow = new BrowserWindow({
+    width: 440,
+    height: 600,
+    backgroundColor:'white',
+    parent: mainWindow,
+    webPreferences: {nodeIntegration: true}
+  });
+  billWindow.configs = entries;
+  billWindow.loadURL(url.format({
+    pathname: path.join(__dirname, 'html', 'billWindow.html'),
+    protocol: 'file:',
+    slashes: true
+  }));
+  billWindow.on('close', () => {
+    billWindow = null;
+  });
+}
+
+function getBillWindow() {
+  return billWindow;
+}
+
 const mainMenuTemplate = [
   {
     label: 'Service',
@@ -230,5 +253,6 @@ module.exports = {
   getEditTrayItemForm: getEditTrayItemForm,
   createPriceCardView: createPriceCardView,
   getPriceCardView: getPriceCardView,
-  createGradePickerWindow, getGradePickerWindow
+  createGradePickerWindow, getGradePickerWindow,
+  createBillWindow, getBillWindow
 };

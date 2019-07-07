@@ -1,10 +1,20 @@
 const {ipcRenderer, remote} = require("electron");
-const {clearSelection, createHtmlElement, addTableHeader,
-  addTableData, emptyTable, parseTable, getDesiNumber, consolidateEntries,
-  getFromDesiRupeeNumber, generateTransactionId, formatDate} = require("./../utils.js");
+const {clearSelection, createHtmlElement, addTableHeader, addTableData,
+  emptyTable, parseTable, getDesiNumber, consolidateEntries, getFromDesiRupeeNumber,
+  generateTransactionId, formatDate, formatDateSlash, formatDateReverse} = require("./../utils.js");
 const ShopCalculator = require("./../ShopCalculator.js");
 const Dao = remote.require("./Dao.js");
 
+/* add tab button listeners */
+document.getElementById("tab-add-sell").addEventListener("click", () => {
+  ipcRenderer.send('open:sell', null);
+});
+
+document.getElementById("tab-add-buy").addEventListener("click", () => {
+  ipcRenderer.send('open:buy', null);
+});
+
+/* ipc signal handlers */
 ipcRenderer.on("add:tab", (event, set) => {
   addTab("sell", set);
 });
@@ -119,8 +129,8 @@ function addTab(tabType, set) {
 }
 
 function buildTab(tabIndex, set) {
-  let tabButton = createHtmlElement("div", "tab-button", "tab-button-" + tabIndex, null, null);
-  document.querySelector(".tab-buttons-container").appendChild(tabButton);
+  let tabButton = createHtmlElement("div", "tab-button float-left", "tab-button-" + tabIndex, null, null);
+  document.querySelector(".tab-buttons").appendChild(tabButton);
   let tabSelectButton = createHtmlElement("button", "select-tab", null, null, null);
   tabSelectButton.addEventListener("click", function() {
     selectTab(this.parentElement);
@@ -549,6 +559,13 @@ function buildNetTotalContainer(tabContent, set) {
   let backButton =
     createHtmlElement("button", "tray-window-button controller-button back-button float-left", "back-button-" + tabIndex, null, null);
   trayControlsContainer.appendChild(backButton);
+  let billButton = createHtmlElement("button", "tray-window-button controller-button bill-button float-left", "bill-button-" + tabIndex, null, null);
+  billButton.addEventListener("click", () => {
+    generateBill(getTabButton(tabIndex).textContent.slice(0, -1), new Date(), "----------",
+      parseTable(document.getElementById("sales-table-" + tabIndex)), parseTable(
+        document.getElementById("purchase-table-" + tabIndex)), getTotals(tabIndex), false);
+  });
+  trayControlsContainer.appendChild(billButton);
   let proceedButton =
     createHtmlElement("button", "tray-window-button controller-button proceed-button float-left", "exchange-proceed-button-" + tabIndex, null, null);
   trayControlsContainer.appendChild(proceedButton);
@@ -961,8 +978,78 @@ function getDiscountEntry(tabId) {
   return discountPrice>0 ? [{"Price": discountPrice}] : [];
 }
 
-function generateBill(salesEntries, purchaseEntries, discountEntry) {
+function getSalesEntryKey(entry) {
+  return [
+    entry.Metal, entry.Rate_Per_Gram, entry.Making_Per_Gram, entry.Making].toString();
+}
 
+function aggregateSalesEntries(salesEntries) {
+  let aggregatedSalesMap = new Map();
+  for (let entry of salesEntries) {
+    if (aggregatedSalesMap.has(getSalesEntryKey(entry))) {
+      let aggregateEntry = aggregatedSalesMap.get(getSalesEntryKey(entry));
+      aggregateEntry.Item += "," + entry.Item;
+      aggregateEntry.ItemNames.push(entry.Item);
+      aggregateEntry.Weight_In_Gram += entry.Weight_In_Gram;
+      aggregateEntry.Weights.push(entry.Weight_In_Gram);
+      aggregateEntry.Price += entry.Price;
+    } else {
+      aggregatedSalesMap.set(getSalesEntryKey(entry),
+        {...entry, ItemNames: [entry.Item], Weights: [entry.Weight_In_Gram]});
+    }
+  }
+
+  return aggregatedSalesMap;
+}
+
+function aggregateItemNames(itemNames) {
+  let itemNamesMap = new Map();
+  for (let itemName of itemNames) {
+    if (itemNamesMap.has(itemName)) {
+      let itemNameEntry = itemNamesMap.get(itemName);
+      itemNameEntry.count += 1;
+    } else {
+      itemNamesMap.set(itemName, {"count": 1});
+    }
+  }
+
+  return itemNamesMap;
+}
+
+function generateBill(tabName, date, transId,
+  salesEntries, purchaseEntries, totals, printable) {
+    if (salesEntries.length == 0 && purchaseEntries.length == 0) {
+      remote.dialog.showMessageBox(null, {
+        type: 'error',
+        buttons: ['Ok'],
+        defaultId: 0,
+        title: 'No item selected',
+        message: 'Cannot generate empty bill!!',
+        detail: 'Please select items to complete this transaction'
+      });
+    } else {
+      let aggregatedSales = [];
+      let aggregatedSalesMap = aggregateSalesEntries(salesEntries);
+      for (let aggregateEntry of aggregatedSalesMap.values()) {
+        aggregateEntry.items = [];
+        let namesMap = aggregateItemNames(aggregateEntry.ItemNames);
+        for (let name of namesMap.keys()) {
+          aggregateEntry.items.push({name: name, qty: namesMap.get(name).count});
+        }
+        aggregatedSales.push(aggregateEntry);
+      }
+
+      ipcRenderer.send('bill:create', {
+        name: tabName,
+        bill_date: formatDateSlash(date),
+        bill_date_reverse: formatDateReverse(date),
+        id: transId,
+        sales: aggregatedSales,
+        purchase: purchaseEntries,
+        totals: totals,
+        printable: printable
+      });
+    }
 }
 
 function finaliseTransaction(tabId) {
@@ -991,21 +1078,45 @@ function finishTransaction(tabId) {
   let purchaseEntries = parseTable(document.getElementById("purchase-table-" + tabId));
   let discountEntry = getDiscountEntry(tabId);
 
-  // generate bills
-  // generateBill(tabName, transId, salesEntries, purchaseEntries, discountEntry);
-
   // enrich transaction entries
   enrichTransactionEntries(salesEntries, transId, date, tabName, "Sales");
   enrichTransactionEntries(purchaseEntries, transId, date, tabName, "Purchase");
   enrichTransactionEntries(discountEntry, transId, date, tabName, "Discount");
 
   // persist transaction entries
-  Dao
-    .persistTransactionEntries(date, consolidateEntries(
-      [salesEntries, purchaseEntries, discountEntry]), () => {
-        alert('Finished transaction for ' + tabName + '!!');
-        closeTab(tabButton);
-      });
+  if (salesEntries.length == 0 && purchaseEntries.length == 0) {
+    remote.dialog.showMessageBox(null, {
+      type: 'error',
+      buttons: ['Ok'],
+      defaultId: 0,
+      title: 'No item selected',
+      message: 'Cannot complete empty transaction!!',
+      detail: 'Please select items to mark this transaction complete'
+    });
+  } else {
+    Dao
+      .persistTransactionEntries(date, consolidateEntries(
+        [salesEntries, purchaseEntries, discountEntry]), () => {
+          alert('Finished transaction for ' + tabName + '!!');
+
+          // generate bills
+          generateBill(tabName, date, transId,
+            salesEntries, purchaseEntries, getTotals(tabId), true);
+
+          // finally close the tab
+          closeTab(tabButton);
+        });
+  }
+}
+
+function getTotals(tabId) {
+  return {
+    sales: document.getElementById("breakup-sales-total-" + tabId).innerHTML,
+    purchase: document.getElementById("breakup-purchase-total-" + tabId).innerHTML,
+    sub_total: document.getElementById("breakup-net-total-" + tabId).innerHTML,
+    discount: "₹ " + getDesiNumber(getAppliedDiscount(tabId)),
+    total_bill: document.getElementById("net-total-display-" + tabId).innerHTML
+  }
 }
 
 function enrichTransactionEntries(

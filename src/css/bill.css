@@ -1,0 +1,139 @@
+/* Bill window styles */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+th {
+  max-width: 130px;
+  padding: 4px 2px;
+  margin-bottom: 6px;
+  vertical-align: bottom;
+  border-top: 2px dashed black;
+  border-bottom: 2px dashed black;
+}
+
+td {
+  padding: 0;
+}
+
+tr.sales-header th:nth-child(1),
+tr.purchase-header th:nth-child(1) {
+  text-align: left;
+  padding-left: 10px;
+}
+
+tr.sales-header th:nth-child(2),
+tr.sales-row td:nth-child(2) {
+  text-align: right;
+  width: 10%;
+}
+
+tr.sales-header th:nth-child(3),
+tr.sales-row td:nth-child(3),
+tr.purchase-header th:nth-child(2),
+tr.purchase-row td:nth-child(2) {
+  text-align: right;
+  width: 20%;
+}
+
+tr.sales-header th:nth-child(4),
+tr.sales-row td:nth-child(4) {
+  text-align: right;
+  width: 22%;
+}
+
+
+tr.sales-header th:nth-child(5),
+tr.sales-row td:nth-child(5) {
+  padding-right: 10px;
+  text-align: right;
+  width: 20%;
+}
+
+tr.purchase-header th:nth-child(3),
+tr.purchase-row td:nth-child(3) {
+  text-align: right;
+  width: 25%;
+}
+
+tr.purchase-header th:nth-child(4),
+tr.purchase-row td:nth-child(4) {
+  padding-right: 10px;
+  text-align: right;
+  width: 25%;
+}
+
+.bill-container {
+  padding: 10px;
+  color: black;
+  background-color: white;
+}
+
+.dashed-box {
+  border-top: 2px dashed black;
+  border-bottom: 2px dashed black;
+}
+
+.section-end {
+  padding-bottom: 6px;
+  border-bottom: 1px dashed black;
+}
+
+.section-close {
+  padding-right: 10px;
+  margin-bottom: 10px;
+  border-bottom: 1px dashed black;
+}
+
+.total-box {
+  padding: 6px 0;
+}
+
+.title-bold {
+  margin: 10px 0;
+  text-align: center;
+  font-size: 35px;
+}
+
+.bill-contents {
+  font-size: 12px;
+}
+
+.wrapper-div {
+  margin: 10px 0;
+  overflow: hidden;
+}
+
+.td-align-left {
+  padding-left: 10px;
+  text-align: left;
+}
+
+.td-align-center {
+  text-align: center;
+}
+
+.td-align-right {
+  text-align: right;
+}
+
+.font-bold {
+  font-weight: bold;
+}
+
+.float-left {
+  float: left;
+}
+
+#print-button {
+  float: right;
+  cursor: pointer;
+  padding: 1px 5px;
+  outline: none;
+  border-radius: 5px;
+  color: black;
+  background-color: white;
+  border: 1px solid black;
+}

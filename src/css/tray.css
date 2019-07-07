@@ -28,7 +28,6 @@ input[type="radio"]
 }
 
 .tab-buttons-container {
-  float: left;
   width: 100%;
   border: none;
   overflow: hidden;
@@ -37,7 +36,6 @@ input[type="radio"]
 
 .tab-button {
   color: #595F68;
-  float: left;
   margin: 1px 0 0;
   border-top-left-radius: 6px;
   border-top-right-radius: 6px;
@@ -46,6 +44,29 @@ input[type="radio"]
 
 .tab-button:hover {
   color: #ADB2BA;
+}
+
+.tab-add-buttons {
+  overflow: hidden;
+  margin: 1px;
+}
+
+.tab-add-button {
+  width: 30px;
+  font-size: 20px;
+  padding: 3px 0;
+  border-radius: 4px;
+  outline: none;
+  color: #363A42;
+  border: 1px solid #1A1E23;
+}
+
+#tab-add-sell:hover {
+  background-color: #6AFC6A;
+}
+
+#tab-add-buy:hover {
+  background-color: #FF4D4D;
 }
 
 .tab-button-selected {
@@ -154,6 +175,11 @@ input[type="radio"]
 
 .back-button {
   background-image: url('../resource/back_play_arrow_36.png');
+}
+
+.bill-button {
+  background-size: 30px 34px;
+  background-image: url('../resource/generate_receipt_36.png');
 }
 
 .top-display {

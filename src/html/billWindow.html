@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="../css/bill.css">
+    <title>Generated Bill</title>
+    <!-- Set page size here: A5, A4 or A3 -->
+    <style>@page { size: A5; margin: 0; }</style>
+  </head>
+  <body>
+    <div id="bill-menu"></div>
+    <div class="bill-container">
+      <div class="wrapper-div" id="bill-header">
+        <div class="title-bold font-bold dashed-box">
+          Rajlakshmi Jewellers
+        </div>
+        <div class="td-align-center">
+          At Amar Chowk, Nawadih Mod, Rajdhanwar
+        </div>
+        <div class="td-align-center">
+          Giridih, Jharkhand, 825412
+        </div>
+        <div class="td-align-center">
+          PH: 9431156469, 7797436320
+        </div>
+      </div>
+      <br>
+      <div class="td-align-center">
+        Billed To <label id="billed-to"></label>
+      </div>
+      <div class="custom-box float-left">
+        <div>DATE</div>
+        <div id="billing-date"></div>
+      </div>
+      <div class="custom-box">
+        <div class="td-align-right">Bill NO</div>
+        <div class="td-align-right" id="bill-no"></div>
+      </div>
+      <div class="wrapper-div bill-contents">
+        <div class="wrapper-div" id="bill-sales"></div>
+        <div class="wrapper-div" id="bill-purchase"></div>
+        <div class="wrapper-div total-box dashed-box" id="bill-total">
+          <div class="float-left">
+            Sub Total
+          </div>
+          <div class="td-align-right" id="sub-total"></div>
+
+          <div class="float-left">
+            Discount
+          </div>
+          <div class="td-align-right" id="discount"></div>
+          <br>
+          <div class="float-left">
+            Total Bill
+          </div>
+          <div class="td-align-right font-bold" id="total-bill"></div>
+        </div>
+      </div>
+    </div>
+  </body>
+  <script type="text/javascript">
+    require('./../renderers/billWindowRenderer.js');
+  </script>
+</html>
