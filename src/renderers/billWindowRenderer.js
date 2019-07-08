@@ -10,7 +10,6 @@ if (configs.printable == true) {
   document.getElementById("bill-menu").appendChild(printButton);
   printButton.addEventListener("click", () => {
     window.print();
-    ipcRenderer.send('save:pdf', configs);
   });
 }
 

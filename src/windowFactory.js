@@ -155,7 +155,7 @@ function getGradePickerWindow() {
   return gradePickerWindow;
 }
 
-function createBillWindow(entries) {
+function createBillWindow(configs) {
   billWindow = new BrowserWindow({
     width: 440,
     height: 600,
@@ -163,7 +163,7 @@ function createBillWindow(entries) {
     parent: mainWindow,
     webPreferences: {nodeIntegration: true}
   });
-  billWindow.configs = entries;
+  billWindow.configs = configs;
   billWindow.loadURL(url.format({
     pathname: path.join(__dirname, 'html', 'billWindow.html'),
     protocol: 'file:',

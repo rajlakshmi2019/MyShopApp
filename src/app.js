@@ -97,19 +97,19 @@ ipcMain.on('update:selected:grade', (event, grade) => {
   windowFactory.getGradePickerWindow().close();
 });
 
-ipcMain.on('bill:create', (event, entries) => {
-  windowFactory.createBillWindow(entries);
-});
+ipcMain.on('bill:create', (event, configs) => {
+  windowFactory.createBillWindow(configs);
+  windowFactory.getBillWindow().webContents.on('did-finish-load', () => {
+    windowFactory.getBillWindow().webContents.printToPDF({
+      marginsType: 2,
+      pageSize:"A5"
+    }, (error, data) => {
+      if(error) return console.log(error.message);
 
-ipcMain.on('save:pdf', (event, configs) => {
-  windowFactory.getBillWindow().webContents.printToPDF({
-    marginsType: 2,
-    pageSize:"A5"
-  }, (error, data) => {
-    if(error) return console.log(error.message);
-
-    // save to pdf file
-    Dao.savePDF(data, configs.bill_date_reverse.slice(0, -2) + '/', configs.id + ".pdf");
+      // save to pdf file
+      Dao.savePDF(data,
+        configs.bill_date_reverse.slice(0, -2) + '/', configs.bill_date_reverse + '_' + configs.id + ".pdf");
+    });
   });
 });
 
