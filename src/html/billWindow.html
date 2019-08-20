@@ -5,7 +5,7 @@
     <link rel="stylesheet" href="../css/bill.css">
     <title>Generated Bill</title>
     <!-- Set page size here: A5, A4 or A3 -->
-    <style>@page { size: A5; margin: 0; }</style>
+    <style>@page { size: A6; margin: 0; }</style>
   </head>
   <body>
     <div id="bill-menu"></div>
@@ -54,6 +54,17 @@
             Total Bill
           </div>
           <div class="td-align-right font-bold" id="total-bill"></div>
+        </div>
+        <div class="wrapper-div total-box dashed-box display-none" id="due-total">
+          <div class="float-left">
+            Paid
+          </div>
+          <div class="td-align-right" id="payment-done"></div>
+
+          <div class="float-left">
+            Due
+          </div>
+          <div class="td-align-right" id="payment-due"></div>
         </div>
       </div>
     </div>

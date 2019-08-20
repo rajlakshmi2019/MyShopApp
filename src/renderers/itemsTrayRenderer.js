@@ -65,6 +65,10 @@ ipcRenderer.on('grade:update', (event, grade) => {
   document.getElementById("applied-price-grade-" + grade.tabIndex).textContent = grade.newGrade;
 });
 
+ipcRenderer.on('mark:pending', (event, configs) => {
+  finishTransaction(configs.tabIndex, configs);
+});
+
 /* Build tab button and content */
 function addTab(tabType, set) {
   let tabIndex = maxTabIndex();
@@ -115,7 +119,26 @@ function addTab(tabType, set) {
 
   netTotalContainer.querySelector(".proceed-button")
     .addEventListener("click", () => {
-      finaliseTransaction(tabIndex);
+      let netTotal = document.getElementById("net-total-display-" + tabIndex).innerHTML
+      if (netTotal.startsWith("- ₹")) {
+        remote.dialog.showMessageBox(null, {
+          type: 'question',
+          buttons: ['Yes', 'No'],
+          defaultId: 1,
+          title: 'Remember to add the discount',
+          message: 'Mark this transaction completed?',
+          detail: 'Amount to be paid to the customer ' + netTotal.substring(2)
+        }, (response) => {
+          if (response == 0) {
+            finishTransaction(tabIndex, {});
+          }
+        });
+      } else {
+        ipcRenderer.send('payment:accept', {
+          tabIndex: tabIndex,
+          netTotal: netTotal
+        });
+      }
     });
 
   /* Select tray and tab */
@@ -136,7 +159,7 @@ function buildTab(tabIndex, set) {
     selectTab(this.parentElement);
   });
   tabButton.appendChild(tabSelectButton);
-  let tabName = createHtmlElement("label", "tab-name", null, set.setName, null);
+  let tabName = createHtmlElement("label", "tab-name", null, set.setName + " " + (tabIndex+1), null);
   tabSelectButton.appendChild(tabName);
   let tabCloseButton = createHtmlElement("button", "close-tab", null, null, decodeURI("&times;"));
   tabCloseButton.addEventListener("click", function() {
@@ -561,9 +584,10 @@ function buildNetTotalContainer(tabContent, set) {
   trayControlsContainer.appendChild(backButton);
   let billButton = createHtmlElement("button", "tray-window-button controller-button bill-button float-left", "bill-button-" + tabIndex, null, null);
   billButton.addEventListener("click", () => {
-    generateBill(getTabButton(tabIndex).textContent.slice(0, -1), new Date(), "----------",
-      parseTable(document.getElementById("sales-table-" + tabIndex)), parseTable(
-        document.getElementById("purchase-table-" + tabIndex)), getTotals(tabIndex), false);
+    generateBill(getTabButton(tabIndex).textContent.slice(0, -1), new Date(), "_________",
+      parseTable(document.getElementById("sales-table-" + tabIndex)),
+      parseTable(document.getElementById("purchase-table-" + tabIndex)),
+      getAdditionalCharge(tabIndex), getTotals(tabIndex), false);
   });
   trayControlsContainer.appendChild(billButton);
   let proceedButton =
@@ -591,14 +615,28 @@ function buildNetTotalContainer(tabContent, set) {
   salesWindowDiv.appendChild(salesTable);
   addTableHeader(salesTable, ["Metal", "Item", "Weight", "Rate", "Making", "Price", "Grade"]);
 
+
   let totalDetailsDiv = createHtmlElement("div", "total-window net-window-div table-header-color gold-inner-shadow", null, null, null);
   rightWrapperDiv.appendChild(totalDetailsDiv);
-  let totalLabel = createHtmlElement("div", "input-header large-font", null, null, "Total Breakup");
-  totalDetailsDiv.appendChild(totalLabel);
   let discountDiv = createHtmlElement("div", "wrapper-div half-width float-left", null, null, null);
   totalDetailsDiv.appendChild(discountDiv);
+  let totalLabel = createHtmlElement("div", "input-header large-font", null, null, "Total Breakup");
+  discountDiv.appendChild(totalLabel);
   let breakupDiv = createHtmlElement("div", "wrapper-div half-width float-right", null, null, null);
   totalDetailsDiv.appendChild(breakupDiv);
+
+  let additionalChargeInputBox = createHtmlElement("div", "wrapper-div table-top-label", null, null, null);
+  discountDiv.appendChild(additionalChargeInputBox);
+  let additionalChargeInputHeader = createHtmlElement("div", "input-header", null, null, "Munga/Moti/Mala");
+  additionalChargeInputBox.appendChild(additionalChargeInputHeader);
+  let additionalChargeInputText = createHtmlElement("input", "discount-input input-text rupee-background", "additional-charge-input-" + tabIndex, null, null);
+  additionalChargeInputText.type = "text";
+  additionalChargeInputText.style.width = "200px";
+  additionalChargeInputText.addEventListener('keyup', function() {
+    updateAdditionalCharges(tabIndex);
+    updateNetTotalPrice(tabIndex);
+  });
+  additionalChargeInputBox.appendChild(additionalChargeInputText);
 
   let discountInputBox = createHtmlElement("div", "wrapper-div table-top-label", null, null, null);
   discountDiv.appendChild(discountInputBox);
@@ -608,9 +646,11 @@ function buildNetTotalContainer(tabContent, set) {
   discountInputText.type = "text";
   discountInputText.style.width = "200px";
   discountInputText.addEventListener('keyup', function() {
+    updateAdditionalCharges(tabIndex);
     updateNetTotalPrice(tabIndex);
   });
   discountInputBox.appendChild(discountInputText);
+
   let discountChartButton = createHtmlElement("div", "discount-chart-button", null, null, "Discount Chart");
   discountChartButton.addEventListener("click", function() {
     let content = this.nextElementSibling;
@@ -642,6 +682,10 @@ function buildNetTotalContainer(tabContent, set) {
   hrWrapperDiv.appendChild(hrDivide);
   let breakupNetTotal = createHtmlElement("h2", "number-font money-green align-right", "breakup-net-total-" + tabIndex, null, "₹ 0");
   breakupDiv.appendChild(breakupNetTotal);
+  let additionalChargeTotal = createHtmlElement("h2", "number-font money-green align-right", "additional-charge-total-" + tabIndex, null, "₹ 0");
+  breakupDiv.appendChild(additionalChargeTotal);
+  let discountTotal = createHtmlElement("h2", "number-font red-color align-right", "discount-total-" + tabIndex, null, "- ₹ 0");
+  breakupDiv.appendChild(discountTotal);
 
 
   let purchaseWindowDiv = createHtmlElement("div", "purchase-window net-window-div table-header-color gold-inner-shadow", null, null, null);
@@ -914,6 +958,10 @@ function getCurrentExchangeItem(exchangePriceCard) {
   return exchangeItem;
 }
 
+function getAdditionalCharge(tabId) {
+  return Number(document.getElementById("additional-charge-input-" + tabId).value);
+}
+
 function getAppliedDiscount(tabId) {
   return Number(document.getElementById("discount-input-" + tabId).value);
 }
@@ -956,7 +1004,8 @@ function updateNetTotalPrice(tabId) {
   let salesTotal = getFromDesiRupeeNumber(document.getElementById("sales-total-" + tabId).textContent);
   let purchaseTotal = getFromDesiRupeeNumber(document.getElementById("purchase-total-" + tabId).textContent);
   let appliedDiscount = getAppliedDiscount(tabId);
-  let netTotal = salesTotal - purchaseTotal - appliedDiscount;
+  let additionalCharge = getAdditionalCharge(tabId);
+  let netTotal = salesTotal - purchaseTotal + additionalCharge - appliedDiscount;
   let netTotalDisplay = document.getElementById("net-total-display-" + tabId);
   if (netTotal < 0) {
     if (netTotalDisplay.classList.contains("money-green")) {
@@ -973,14 +1022,22 @@ function updateNetTotalPrice(tabId) {
   }
 }
 
-function getDiscountEntry(tabId) {
-  let discountPrice = getAppliedDiscount(tabId);
-  return discountPrice>0 ? [{"Price": discountPrice}] : [];
+function updateAdditionalCharges(tabId) {
+  document.getElementById("additional-charge-total-" + tabId).innerHTML = "₹ " + getDesiNumber(getAdditionalCharge(tabId));
+  document.getElementById("discount-total-" + tabId).innerHTML = "-₹ " + getDesiNumber(getAppliedDiscount(tabId));
+}
+
+function getOtherTransactionEntry(price) {
+  return price>0 ? [{"Price": price}] : [];
 }
 
 function getSalesEntryKey(entry) {
-  return [
-    entry.Metal, entry.Rate_Per_Gram, entry.Making_Per_Gram, entry.Making].toString();
+  let entryKey = [entry.Metal, entry.Rate_Per_Gram, entry.Making_Per_Gram, entry.Making];
+  if (entry.Item == "Dulhan Payal") {
+    entryKey.push(entry.Item);
+  }
+
+  return entryKey.toString()
 }
 
 function aggregateSalesEntries(salesEntries) {
@@ -997,7 +1054,9 @@ function aggregateSalesEntries(salesEntries) {
       aggregatedSalesMap.set(getSalesEntryKey(entry),
         {...entry, ItemNames: [entry.Item], Weights: [entry.Weight_In_Gram]});
     }
+    console.log(aggregatedSalesMap);
   }
+  console.log(aggregatedSalesMap.gena);
 
   return aggregatedSalesMap;
 }
@@ -1005,6 +1064,11 @@ function aggregateSalesEntries(salesEntries) {
 function aggregateItemNames(itemNames) {
   let itemNamesMap = new Map();
   for (let itemName of itemNames) {
+    if (itemName == "Dulhan Payal") {
+      itemName = itemName + " " + (
+        Dao.getMappedItem(["Silver", itemName].toString()).APPLIED * 1000);
+    }
+
     if (itemNamesMap.has(itemName)) {
       let itemNameEntry = itemNamesMap.get(itemName);
       itemNameEntry.count += 1;
@@ -1017,8 +1081,8 @@ function aggregateItemNames(itemNames) {
 }
 
 function generateBill(tabName, date, transId,
-  salesEntries, purchaseEntries, totals, printable) {
-    if (salesEntries.length == 0 && purchaseEntries.length == 0) {
+  salesEntries, purchaseEntries, additionalCharge, totals, savable) {
+    if (salesEntries.length == 0 && purchaseEntries.length == 0 && additionalCharge == 0) {
       remote.dialog.showMessageBox(null, {
         type: 'error',
         buttons: ['Ok'],
@@ -1046,62 +1110,76 @@ function generateBill(tabName, date, transId,
         id: transId,
         sales: aggregatedSales,
         purchase: purchaseEntries,
+        additional: additionalCharge,
         totals: totals,
-        printable: printable
+        savable: savable
       });
     }
 }
 
-function finaliseTransaction(tabId) {
-  remote.dialog.showMessageBox(null, {
-    type: 'question',
-    buttons: ['Yes', 'No'],
-    defaultId: 1,
-    title: 'Remember to update the discount',
-    message: 'Mark this transaction completed?',
-    detail: 'Please make sure you have collected the cash amount'
-  }, (response) => {
-    if (response == 0) {
-      finishTransaction(tabId);
-    }
-  });
-}
-
-function finishTransaction(tabId) {
+function finishTransaction(tabId, additionalConfigs) {
   let date = new Date();
   let tabButton = getTabButton(tabId);
   let tabName = tabButton.textContent.slice(0, -1);
   let transId = generateTransactionId(date);
+  let totalDiscount = getAppliedDiscount(tabId);
+  if (additionalConfigs.markAs === "Discount") {
+    totalDiscount += additionalConfigs.pending;
+  }
 
   // transaction entries
   let salesEntries = parseTable(document.getElementById("sales-table-" + tabId));
   let purchaseEntries = parseTable(document.getElementById("purchase-table-" + tabId));
-  let discountEntry = getDiscountEntry(tabId);
+  let additionalChargeEntry = getOtherTransactionEntry(getAdditionalCharge(tabId));
+  let discountEntry = getOtherTransactionEntry(totalDiscount);
 
   // enrich transaction entries
   enrichTransactionEntries(salesEntries, transId, date, tabName, "Sales");
   enrichTransactionEntries(purchaseEntries, transId, date, tabName, "Purchase");
+  enrichTransactionEntries(additionalChargeEntry, transId, date, tabName, "Sales Extra");
   enrichTransactionEntries(discountEntry, transId, date, tabName, "Discount");
 
+  // other transaction entries e.g. due, return
+  let allTransactionEntries = [salesEntries, purchaseEntries, additionalChargeEntry, discountEntry];
+  if (additionalConfigs.markAs != null) {
+    if (additionalConfigs.markAs !== "Discount") {
+      let otherEntry = getOtherTransactionEntry(additionalConfigs.pending);
+      enrichTransactionEntries(otherEntry, transId, date, tabName, additionalConfigs.markAs);
+      allTransactionEntries.push(otherEntry);
+    }
+  }
+
   // persist transaction entries
-  if (salesEntries.length == 0 && purchaseEntries.length == 0) {
-    remote.dialog.showMessageBox(null, {
-      type: 'error',
-      buttons: ['Ok'],
-      defaultId: 0,
-      title: 'No item selected',
-      message: 'Cannot complete empty transaction!!',
-      detail: 'Please select items to mark this transaction complete'
-    });
+  if (salesEntries.length == 0 && purchaseEntries.length == 0
+    && additionalChargeEntry.length == 0) {
+      remote.dialog.showMessageBox(null, {
+        type: 'error',
+        buttons: ['Ok'],
+        defaultId: 0,
+        title: 'No item selected',
+        message: 'Cannot complete empty transaction!!',
+        detail: 'Please select items to mark this transaction complete'
+      });
   } else {
     Dao
-      .persistTransactionEntries(date, consolidateEntries(
-        [salesEntries, purchaseEntries, discountEntry]), () => {
+      .persistTransactionEntries(date,
+        consolidateEntries(allTransactionEntries), () => {
           alert('Finished transaction for ' + tabName + '!!');
 
+          // bill totals
+          let billTotals = getTotals(tabId);
+          billTotals.pending_as = additionalConfigs.markAs;
+          billTotals.paid_amount = "₹ " + getDesiNumber(additionalConfigs.paid);
+          billTotals.pending_amount = "₹ " + getDesiNumber(additionalConfigs.pending);
+          billTotals.discount = "₹ " + getDesiNumber(totalDiscount);
+          if (billTotals.pending_as === "Discount") {
+            // update total bill when discount is updated
+            billTotals.total_bill = billTotals.paid_amount;
+          }
+
           // generate bills
-          generateBill(tabName, date, transId,
-            salesEntries, purchaseEntries, getTotals(tabId), true);
+          generateBill(tabName, date, transId, salesEntries, purchaseEntries,
+            getAdditionalCharge(tabId), billTotals, true);
 
           // finally close the tab
           closeTab(tabButton);
@@ -1110,10 +1188,17 @@ function finishTransaction(tabId) {
 }
 
 function getTotals(tabId) {
+  let salesTotal = getAdditionalCharge(tabId) +
+    getFromDesiRupeeNumber(document.getElementById("breakup-sales-total-" + tabId).innerHTML);
+
+  let subTotalVal = document.getElementById("breakup-net-total-" + tabId).innerHTML;
+  let subTotal = getAdditionalCharge(tabId) + (subTotalVal.startsWith("- ₹") ?
+    -1 * getFromDesiRupeeNumber(subTotalVal.substring(2)) : getFromDesiRupeeNumber(subTotalVal));
+
   return {
-    sales: document.getElementById("breakup-sales-total-" + tabId).innerHTML,
+    sales: "₹ " + getDesiNumber(salesTotal),
     purchase: document.getElementById("breakup-purchase-total-" + tabId).innerHTML,
-    sub_total: document.getElementById("breakup-net-total-" + tabId).innerHTML,
+    sub_total: (subTotalVal.startsWith("- ₹") ? "- ₹ " : "₹ ") + getDesiNumber(Math.abs(subTotal)),
     discount: "₹ " + getDesiNumber(getAppliedDiscount(tabId)),
     total_bill: document.getElementById("net-total-display-" + tabId).innerHTML
   }

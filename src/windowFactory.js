@@ -2,7 +2,8 @@ const url = require('url');
 const path = require('path');
 const {app, BrowserWindow, Menu} = require('electron');
 
-let mainWindow, goldSellForm, goldExchangeForm, editTrayItemForm, priceCardView, gradePickerWindow, billWindow;
+let mainWindow, goldSellForm, goldExchangeForm, editTrayItemForm;
+let priceCardView, gradePickerWindow, billWindow, paymentAcceptWindow;
 
 function createMainWindow() {
   mainWindow = new BrowserWindow({backgroundColor:'#363A42', webPreferences: {nodeIntegration: true}});
@@ -178,6 +179,30 @@ function getBillWindow() {
   return billWindow;
 }
 
+function createPaymentAcceptForm(configs) {
+  paymentAcceptWindow = new BrowserWindow({
+    width: 400,
+    height: 350,
+    frame: false,
+    backgroundColor:'#205081',
+    parent: mainWindow,
+    webPreferences: {nodeIntegration: true}
+  });
+  paymentAcceptWindow.configs = configs;
+  paymentAcceptWindow.loadURL(url.format({
+    pathname: path.join(__dirname, 'html', 'paymentAcceptForm.html'),
+    protocol: 'file:',
+    slashes: true
+  }));
+  paymentAcceptWindow.on('close', () => {
+    paymentAcceptWindow = null;
+  });
+}
+
+function getPaymentAcceptForm() {
+  return paymentAcceptWindow;
+}
+
 const mainMenuTemplate = [
   {
     label: 'Service',
@@ -254,5 +279,6 @@ module.exports = {
   createPriceCardView: createPriceCardView,
   getPriceCardView: getPriceCardView,
   createGradePickerWindow, getGradePickerWindow,
-  createBillWindow, getBillWindow
+  createBillWindow, getBillWindow,
+  createPaymentAcceptForm, getPaymentAcceptForm
 };

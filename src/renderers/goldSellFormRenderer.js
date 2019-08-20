@@ -224,12 +224,20 @@ function submitFormData() {
     }
   }
 
+  let setNameElement = document.getElementById("set-name");
+  if (setNameElement.value === "" && formData.length > 0) {
+    setNameElement.style.borderColor = "red";
+    setNameElement.parentElement.scrollIntoView();
+    alert("Please Enter Customer Details");
+    return;
+  }
+
   let purchaseRateDiff = Dao.getPurchaseRateDiff();
   let goldRateMain = Number(document.getElementById("gold-rate-main").value);
   let silverRateMain = Number(document.getElementById("silver-rate-main").value);
   let payload = {
     setItems: formData,
-    setName: document.getElementById("set-name").value,
+    setName: setNameElement.value,
     goldRate: goldRateMain,
     goldPurchaseRate:
       ShopCalculator.calculateMetalPurchaseRate(goldRateMain, purchaseRateDiff.Gold),

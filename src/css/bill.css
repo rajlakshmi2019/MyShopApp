@@ -7,11 +7,11 @@ table {
 
 th {
   max-width: 130px;
-  padding: 4px 2px;
+  padding: 4px 0;
   margin-bottom: 6px;
   vertical-align: bottom;
-  border-top: 2px dashed black;
-  border-bottom: 2px dashed black;
+  border-top: 2px solid black;
+  border-bottom: 2px solid black;
 }
 
 td {
@@ -22,6 +22,7 @@ tr.sales-header th:nth-child(1),
 tr.purchase-header th:nth-child(1) {
   text-align: left;
   padding-left: 10px;
+  width: 25%;
 }
 
 tr.sales-header th:nth-child(2),
@@ -35,21 +36,23 @@ tr.sales-row td:nth-child(3),
 tr.purchase-header th:nth-child(2),
 tr.purchase-row td:nth-child(2) {
   text-align: right;
-  width: 20%;
+  width: 13%;
 }
 
 tr.sales-header th:nth-child(4),
 tr.sales-row td:nth-child(4) {
   text-align: right;
+}
+
+tr.sales-row td:nth-child(5) {
+  text-align: right;
   width: 22%;
 }
 
-
-tr.sales-header th:nth-child(5),
-tr.sales-row td:nth-child(5) {
+tr.sales-header th:nth-child(5) {
   padding-right: 10px;
   text-align: right;
-  width: 20%;
+  width: 22%;
 }
 
 tr.purchase-header th:nth-child(3),
@@ -58,9 +61,13 @@ tr.purchase-row td:nth-child(3) {
   width: 25%;
 }
 
-tr.purchase-header th:nth-child(4),
-tr.purchase-row td:nth-child(4) {
+tr.purchase-header th:nth-child(4) {
   padding-right: 10px;
+  text-align: right;
+  width: 25%;
+}
+
+tr.purchase-row td:nth-child(4) {
   text-align: right;
   width: 25%;
 }
@@ -72,19 +79,18 @@ tr.purchase-row td:nth-child(4) {
 }
 
 .dashed-box {
-  border-top: 2px dashed black;
-  border-bottom: 2px dashed black;
+  border-top: 2px solid black;
+  border-bottom: 2px solid black;
 }
 
 .section-end {
   padding-bottom: 6px;
-  border-bottom: 1px dashed black;
+  border-bottom: 1px solid black;
 }
 
 .section-close {
-  padding-right: 10px;
   margin-bottom: 10px;
-  border-bottom: 1px dashed black;
+  border-bottom: 1px solid black;
 }
 
 .total-box {
@@ -107,7 +113,6 @@ tr.purchase-row td:nth-child(4) {
 }
 
 .td-align-left {
-  padding-left: 10px;
   text-align: left;
 }
 
@@ -125,6 +130,14 @@ tr.purchase-row td:nth-child(4) {
 
 .float-left {
   float: left;
+}
+
+.display-none {
+  display: none;
+}
+
+.display-block {
+  display: block;
 }
 
 #print-button {

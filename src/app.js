@@ -97,6 +97,17 @@ ipcMain.on('update:selected:grade', (event, grade) => {
   windowFactory.getGradePickerWindow().close();
 });
 
+ipcMain.on('payment:accept', (event, configs) => {
+  if (windowFactory.getPaymentAcceptForm() == null) {
+    windowFactory.createPaymentAcceptForm(configs);
+  }
+});
+
+ipcMain.on('update:pending', (event, configs) => {
+  windowFactory.getMainWindow().webContents.send('mark:pending', configs);
+  windowFactory.getPaymentAcceptForm().close();
+});
+
 ipcMain.on('bill:create', (event, configs) => {
   windowFactory.createBillWindow(configs);
   windowFactory.getBillWindow().webContents.on('did-finish-load', () => {
@@ -107,8 +118,10 @@ ipcMain.on('bill:create', (event, configs) => {
       if(error) return console.log(error.message);
 
       // save to pdf file
-      Dao.savePDF(data,
-        configs.bill_date_reverse.slice(0, -2) + '/', configs.bill_date_reverse + '_' + configs.id + ".pdf");
+      if (configs.savable) {
+        Dao.savePDF(data, configs.bill_date_reverse.slice(0, -2) + '/',
+          configs.bill_date_reverse + '_' + configs.id + ".pdf");
+      }
     });
   });
 });

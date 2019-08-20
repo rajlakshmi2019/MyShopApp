@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Pick a grade</title>
+    <link rel="stylesheet" href="../css/app.css">
+    <link rel="stylesheet" href="../css/body.css">
+    <link rel="stylesheet" href="../css/tray.css">
+    <link rel="stylesheet" href="../css/done.css">
+  </head>
+  <body>
+    <div id="accept-payment-div">
+      <h1 class="big-header-margin">Accept Payment</h1>
+      <div class="wrapper-div">
+        <h2 class="number-font-without-margin input-header float-left">Total Bill of </h2>
+        <h2 class="number-font money-green input-header" id="net-total">₹ 0</h2>
+        <div class="wrapper-div">
+          <input class="input-text rupee-background" id="payment-input">
+        </div>
+      </div>
+      <div class="wrapper-div upper-margin">
+        <h2 class="number-font-without-margin input-header float-left">Total Pending </h2>
+        <h2 class="number-font red-color input-header" id="pending-total">₹ 0</h2>
+        <div id="pending-form">
+          <input type="radio" name="pending-opt" id="due" value="Due" checked> <b>Due</b>
+          &nbsp;&nbsp;
+          <input type="radio" name="pending-opt" id="discount" value="Discount"> <b>Discount</b>
+          &nbsp;&nbsp;
+          <input type="radio" name="pending-opt" id="return" value="Return"> <b>Return</b>
+        </div>
+      </div>
+    </div>
+    <div class="form-submit-div">
+      <a class="form-submit">
+        <div class="done-button">
+          <div class="done-check-left"></div>
+          <div class="done-check-right"></div>
+        </div>
+        <div class='done-button-text'>
+          <span>Done</span>
+        </div>
+      </a>
+    </div>
+  </body>
+  <script type="text/javascript">
+    require('./../renderers/paymentAcceptFormRenderer.js');
+  </script>
+</html>

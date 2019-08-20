@@ -34,13 +34,20 @@ submitButton.addEventListener("dblclick", (event) => {
 });
 
 function submitFormData() {
+  let setNameElement = document.getElementById("set-name");
+  if (setNameElement.value === "") {
+    setNameElement.style.borderColor = "red";
+    window.close();
+    return;
+  }
+
   let goldRateSell = Number(document.getElementById("gold-rate-sell").value);
   let silverRateSell = Number(document.getElementById("silver-rate-sell").value);
   let goldRatePurchase = Number(document.getElementById("gold-rate-purchase").value);
   let silverRatePurchase = Number(document.getElementById("silver-rate-purchase").value);
   let payload = {
     setItems: [],
-    setName: document.getElementById("set-name").value,
+    setName: setNameElement.value,
     goldRate: goldRateSell,
     goldPurchaseRate: goldRatePurchase,
     silverRate: silverRateSell,

@@ -15,5 +15,8 @@
   "dependencies": {
     "csvtojson": "^2.0.8",
     "electron": "^5.0.1"
+  },
+  "devDependencies": {
+    "electron-packager": "^14.0.4"
   }
 }

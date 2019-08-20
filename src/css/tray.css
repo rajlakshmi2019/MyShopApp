@@ -247,6 +247,12 @@ input[type="radio"]
   font-family: Old Standard TT;
 }
 
+.number-font-without-margin {
+  padding: 5px 10px 5px 0;
+  font-weight: bold;
+  font-family: Old Standard TT;
+}
+
 .big-header-margin {
   margin-bottom: 25px;
 }

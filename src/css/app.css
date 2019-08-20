@@ -323,3 +323,8 @@ div, span, a, h2, h3, p {
   font-size: 18px;
   font-weight: bold;
 }
+
+#accept-payment-div {
+  color: #FFDF00;
+  padding: 20px;
+}
