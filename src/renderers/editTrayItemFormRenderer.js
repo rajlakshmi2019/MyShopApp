@@ -17,7 +17,7 @@ if (item.metal === 'Gold') {
   itemColor = "silver-color";
 }
 
-document.querySelector(".form-div").classList.add(itemColor);
+document.querySelector(".form-edit-tray-div").classList.add(itemColor);
 document.querySelector(".item-header").textContent = item.itemName;
 document.querySelector(".rate-per-gram").querySelector(".input-text").value = item.ratePerGram;
 document.querySelector(".making-per-gram").querySelector(".input-text").value = item.makingPerGram;

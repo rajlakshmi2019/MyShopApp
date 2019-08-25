@@ -351,20 +351,25 @@ function addPriceLabels(item, priceCardContainer, appliedPricingGrade, newPricin
   for(let i=0; i<priceCards.length; i++) {
     priceCard = priceCards[i];
     if (i == 0) {
-      priceCard.querySelector(".metal-rate").innerHTML = decodeURI("&#8377;") + " " + getDesiNumber(item.ratePerGram) +" /g";
-      priceCard.querySelector(".min-making-charge").innerHTML = decodeURI("&#8377;") + " " + getDesiNumber(item.minimumMakingCharge);
-      priceCard.querySelector(".making-rate").innerHTML = decodeURI("&#8377;") + " " + getDesiNumber(
+      priceCard.querySelector(".metal-rate").innerHTML = "₹ " + getDesiNumber(item.ratePerGram) +" /g";
+      priceCard.querySelector(".min-making-charge").innerHTML = "₹ " + getDesiNumber(
+        ShopCalculator.calculateGradeMakingRate(item.minimumMakingCharge,
+          gradeMakingRateDiff[appliedPricingGrade][mappedItem.METAL].MM_DIFF,
+          gradeMakingRateDiff[newPricingGrade][mappedItem.METAL].MM_DIFF));
+      priceCard.querySelector(".making-rate").innerHTML = "₹ " + getDesiNumber(
         ShopCalculator.calculateGradeMakingRate(item.makingPerGram,
-          gradeMakingRateDiff[appliedPricingGrade][mappedItem.METAL], gradeMakingRateDiff[newPricingGrade][mappedItem.METAL])) + " /g";
+          gradeMakingRateDiff[appliedPricingGrade][mappedItem.METAL].DIFF,
+          gradeMakingRateDiff[newPricingGrade][mappedItem.METAL].DIFF)) + " /g";
     } else {
       let weight = parseFloat(priceCard.querySelector(".item-label").textContent);
-      priceCard.querySelector(".money-green").innerHTML = decodeURI("&#8377;") + " " + getDesiNumber(
-        ShopCalculator.calculateGardePrice(
-          weight, item.ratePerGram, item.makingPerGram, item.minimumMakingCharge, mappedItem.APPLIED,
-          gradeMakingRateDiff[appliedPricingGrade][mappedItem.METAL], gradeMakingRateDiff[newPricingGrade][mappedItem.METAL]));
-      priceCard.querySelector(".metal-price").innerHTML = decodeURI("&#8377;") + " " + getDesiNumber(
+      priceCard.querySelector(".money-green").innerHTML = "₹ " + getDesiNumber(
+        ShopCalculator.calculateGardePrice(weight, item.ratePerGram,
+          item.makingPerGram, item.minimumMakingCharge, mappedItem.APPLIED,
+          gradeMakingRateDiff[appliedPricingGrade][mappedItem.METAL],
+          gradeMakingRateDiff[newPricingGrade][mappedItem.METAL]));
+      priceCard.querySelector(".metal-price").innerHTML = "₹ " + getDesiNumber(
         ShopCalculator.calculateMetalPrice(weight, item.ratePerGram, mappedItem.APPLIED));
-      priceCard.querySelector(".making-charge").innerHTML = decodeURI("&#8377;") + " " + getDesiNumber(
+      priceCard.querySelector(".making-charge").innerHTML = "₹ " + getDesiNumber(
         ShopCalculator.calculateGradeMakingCharge(weight, item.makingPerGram, item.minimumMakingCharge,
           gradeMakingRateDiff[appliedPricingGrade][mappedItem.METAL], gradeMakingRateDiff[newPricingGrade][mappedItem.METAL]));
     }

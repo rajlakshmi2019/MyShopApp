@@ -1,5 +1,5 @@
 const {ipcRenderer, remote} = require("electron");
-const {clearSelection, getInputTextFloatValue} = require("./../utils.js");
+const {clearSelection} = require("./../utils.js");
 const ShopCalculator = require("./../ShopCalculator.js");
 const Dao = remote.require("./Dao.js");
 
@@ -40,29 +40,31 @@ silverItemsMap.forEach((value, key, map) => {
 
 /* Add content for collapsible-option */
 function addItemForms(metal, itemType, itemNameList) {
-  let contentElementId = metal.toLowerCase() + "-content";
+  let content = document.getElementById(metal.toLowerCase() + "-content");
 
   // collapsible-option button
   let collapsibleOptBtn = document.createElement('button');
   collapsibleOptBtn.className = "collapsible-option collapsible";
   collapsibleOptBtn.textContent = itemType + " ";
+  content.appendChild(collapsibleOptBtn);
 
   let collapsibleOptState = document.createElement('span');
   collapsibleOptState.className = "collapsible-option-state";
   collapsibleOptState.innerHTML = decodeURI("&#x25B6;");
-
   collapsibleOptBtn.appendChild(collapsibleOptState);
 
   // collapsible-option-content
   let collapsibleOptContent = document.createElement('div');
   collapsibleOptContent.className = "option-content";
-  for(let i=0; i<itemNameList.length; i++) {
-    let formContent = document.createElement('div');
-    formContent.className = "card-inward";
-    collapsibleOptContent.appendChild(formContent);
+  content.appendChild(collapsibleOptContent);
 
+  let formContent = document.createElement('div');
+  formContent.className = "card-inward";
+  collapsibleOptContent.appendChild(formContent);
+
+  for(let i=0; i<itemNameList.length; i++) {
     let formDiv = document.createElement('div');
-    formDiv.className = "form-div";
+    formDiv.className = "form-div card-outward float-left";
     formContent.appendChild(formDiv);
 
     let itemName = itemNameList[i];
@@ -71,23 +73,15 @@ function addItemForms(metal, itemType, itemNameList) {
     itemHeader.textContent = itemName;
     formDiv.appendChild(itemHeader);
 
-    let leftFormDiv = document.createElement('div');
-    leftFormDiv.className = "split-seventy float-left";
-    let leftInputBox1 = createLeftInputBox(
-      "input-box split-forty float-left rate-per-gram", "Rate per gram", metalRate[metal]);
-    leftFormDiv.appendChild(leftInputBox1);
-    let leftInputBox2 = createLeftInputBox("input-box split-half float-left making-per-gram",
-      "Making Charge per gram", Dao.getMappedItem([metal, itemName].toString()).MAKING_RATE);
-    leftFormDiv.appendChild(leftInputBox2);
-    let leftInputBox3 = createLeftInputBox("input-box split-half float-left minimum-making",
-      "Minimum Making Charge", Dao.getMappedItem([metal, itemName].toString()).MIN_MAKING);
-    leftFormDiv.appendChild(leftInputBox3);
-    formDiv.appendChild(leftFormDiv);
+    let metalHeader = document.createElement('div');
+    metalHeader.className = "metal-header display-none";
+    metalHeader.textContent = metal;
+    formDiv.appendChild(metalHeader);
 
     let rightFormDiv = document.createElement('div');
-    rightFormDiv.className = "split-thirty float-left";
+    rightFormDiv.className = "wrapper-div";
     let rightInputBox = document.createElement('div');
-    rightInputBox.className = "input-box float-right";
+    rightInputBox.className = "input-box";
     let inputHeaderDiv = document.createElement('div');
     inputHeaderDiv.className = "input-header";
     inputHeaderDiv.textContent = "Weight In Grams";
@@ -95,37 +89,28 @@ function addItemForms(metal, itemType, itemNameList) {
     let inputTextArea = document.createElement('textarea');
     inputTextArea.className = "input-text input-weights";
     inputTextArea.rows = "5";
-    inputTextArea.cols = "20";
+    inputTextArea.cols = "19";
     rightInputBox.appendChild(inputTextArea);
     rightFormDiv.appendChild(rightInputBox);
     formDiv.appendChild(rightFormDiv);
   }
 
+  let quickSubmitDiv = document.createElement('div');
+  quickSubmitDiv.className = "quick-submit";
+  formContent.appendChild(quickSubmitDiv);
+
+  let quickSubmitButton = document.createElement('button');
+  quickSubmitButton.className = "quick-submit-btn";
+  quickSubmitButton.innerHTML = decodeURI("&#x27A1");
+  quickSubmitButton.addEventListener('click', (event) => {
+    event.preventDefault();
+    submitFormData();
+    clearSelection();
+  });
+  quickSubmitDiv.appendChild(quickSubmitButton);
+
   // add click event listener to collapsible option button
   addCollapsibleClickListener(collapsibleOptBtn, collapsibleOptContent);
-
-  // Add collapsible option elements
-  let content = document.getElementById(contentElementId);
-  content.appendChild(collapsibleOptBtn);
-  content.appendChild(collapsibleOptContent);
-}
-
-function createLeftInputBox(className, inputHeader, inputValue) {
-  let inputBox = document.createElement('div');
-  inputBox.className = className;
-
-  let inputHeaderDiv = document.createElement('div');
-  inputHeaderDiv.className = "input-header";
-  inputHeaderDiv.textContent = inputHeader;
-  inputBox.appendChild(inputHeaderDiv);
-
-  let inputText = document.createElement('input');
-  inputText.type = "text";
-  inputText.className = "input-text rupee-background";
-  inputText.value = inputValue;
-  inputBox.appendChild(inputText);
-
-  return inputBox;
 }
 
 function addCollapsibleClickListener(collapsibleOptButton, collapsibleOptContent) {
@@ -166,30 +151,16 @@ for (let i=0; i< collapsibles.length; i++) {
 /* Main rate populator */
 let mainGoldRate = document.getElementById("gold-rate-main");
 mainGoldRate.value = metalRate["Gold"];
-mainGoldRate.addEventListener('keyup', function() {
-  let goldContent = document.getElementById("gold-content");
-  let goldInputBoxes = goldContent.getElementsByClassName("rate-per-gram");
-  for(let i=0; i<goldInputBoxes.length; i++) {
-    goldInputBoxes[i].querySelector(".input-text").value = this.value;
-  }
-});
 
 let mainSilverRate = document.getElementById("silver-rate-main");
 mainSilverRate.value = metalRate["Silver"];
-mainSilverRate.addEventListener('keyup', function() {
-  let silverContent = document.getElementById("silver-content");
-  let silverInputBoxes = silverContent.getElementsByClassName("rate-per-gram");
-  for(let i=0; i<silverInputBoxes.length; i++) {
-    silverInputBoxes[i].querySelector(".input-text").value = this.value;
-  }
-});
 
 /* Done Button Event Listener */
 let submitButton = document.querySelector(".form-submit");
 submitButton.addEventListener('click', (event) => {
   event.preventDefault();
-  clearSelection();
   submitFormData();
+  clearSelection();
 });
 submitButton.addEventListener("dblclick", (event) => {
   event.preventDefault();
@@ -197,11 +168,17 @@ submitButton.addEventListener("dblclick", (event) => {
 });
 
 function submitFormData() {
+  let purchaseRateDiff = Dao.getPurchaseRateDiff();
+  let goldRateMain = Number(document.getElementById("gold-rate-main").value);
+  let silverRateMain = Number(document.getElementById("silver-rate-main").value);
+
   let formData = [];
   let formDataContainers = document.getElementsByClassName("form-div");
   for (let i=0; i<formDataContainers.length; i++) {
     let formDataObject = {};
     let formDataContainer = formDataContainers[i];
+    let metal = formDataContainer.querySelector(".metal-header").textContent;
+    let itemName = formDataContainer.querySelector(".item-header").textContent;
 
     formDataObject.weightList = [];
     let inputWeights = formDataContainer.querySelector(".input-weights").value.split('\n');
@@ -213,13 +190,14 @@ function submitFormData() {
     }
 
     if (formDataObject.weightList.length > 0) {
-      formDataObject.itemName = formDataContainer.querySelector(".item-header").textContent;
-      formDataObject.metal = getItemMetal(formDataObject.itemName);
-      formDataObject.ratePerGram = getInputTextFloatValue(formDataContainer.querySelector(".rate-per-gram"));
-      formDataObject.makingPerGram = getInputTextFloatValue(formDataContainer.querySelector(".making-per-gram"));
-      formDataObject.minimumMakingCharge = getInputTextFloatValue(formDataContainer.querySelector(".minimum-making"));
-      if (!(isNaN(formDataObject.ratePerGram) || isNaN(formDataObject.ratePerGram) || isNaN(formDataObject.minimumMakingCharge))) {
-        formData.push(formDataObject);
+      formDataObject.metal = metal;
+      formDataObject.itemName = itemName;
+      formDataObject.ratePerGram = (metal === 'Gold') ? goldRateMain : silverRateMain;
+      formDataObject.makingPerGram = Dao.getMappedItem([metal, itemName].toString()).MAKING_RATE;
+      formDataObject.minimumMakingCharge = Dao.getMappedItem([metal, itemName].toString()).MIN_MAKING;
+      if (!(isNaN(formDataObject.ratePerGram) ||
+        isNaN(formDataObject.ratePerGram) || isNaN(formDataObject.minimumMakingCharge))) {
+          formData.push(formDataObject);
       }
     }
   }
@@ -232,9 +210,6 @@ function submitFormData() {
     return;
   }
 
-  let purchaseRateDiff = Dao.getPurchaseRateDiff();
-  let goldRateMain = Number(document.getElementById("gold-rate-main").value);
-  let silverRateMain = Number(document.getElementById("silver-rate-main").value);
   let payload = {
     setItems: formData,
     setName: setNameElement.value,
@@ -249,26 +224,4 @@ function submitFormData() {
 
   // send submit signal and payload
   ipcRenderer.send('set:create', payload);
-}
-
-function getItemMetal(itemName) {
-  let itemsItr = goldItemsMap.values();
-  let currentItr = itemsItr.next()
-  while(!currentItr.done) {
-    if (currentItr.value.includes(itemName)) {
-      return 'Gold';
-    }
-    currentItr = itemsItr.next();
-  }
-
-  itemsItr = silverItemsMap.values();
-  currentItr = itemsItr.next()
-  while(!currentItr.done) {
-    if (currentItr.value.includes(itemName)) {
-      return 'Silver';
-    }
-    currentItr = itemsItr.next();
-  }
-
-  return 'Others';
 }

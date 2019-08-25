@@ -35,9 +35,9 @@ document.querySelector(".main-div").classList.add(itemColor);
 document.getElementById("item-name-label").innerHTML = prices.itemName;
 document.getElementById("weight-label").innerHTML = prices.weight + " g";
 document.getElementById("metal-selling-price").innerHTML =
-  prices.metal + " " + decodeURI("&#8377;") + " " + getDesiNumber(prices.ratePerGram) + " /g";
+  prices.metal + " ₹ " + getDesiNumber(prices.ratePerGram) + " /g";
 document.getElementById("minimum-making-label").innerHTML =
-  decodeURI("&#8377;") + " " + getDesiNumber(prices.minimumMakingCharge) + "  minimun making";
+  "₹ " + getDesiNumber(prices.minimumMakingCharge) + "  minimun making";
 
 let metalRate = Dao.getTodaysRate();
 let purchaseRateDiff = Dao.getPurchaseRateDiff();
@@ -64,7 +64,7 @@ for (let i=0; i<gradesList.length; i++) {
 function addGradePriceLabels(grade) {
 
   let makingRate = ShopCalculator.calculateGradeMakingRate(prices.makingPerGram,
-    gradeMakingRateDiff[appliedGrade][mappedItem.METAL], gradeMakingRateDiff[grade][mappedItem.METAL]);
+    gradeMakingRateDiff[appliedGrade][mappedItem.METAL].DIFF, gradeMakingRateDiff[grade][mappedItem.METAL].DIFF);
 
   let makingCharge = ShopCalculator.calculateGradeMakingCharge(
     prices.weight, prices.makingPerGram, prices.minimumMakingCharge,

@@ -6,15 +6,15 @@ function calculateGradeMakingRate(makingRate, appliedGradeMakingRateDiff, newGra
   return makingRate - appliedGradeMakingRateDiff + newGradeMakingRateDiff;
 }
 
-function calculateGradeMakingCharge(weight, makingRate, minimumMaking, appliedGradeMakingRateDiff, newGradeMakingRateDiff) {
-  return Math.max(weight*calculateGradeMakingRate(
-    makingRate, appliedGradeMakingRateDiff, newGradeMakingRateDiff), minimumMaking);
+function calculateGradeMakingCharge(weight, makingRate, minimumMaking, appliedGradeMakingDiff, newGradeMakingDiff) {
+  return Math.max(weight*calculateGradeMakingRate(makingRate, appliedGradeMakingDiff["DIFF"], newGradeMakingDiff["DIFF"]),
+    calculateGradeMakingRate(minimumMaking, appliedGradeMakingDiff["MM_DIFF"], newGradeMakingDiff["MM_DIFF"]));
 }
 
 function calculateGardePrice(
-  weight, metalRate, makingRate, minimumMaking, purity, appliedGradeMakingRateDiff, newGradeMakingRateDiff) {
+  weight, metalRate, makingRate, minimumMaking, purity, appliedGradeMakingDiff, newGradeMakingDiff) {
   return calculateMetalPrice(weight, metalRate, purity) +
-    calculateGradeMakingCharge(weight, makingRate, minimumMaking, appliedGradeMakingRateDiff, newGradeMakingRateDiff);
+    calculateGradeMakingCharge(weight, makingRate, minimumMaking, appliedGradeMakingDiff, newGradeMakingDiff);
 }
 
 function calculateMetalPurchaseRate(metalRate, purchaseRateDiff) {

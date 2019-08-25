@@ -88,7 +88,7 @@ function getGoldExchangeForm() {
 function createEditTrayItemForm(item) {
   editTrayItemForm = new BrowserWindow({
     width: 1000,
-    height: 340,
+    height: 310,
     frame: false,
     backgroundColor:'#205081',
     parent: mainWindow,
@@ -136,7 +136,7 @@ function getPriceCardView() {
 function createGradePickerWindow() {
   gradePickerWindow = new BrowserWindow({
     width: 350,
-    height: 300,
+    height: 270,
     frame: false,
     backgroundColor:'#205081',
     parent: mainWindow,

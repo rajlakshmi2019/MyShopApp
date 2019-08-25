@@ -17,7 +17,10 @@ class AppConfigs {
     this.gradeMakingRateDiff = gradesMakingRateDiffRecords.reduce((accumulator, record) => {
       accumulator[record.GRADE] =
         accumulator[record.GRADE] == null ? {} : accumulator[record.GRADE];
-      accumulator[record.GRADE][record.METAL] = Number(record.DIFF);
+      accumulator[record.GRADE][record.METAL] = {
+        "DIFF": Number(record.DIFF),
+        "MM_DIFF": Number(record.MM_DIFF)
+      };
       return accumulator;
     }, {});
 
