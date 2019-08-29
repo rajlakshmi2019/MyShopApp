@@ -1,9 +1,11 @@
 const fs = require('fs');
 const os = require('os');
+const crypto = require('crypto');
 const readline = require('readline');
 const csv = require('csvtojson');
 const AppConfigs = require('./AppConfigs.js');
 const {formatDate, formatDateReverse} = require("./utils.js");
+const password = "$kype!sN0tMun$hi"
 
 let appConfigs = null;
 
@@ -17,7 +19,7 @@ let loadAppConfigs = async function() {
     metalRateRecords, purchaseRateDiffRecords, gradesMakingRateDiffRecords, itemsConfigRecords);
 }
 
-let persistTransactionEntries = function(transactionDate, transactionEntries, callback) {
+let persistTransactionEntries = async function(transactionDate, transactionEntries) {
 
   // build transaction string
   let transaction = "";
@@ -30,21 +32,31 @@ let persistTransactionEntries = function(transactionDate, transactionEntries, ca
     transaction = transaction + entryRow + '\n';
   }
 
-  // write to transactions file
-  writeTransactionToFile(process.env.BASE_DATA_DIR, 'transactions.csv', transaction, (err) => {
-    if(err) {
-      // write to backup file if error
-      writeTransactionToFile(process.env.LOCAL_DATA_DIR, 'transactions.csv', transaction, (err) => {});
-    }
+  // TODO: take a lock on file here
 
-    // callback of completion
-    callback();
-  });
+  // init vector for block cypher chaining
+  let iv = getIthBlockFromEnd(2, process.env.BASE_DATA_DIR + 'running');
+  if (iv == null) {
+    iv = crypto.randomBytes(16);
+  }
 
-  // write to dated transactions file
-  let reverseDateText = formatDateReverse(transactionDate);
-  let datedFilePath = process.env.BASE_DATA_DIR + reverseDateText.slice(0, -2) + '/';
-  writeTransactionToFile(datedFilePath, 'transactions_' + reverseDateText + '.csv', transaction, (err) => {});
+  // get aes256 encryption key from password
+  let aes256Key = crypto.createHash('sha256').update("*******").digest();
+
+  // get last last block
+  let lastBlockEnc = getIthBlockFromEnd(1, process.env.BASE_DATA_DIR + 'running');
+
+  // decrypt last block
+  let lastBlock = "";
+  if (lastBlockEnc != null) {
+    lastBlock = decryptAES256(aes256Key, iv, lastBlockEnc);
+  }
+
+  // encrypt transaction
+  transactionEnc = encryptAES256(aes256Key, iv, lastBlock + transaction);
+
+  // write encrypted transaction
+  appendToFileOverwritingLastBlock(process.env.BASE_DATA_DIR + 'running', iv, transactionEnc);
 }
 
 let savePDF = function(pdf, filedir, filename) {
@@ -105,6 +117,103 @@ let getMappedItem = function(itemKey) {
   return appConfigs.itemConfigs.get(itemKey);
 }
 
+// encryption/decryption utils
+function encryptAES256(key, iv, data) {
+  var cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
+  return Buffer.concat([cipher.update(data), cipher.final()]);
+}
+
+function decryptAES256(key, iv, data) {
+  var cipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
+  return cipher.update(data, null, 'utf8') + cipher.final('utf8');
+}
+
+// file reading/writing utility methods
+
+// read ith block (16 bytes) from end
+function getIthBlockFromEnd(i, file) {
+  let blockSizeInBytes = 16;
+  if (fs.existsSync(file)) {
+    let fileSizeInBytes = fs.statSync(file)["size"];
+    if (fileSizeInBytes >= i * blockSizeInBytes) {
+      let start = fileSizeInBytes - i * blockSizeInBytes;
+      let length = Math.min(fileSizeInBytes - start, blockSizeInBytes);
+      return readBytesFromFile(file, start, length);
+    }
+  }
+
+  return null;
+}
+
+function readBytesFromFile(file, start, length) {
+  if (fs.existsSync(file)) {
+    let pos = 0;
+    let bytesRead;
+    let readStart = start;
+    let buffer = Buffer.alloc(length);
+    let fd = fs.openSync(file, 'r');
+    do {
+      bytesRead = tryReadSync(fd, buffer, pos, length, readStart);
+      pos += bytesRead;
+      readStart = null;
+    } while (bytesRead !== 0 && pos < length);
+
+    fs.closeSync(fd);
+    return buffer;
+  }
+
+  return null;
+}
+
+function tryReadSync(fd, buffer, pos, len, start) {
+  let threw = true;
+  let bytesRead;
+  try {
+    bytesRead = fs.readSync(fd, buffer, pos, len, start);
+    threw = false;
+  } finally {
+    if (threw) fs.closeSync(fd);
+  }
+  return bytesRead;
+}
+
+// append to file, overwrite last block
+function appendToFileOverwritingLastBlock(file, initContent, content) {
+  let blockSizeInBytes = 16;
+  let fileSizeInBytes = 0;
+  if (fs.existsSync(file)) {
+    fileSizeInBytes = fs.statSync(file)["size"];
+  } else {
+    fs.closeSync(fs.openSync(file, 'w'))
+    content = Buffer.concat([initContent, content]);
+  }
+
+  let pos = 0;
+  let bytesWrote;
+  let start = Math.max(0, fileSizeInBytes - blockSizeInBytes);
+  let length = Buffer.byteLength(content);
+  let fd = fs.openSync(file, 'r+');
+  do {
+    bytesWrote = tryWriteSync(fd, content, pos, length, start);
+    pos += bytesWrote;
+    start = null;
+  } while (bytesWrote !== 0 && pos < length);
+
+  fs.closeSync(fd);
+}
+
+function tryWriteSync(fd, buffer, pos, len, start) {
+  let threw = true;
+  let bytesWrote;
+  try {
+    bytesWrote = fs.writeSync(fd, buffer, pos, len, start);
+    threw = false;
+  } finally {
+    if (threw) fs.closeSync(fd);
+  }
+  return bytesWrote;
+}
+
 // helper function to write transaction entries to file
 function writeTransactionToFile(filepath, filename, transaction, errorCallback) {
   // check if file exists
@@ -117,7 +226,7 @@ function writeTransactionToFile(filepath, filename, transaction, errorCallback) 
   }
 
   // write to file
-  fs.appendFile(filepath + filename, transaction, errorCallback);
+  fs.appendFileSync(filepath + filename, transaction, errorCallback);
 }
 
 module.exports = {
