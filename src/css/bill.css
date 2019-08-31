@@ -1,4 +1,8 @@
 /* Bill window styles */
+body,html {
+  margin-top: 0;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -73,7 +77,7 @@ tr.purchase-row td:nth-child(4) {
 }
 
 .bill-container {
-  padding: 10px;
+  padding: 10px 5px;
   color: black;
   background-color: white;
 }
@@ -138,6 +142,14 @@ tr.purchase-row td:nth-child(4) {
 
 .display-block {
   display: block;
+}
+
+table.print-friendly tr {
+  page-break-inside: avoid;
+}
+
+.avoid-break-inside {
+  break-inside: avoid-page;
 }
 
 #print-button {

@@ -16,6 +16,10 @@ th, td {
   border: 2px solid #1EB4FF;
 }
 
+th.silver-border, td.silver-border {
+  border: 2px solid silver;
+}
+
 input[type="radio"]
 {
   cursor: pointer;

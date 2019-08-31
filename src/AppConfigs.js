@@ -1,13 +1,13 @@
 class AppConfigs {
 
   // constructor
-  constructor(metalRateRecords, purchaseRateDiffRecords, gradesMakingRateDiffRecords, itemsConfigRecords) {
+  constructor(metalRateRecords, gradesMakingRateDiffRecords, itemsConfigRecords) {
     this.metalRate = metalRateRecords.reduce((accumulator, record) => {
       accumulator[record.METAL] = Number(record.RATE);
       return accumulator;
     }, {});
 
-    this.purchaseRateDiff = purchaseRateDiffRecords.reduce((accumulator, record) => {
+    this.purchaseRateDiff = metalRateRecords.reduce((accumulator, record) => {
       accumulator[record.METAL] = Number(record.DIFF);
       return accumulator;
     }, {});

@@ -4,6 +4,7 @@ const {app, BrowserWindow, Menu} = require('electron');
 
 let mainWindow, goldSellForm, goldExchangeForm, editTrayItemForm;
 let priceCardView, gradePickerWindow, billWindow, paymentAcceptWindow;
+let updateConfigsWindow;
 
 function createMainWindow() {
   mainWindow = new BrowserWindow({backgroundColor:'#363A42', webPreferences: {nodeIntegration: true}});
@@ -156,6 +157,29 @@ function getGradePickerWindow() {
   return gradePickerWindow;
 }
 
+function createUpdateConfigsWindow() {
+  updateConfigsWindow = new BrowserWindow({
+    width: 440,
+    height: 340,
+    frame: false,
+    backgroundColor:'#363A42',
+    parent: mainWindow,
+    webPreferences: {nodeIntegration: true}
+  });
+  updateConfigsWindow.loadURL(url.format({
+    pathname: path.join(__dirname, 'html', 'updateConfigsWindow.html'),
+    protocol: 'file:',
+    slashes: true
+  }));
+  updateConfigsWindow.on('close', () => {
+    updateConfigsWindow = null;
+  });
+}
+
+function getUpdateConfigsWindow() {
+  return updateConfigsWindow;
+}
+
 function createBillWindow(configs) {
   billWindow = new BrowserWindow({
     width: 440,
@@ -278,6 +302,7 @@ module.exports = {
   getEditTrayItemForm: getEditTrayItemForm,
   createPriceCardView: createPriceCardView,
   getPriceCardView: getPriceCardView,
+  createUpdateConfigsWindow,getUpdateConfigsWindow,
   createGradePickerWindow, getGradePickerWindow,
   createBillWindow, getBillWindow,
   createPaymentAcceptForm, getPaymentAcceptForm

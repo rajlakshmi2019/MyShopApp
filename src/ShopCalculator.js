@@ -21,6 +21,10 @@ function calculateMetalPurchaseRate(metalRate, purchaseRateDiff) {
   return metalRate + purchaseRateDiff;
 }
 
+function calculateMetalPurchaseRateDiff(metalRate, purchaseRate) {
+  return purchaseRate - metalRate;
+}
+
 function calculateCostPrice(weight, costRate, afterWastage) {
   return weight * costRate * afterWastage;
 }
@@ -31,5 +35,6 @@ module.exports = {
   calculateGradeMakingCharge,
   calculateGardePrice,
   calculateMetalPurchaseRate,
+  calculateMetalPurchaseRateDiff,
   calculateCostPrice,
 };

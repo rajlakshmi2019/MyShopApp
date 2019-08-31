@@ -20,7 +20,7 @@ document.getElementById("billing-date").textContent = configs.bill_date;
 if (configs.sales.length > 0 || configs.additional > 0) {
   configs.sales = configs.sales.sort(compare);
 
-  let salesBillTable = createHtmlElement("table", "bill-table", null, null, null);
+  let salesBillTable = createHtmlElement("table", "bill-table print-friendly", null, null, null);
   document.getElementById("bill-sales").appendChild(salesBillTable);
 
   let thr = addTableHeader(
@@ -80,7 +80,7 @@ if (configs.sales.length > 0 || configs.additional > 0) {
 if (configs.purchase.length > 0) {
   configs.purchase = configs.purchase.sort(compare);
 
-  let purchaseBillTable = createHtmlElement("table", "bill-table", null, null, null);
+  let purchaseBillTable = createHtmlElement("table", "bill-table print-friendly", null, null, null);
   document.getElementById("bill-purchase").appendChild(purchaseBillTable);
 
   let thr = addTableHeader(

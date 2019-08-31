@@ -1167,8 +1167,8 @@ function finishTransaction(tabId, additionalConfigs) {
       });
   } else {
     Dao
-      .persistTransactionEntries(date,
-        consolidateEntries(allTransactionEntries)).then(() => {
+      .persistTransactionEntries(date, consolidateEntries(allTransactionEntries))
+      .then(() => {
           alert('Finished transaction for ' + tabName + '!!');
 
           // bill totals

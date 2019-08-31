@@ -23,6 +23,10 @@ ipcMain.on('open:buy', () => {
   windowFactory.createGoldExchangeForm();
 });
 
+ipcMain.on('open:configs', () => {
+  windowFactory.createUpdateConfigsWindow();
+});
+
 ipcMain.on('set:create', (event, set) => {
   let mainWindow = windowFactory.getMainWindow();
   if (set.setItems.length > 0 && set.tabIndex == null) {

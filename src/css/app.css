@@ -303,6 +303,11 @@ hr.solid {
   color: #363A42;
 }
 
+.small-popups-div {
+  color: #FFDF00;
+  padding: 20px;
+}
+
 div, span, a, h2, h3, p {
   -webkit-user-select: none; /* webkit (safari, chrome) browsers */
   -moz-user-select: none; /* mozilla browsers */

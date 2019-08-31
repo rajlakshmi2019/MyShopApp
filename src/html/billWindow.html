@@ -5,7 +5,7 @@
     <link rel="stylesheet" href="../css/bill.css">
     <title>Generated Bill</title>
     <!-- Set page size here: A5, A4 or A3 -->
-    <style>@page { size: A6; margin: 0; }</style>
+    <style>@page { size: A6; margin: 10px 0 0; }</style>
   </head>
   <body>
     <div id="bill-menu"></div>
@@ -38,8 +38,8 @@
       </div>
       <div class="wrapper-div bill-contents">
         <div class="wrapper-div" id="bill-sales"></div>
-        <div class="wrapper-div" id="bill-purchase"></div>
-        <div class="wrapper-div total-box dashed-box" id="bill-total">
+        <div class="wrapper-div avoid-break-inside" id="bill-purchase"></div>
+        <div class="wrapper-div total-box dashed-box avoid-break-inside" id="bill-total">
           <div class="float-left">
             Sub Total
           </div>

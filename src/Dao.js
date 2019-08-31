@@ -5,18 +5,16 @@ const readline = require('readline');
 const csv = require('csvtojson');
 const AppConfigs = require('./AppConfigs.js');
 const {formatDate, formatDateReverse} = require("./utils.js");
-const password = "$kype!sN0tMun$hi"
 
 let appConfigs = null;
 
 let loadAppConfigs = async function() {
   let metalRateRecords = await csv().fromFile(process.env.BASE_CONFIG_DIR + 'metal_rate.csv');
-  let purchaseRateDiffRecords = await csv().fromFile(process.env.BASE_CONFIG_DIR + 'purchase_rate_diff.csv');
   let gradesMakingRateDiffRecords = await csv().fromFile(process.env.BASE_CONFIG_DIR + 'grades_making_rate_diff.csv');
   let itemsConfigRecords = await csv().fromFile(process.env.BASE_CONFIG_DIR + 'items_config.csv');
 
   appConfigs = new AppConfigs(
-    metalRateRecords, purchaseRateDiffRecords, gradesMakingRateDiffRecords, itemsConfigRecords);
+    metalRateRecords, gradesMakingRateDiffRecords, itemsConfigRecords);
 }
 
 let persistTransactionEntries = async function(transactionDate, transactionEntries) {
@@ -115,6 +113,15 @@ let getSilverItemTypes = function() {
 
 let getMappedItem = function(itemKey) {
   return appConfigs.itemConfigs.get(itemKey);
+}
+
+let updateMetalRate = async function(metalRate, purchaseRateDiff) {
+  let metalRateContent = "METAL,RATE,DIFF\n" +
+    "Gold," + metalRate.Gold + "," + purchaseRateDiff.Gold + "\n" +
+    "Silver," + metalRate.Silver + "," + purchaseRateDiff.Silver + "\n";
+    // write to file
+    fs.writeFileSync(process.env.BASE_CONFIG_DIR + 'metal_rate.csv', metalRateContent);
+    loadAppConfigs();
 }
 
 // encryption/decryption utils
@@ -226,7 +233,7 @@ function writeTransactionToFile(filepath, filename, transaction, errorCallback) 
   }
 
   // write to file
-  fs.appendFileSync(filepath + filename, transaction, errorCallback);
+  fs.appendFile(filepath + filename, transaction);
 }
 
 module.exports = {
@@ -243,5 +250,6 @@ module.exports = {
   getGradesList,
   getGoldItemTypes,
   getSilverItemTypes,
-  getMappedItem
+  getMappedItem,
+  updateMetalRate
 }

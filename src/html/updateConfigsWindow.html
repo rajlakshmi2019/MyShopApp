@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Update Configs</title>
+    <link rel="stylesheet" href="../css/app.css">
+    <link rel="stylesheet" href="../css/tray.css">
+    <link rel="stylesheet" href="../css/done.css">
+  </head>
+  <body>
+    <div class="small-popups-div" id="update-configs-div">
+      <h1 class="big-header-margin align-center">Metal Rate</h1>
+      <table>
+        <tr>
+          <th class="silver-border">Metal</th>
+          <th class="silver-border">Selling Rate</th>
+          <th class="silver-border">Purchase Rate</th>
+        </tr>
+        <tr>
+          <th class="silver-border">Gold</th>
+          <td class="silver-border align-center"><input class="input-text rupee-background" size="10" id="gold-rate-sell"></td>
+          <td class="silver-border align-center"><input class="input-text rupee-background" size="10" id="gold-rate-purchase"></td>
+        </tr>
+        <tr>
+          <th class="silver-border">Silver</th>
+          <td class="silver-border align-center"><input class="input-text rupee-background" size="10" id="silver-rate-sell"></td>
+          <td class="silver-border align-center"><input class="input-text rupee-background" size="10" id="silver-rate-purchase"></td>
+        </tr>
+      </table>
+    </div>
+    <div class="form-submit-div">
+      <a class="form-submit">
+        <div class="done-button">
+          <div class="done-check-left"></div>
+          <div class="done-check-right"></div>
+        </div>
+        <div class='done-button-text'>
+          <span>Done</span>
+        </div>
+      </a>
+    </div>
+  </body>
+  <script type="text/javascript">
+    require('./../renderers/updateConfigsWindow.js');
+  </script>
+</html>
