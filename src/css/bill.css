@@ -1,6 +1,6 @@
 /* Bill window styles */
 body {
-  margin: 0 8px 0 5px;
+  margin: 0 7px 0 5px;
 }
 
 @media print {
@@ -28,11 +28,21 @@ td {
   padding: 0;
 }
 
+tr {
+  border-left: 1px solid black;
+  border-right: 1px solid black;
+}
+
 tr.sales-header th:nth-child(1),
 tr.purchase-header th:nth-child(1) {
   text-align: left;
   padding-left: 10px;
   width: 25%;
+}
+
+tr.sales-row td:nth-child(1),
+tr.purchase-row td:nth-child(1) {
+  padding-left: 2px;
 }
 
 tr.sales-header th:nth-child(2),
@@ -55,6 +65,7 @@ tr.sales-row td:nth-child(4) {
 }
 
 tr.sales-row td:nth-child(5) {
+  padding-right: 2px;
   text-align: right;
   width: 22%;
 }
@@ -72,12 +83,13 @@ tr.purchase-row td:nth-child(3) {
 }
 
 tr.purchase-header th:nth-child(4) {
-  padding-right: 10px;
+  padding-right: 8px;
   text-align: right;
   width: 25%;
 }
 
 tr.purchase-row td:nth-child(4) {
+  padding-right: 2px;
   text-align: right;
   width: 25%;
 }
@@ -100,7 +112,11 @@ tr.purchase-row td:nth-child(4) {
 }
 
 .section-close {
+  padding-right: 2px;
   margin-bottom: 10px;
+  border-left: 1px solid black;
+  border-right: 1px solid black;
+  border-bottom: 1px solid black;
 }
 
 .title-large {
@@ -126,7 +142,8 @@ tr.purchase-row td:nth-child(4) {
 }
 
 .total-box {
-  padding-top: 4px;
+  padding: 4px 0 2px;
+  border: 1px solid black;
 }
 
 .due-box {
@@ -252,4 +269,13 @@ table.print-friendly tr {
 
 #name-header-div {
   width: 62%;
+}
+
+#bill-footer {
+  color: white;
+  background-color: black;
+  margin: 2px 0;
+  font-size: 14px;
+  font-weight: bold;
+  font-style: italic;
 }

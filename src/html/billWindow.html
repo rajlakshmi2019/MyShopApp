@@ -5,7 +5,7 @@
     <link rel="stylesheet" href="../css/bill.css">
     <title>Generated Bill</title>
     <!-- Set page size here: A5, A4 or A3 -->
-    <style>@page { size: A6; margin: 10px 5px; }</style>
+    <style>@page { size: A6; margin: 10px 5px 38px; }</style>
   </head>
   <body>
     <div id="bill-menu"></div>
@@ -75,33 +75,39 @@
       </div>
       <br>
       <div class="wrapper-div bill-contents">
-        <div class="wrapper-div upper-margin" id="bill-sales"></div>
-        <div class="wrapper-div upper-margin avoid-break-inside" id="bill-purchase"></div>
-        <div class="overflow-hidden upper-margin total-box dashed-box avoid-break-inside" id="bill-total">
-          <div class="float-left">
+        <div class="wrapper-div" id="bill-sales"></div>
+        <div class="wrapper-div avoid-break-inside" id="bill-purchase"></div>
+        <div class="overflow-hidden total-box avoid-break-inside" id="bill-total">
+          <div class="float-left custom-box">
             Sub Total
           </div>
-          <div class="td-align-right" id="sub-total"></div>
+          <div class="td-align-right custom-box" id="sub-total"></div>
 
-          <div class="float-left">
+          <div class="float-left custom-box">
             Discount
           </div>
-          <div class="td-align-right" id="discount"></div>
+          <div class="td-align-right custom-box" id="discount"></div>
           <br>
-          <div class="float-left">
+          <div class="float-left custom-box">
             Total Bill
           </div>
-          <div class="td-align-right" id="total-bill"></div>
+          <div class="td-align-right custom-box" id="total-bill"></div>
           <div class="overflow-hidden due-box display-none" id="due-total">
-            <div class="float-left">
+            <div class="float-left custom-box">
               Paid
             </div>
-            <div class="td-align-right" id="payment-done"></div>
+            <div class="td-align-right custom-box" id="payment-done"></div>
 
-            <div class="float-left">
+            <div class="float-left custom-box">
               Due
             </div>
-            <div class="td-align-right" id="payment-due"></div>
+            <div class="td-align-right custom-box" id="payment-due"></div>
+          </div>
+          <div class="overflow-hidden td-align-center" id="bill-footer">
+            Purity is our Speciality
+          </div>
+          <div class="overflow-hidden td-align-center" id="footer-message">
+            Cash Refund 90% on Market Purchase Rate
           </div>
         </div>
       </div>
