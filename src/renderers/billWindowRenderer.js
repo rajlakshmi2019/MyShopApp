@@ -5,15 +5,21 @@ const {createHtmlElement, addTableHeader, addTableData, getDesiNumber, getFromDe
 let configs = remote.getCurrentWindow().configs;
 
 // add print button
+let printButtonDiv = createHtmlElement("div", "no-print", "print-button-div", null, null);
+document.getElementById("bill-menu").appendChild(printButtonDiv);
+
 let printButton = createHtmlElement("button", null, "print-button", null, "print");
-document.getElementById("bill-menu").appendChild(printButton);
+printButtonDiv.appendChild(printButton);
 printButton.addEventListener("click", () => {
   window.print();
 });
 
+// populate header
+document.getElementById("top-center-header").textContent = "ESTIMATE ONLY";
+document.getElementById("top-right-header").textContent = "Mob: 9431156469, 8797558240";
+
 // general info
 document.getElementById("bill-no").textContent = configs.id;
-document.getElementById("billed-to").textContent = configs.name;
 document.getElementById("billing-date").textContent = configs.bill_date;
 
 // sales table in bill

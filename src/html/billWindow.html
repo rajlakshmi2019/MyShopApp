@@ -5,41 +5,79 @@
     <link rel="stylesheet" href="../css/bill.css">
     <title>Generated Bill</title>
     <!-- Set page size here: A5, A4 or A3 -->
-    <style>@page { size: A6; margin: 10px 0 0; }</style>
+    <style>@page { size: A6; margin: 10px 6px 10px 5px; }</style>
   </head>
   <body>
     <div id="bill-menu"></div>
     <div class="bill-container">
       <div class="wrapper-div" id="bill-header">
-        <div class="title-bold font-bold dashed-box">
-          Rajlakshmi Jewellers
+        <div id="bill-top-header">
+          <div class="float-left split-forty" id="top-left-header"></div>
+          <div class="float-left td-align-center" id="top-center-header"></div>
+          <div class="float-right td-align-right split-forty" id="top-right-header"></div>
         </div>
-        <div class="td-align-center">
-          At Amar Chowk, Nawadih Mod, Rajdhanwar
+        <div class="overflow-hidden">
+          <img class="float-left" src="./../resource/rj_logo_75.png" alt="RJ">
+          <div class="wrapper-div float-left" id="name-header-div">
+            <div class="title-large font-bold">
+              Rajlakshmi Jewellers
+            </div>
+            <div class="sub-title font-bold">
+              The jewellery people
+            </div>
+            <div class="td-align-center">
+              Amar Chowk (Nawadih More), Rajdhanwar
+            </div>
+            <div class="td-align-center">
+              Giridih (Jharkhand) - 825412
+            </div>
+          </div>
+          <img class="float-right" src="./../resource/hallmark_65.png" alt="hallmark">
         </div>
-        <div class="td-align-center">
-          Giridih, Jharkhand, 825412
+        <div class="overflow-hidden">
+          <div class="custom-box float-left">
+            INVOICE NO.&nbsp;&nbsp;&nbsp;&nbsp;
+            <label class="td-align-left" id="bill-no"></label>
+          </div>
+          <div class="custom-box float-right td-align-right">
+            DATE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <label id="billing-date"></label>
+          </div>
         </div>
-        <div class="td-align-center">
-          PH: 9431156469, 7797436320
+        <div class="overflow-hidden">
+          <div class="custom-box float-left">
+            NAME&nbsp;&nbsp;&nbsp;&nbsp;
+            <label class="td-align-left" id="billing-name">
+              ..............................
+            </label>
+          </div>
+          <div class="custom-box float-right td-align-right">
+            PLACE&nbsp;&nbsp;
+            <label id="billing-place">
+              Rajdhanwar
+            </label>
+          </div>
+        </div>
+        <div class="overflow-hidden">
+          <div class="custom-box float-left">
+            ADDR&nbsp;&nbsp;&nbsp;&nbsp;
+            <label id="billing-address">
+              ..............................
+            </label>
+          </div>
+          <div class="custom-box float-right td-align-right">
+            MOB.&nbsp;
+            <label class="td-align-left" id="billing-phone-no">
+              .......................
+            </label>
+          </div>
         </div>
       </div>
       <br>
-      <div class="td-align-center">
-        Billed To <label id="billed-to"></label>
-      </div>
-      <div class="custom-box float-left">
-        <div>DATE</div>
-        <div id="billing-date"></div>
-      </div>
-      <div class="custom-box">
-        <div class="td-align-right">Bill NO</div>
-        <div class="td-align-right" id="bill-no"></div>
-      </div>
       <div class="wrapper-div bill-contents">
-        <div class="wrapper-div" id="bill-sales"></div>
-        <div class="wrapper-div avoid-break-inside" id="bill-purchase"></div>
-        <div class="wrapper-div total-box dashed-box avoid-break-inside" id="bill-total">
+        <div class="wrapper-div upper-margin" id="bill-sales"></div>
+        <div class="wrapper-div upper-margin avoid-break-inside" id="bill-purchase"></div>
+        <div class="overflow-hidden upper-margin total-box dashed-box avoid-break-inside" id="bill-total">
           <div class="float-left">
             Sub Total
           </div>
@@ -53,18 +91,18 @@
           <div class="float-left">
             Total Bill
           </div>
-          <div class="td-align-right font-bold" id="total-bill"></div>
-        </div>
-        <div class="wrapper-div total-box dashed-box display-none" id="due-total">
-          <div class="float-left">
-            Paid
-          </div>
-          <div class="td-align-right" id="payment-done"></div>
+          <div class="td-align-right" id="total-bill"></div>
+          <div class="overflow-hidden due-box display-none" id="due-total">
+            <div class="float-left">
+              Paid
+            </div>
+            <div class="td-align-right" id="payment-done"></div>
 
-          <div class="float-left">
-            Due
+            <div class="float-left">
+              Due
+            </div>
+            <div class="td-align-right" id="payment-due"></div>
           </div>
-          <div class="td-align-right" id="payment-due"></div>
         </div>
       </div>
     </div>

@@ -589,7 +589,7 @@ function buildNetTotalContainer(tabContent, set) {
   trayControlsContainer.appendChild(backButton);
   let billButton = createHtmlElement("button", "tray-window-button controller-button bill-button float-left", "bill-button-" + tabIndex, null, null);
   billButton.addEventListener("click", () => {
-    generateBill(getTabButton(tabIndex).textContent.slice(0, -1), new Date(), "_________",
+    generateBill(getTabButton(tabIndex).textContent.slice(0, -1), new Date(), ".................",
       parseTable(document.getElementById("sales-table-" + tabIndex)),
       parseTable(document.getElementById("purchase-table-" + tabIndex)),
       getAdditionalCharge(tabIndex), getTotals(tabIndex), false);

@@ -1,6 +1,6 @@
 /* Bill window styles */
-body,html {
-  margin-top: 0;
+body {
+  margin: 0 6px 0 5px;
 }
 
 table {
@@ -77,14 +77,15 @@ tr.purchase-row td:nth-child(4) {
 }
 
 .bill-container {
-  padding: 10px 5px;
+  padding: 0;
   color: black;
+  font-size: 12px;
   background-color: white;
 }
 
 .dashed-box {
-  border-top: 2px solid black;
-  border-bottom: 2px solid black;
+  border-top: 1px solid black;
+  border-bottom: 1px solid black;
 }
 
 .section-end {
@@ -94,26 +95,50 @@ tr.purchase-row td:nth-child(4) {
 
 .section-close {
   margin-bottom: 10px;
-  border-bottom: 1px solid black;
 }
 
-.total-box {
-  padding: 6px 0;
-}
-
-.title-bold {
-  margin: 10px 0;
+.title-large {
+  margin-bottom: 0;
   text-align: center;
-  font-size: 35px;
+  font-size: 22px;
+}
+
+@font-face {
+  font-family: 'gabriele';
+  src: url('../resource/dsGabriele.ttf');
+}
+
+.sub-title {
+  margin-bottom: 0;
+  text-align: center;
+  font-size: 18px;
+  font-family: gabriele;
 }
 
 .bill-contents {
   font-size: 12px;
 }
 
+.total-box {
+  padding-top: 4px;
+}
+
+.due-box {
+  padding-top: 4px;
+  border-top: 1px solid black;
+}
+
 .wrapper-div {
-  margin: 10px 0;
+  margin-bottom: 10px;
   overflow: hidden;
+}
+
+.custom-box {
+  margin: 0 2px;
+}
+
+.upper-margin {
+  margin-top: 12px;
 }
 
 .td-align-left {
@@ -136,12 +161,24 @@ tr.purchase-row td:nth-child(4) {
   float: left;
 }
 
+.float-right {
+  float: right;
+}
+
+.split-forty {
+  width: calc(38% - 1px);
+}
+
 .display-none {
   display: none;
 }
 
 .display-block {
   display: block;
+}
+
+.overflow-hidden {
+  overflow: hidden;
 }
 
 table.print-friendly tr {
@@ -152,13 +189,60 @@ table.print-friendly tr {
   break-inside: avoid-page;
 }
 
+@media print {
+  .no-print, .no-print * {
+    display: none !important;
+  }
+}
+
+#print-button-div {
+  overflow: hidden;
+}
+
 #print-button {
-  float: right;
+  position:fixed;
+  top: 2px;
+  right: 2px;
+  z-index: 2;
   cursor: pointer;
   padding: 1px 5px;
+  margin-bottom: 10px;
   outline: none;
   border-radius: 5px;
   color: black;
   background-color: white;
   border: 1px solid black;
+}
+
+#top-left-header {
+  font-weight: bold;
+  padding-top: 4px;
+}
+
+#bill-header {
+  border: 2px solid black;
+}
+
+#bill-top-header {
+  overflow: hidden;
+  font-size: 12px;
+}
+
+#top-right-header {
+  font-size: 10px;
+  padding-top: 2px;
+  padding-right: 2px;
+}
+
+#top-center-header {
+  padding-top: 0;
+  width: 24%;
+  font-size: 11px;
+  font-weight: normal;
+  color: white;
+  background-color: black;
+}
+
+#name-header-div {
+  width: 62%;
 }
