@@ -1,6 +1,12 @@
 /* Bill window styles */
 body {
-  margin: 0 6px 0 5px;
+  margin: 0 8px 0 5px;
+}
+
+@media print {
+  body {
+    -webkit-print-color-adjust: exact;
+  }
 }
 
 table {
@@ -237,10 +243,11 @@ table.print-friendly tr {
 #top-center-header {
   padding-top: 0;
   width: 24%;
-  font-size: 11px;
-  font-weight: normal;
   color: white;
   background-color: black;
+  font-size: 11px;
+  font-weight: normal;
+  font-family:"Courier New", Courier, monospace;
 }
 
 #name-header-div {
