@@ -122,7 +122,7 @@ tr.purchase-row td:nth-child(4) {
 .title-large {
   margin-bottom: 0;
   text-align: center;
-  font-size: 22px;
+  font-size: 28px;
 }
 
 @font-face {
@@ -268,7 +268,7 @@ table.print-friendly tr {
 }
 
 #name-header-div {
-  width: 62%;
+  width: 63%;
 }
 
 #bill-footer {
