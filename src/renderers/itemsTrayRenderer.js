@@ -1036,40 +1036,63 @@ function getOtherTransactionEntry(price) {
   return price>0 ? [{"Price": price}] : [];
 }
 
-function getSalesEntryKey(entry) {
+function getSalesRateKey(entry) {
   let entryKey = [entry.Metal, entry.Rate_Per_Gram, entry.Making_Per_Gram, entry.Making];
-  if (entry.Item == "Dulhan Payal") {
+  if (entry.Item === "Fancy Payal") {
+    entry.Item = entry.Item + " " + (
+      Dao.getMappedItem(["Silver", entry.Item].toString()).APPLIED * 1000)
     entryKey.push(entry.Item);
   }
 
-  return entryKey.toString()
+  return entryKey;
+}
+
+function groupBySalesRateKey(aggregatedSalesMap) {
+  groupMap = new Map();
+  for (let entry of aggregatedSalesMap.values()) {
+    let salesRateKey = getSalesRateKey(entry).toString();
+    if (groupMap.has(salesRateKey)) {
+      let groupEntry = groupMap.get(salesRateKey);
+      groupEntry.items.push(entry);
+    } else {
+      groupMap.set(salesRateKey, {...entry, items: [entry]})
+    }
+  }
+
+  return Array.from(groupMap.values());
+}
+
+function getSalesEntryKey(entry) {
+  let entryKey = getSalesRateKey(entry);
+  entryKey.push(entry.Item);
+  return entryKey;
 }
 
 function aggregateSalesEntries(salesEntries) {
   let aggregatedSalesMap = new Map();
   for (let entry of salesEntries) {
-    if (aggregatedSalesMap.has(getSalesEntryKey(entry))) {
-      let aggregateEntry = aggregatedSalesMap.get(getSalesEntryKey(entry));
+    let salesEntryKey = getSalesEntryKey(entry).toString();
+    if (aggregatedSalesMap.has(salesEntryKey)) {
+      let aggregateEntry = aggregatedSalesMap.get(salesEntryKey);
       aggregateEntry.Item += "," + entry.Item;
       aggregateEntry.ItemNames.push(entry.Item);
       aggregateEntry.Weight_In_Gram += entry.Weight_In_Gram;
       aggregateEntry.Weights.push(entry.Weight_In_Gram);
       aggregateEntry.Price += entry.Price;
+      aggregateEntry.Quantity += 1;
     } else {
-      aggregatedSalesMap.set(getSalesEntryKey(entry),
-        {...entry, ItemNames: [entry.Item], Weights: [entry.Weight_In_Gram]});
+      aggregatedSalesMap.set(salesEntryKey,
+        {...entry, Quantity: 1, ItemNames: [entry.Item], Weights: [entry.Weight_In_Gram]});
     }
-    console.log(aggregatedSalesMap);
   }
-  console.log(aggregatedSalesMap.gena);
 
-  return aggregatedSalesMap;
+  return groupBySalesRateKey(aggregatedSalesMap);
 }
 
 function aggregateItemNames(itemNames) {
   let itemNamesMap = new Map();
   for (let itemName of itemNames) {
-    if (itemName == "Dulhan Payal") {
+    if (itemName == "Fancy Payal") {
       itemName = itemName + " " + (
         Dao.getMappedItem(["Silver", itemName].toString()).APPLIED * 1000);
     }
@@ -1097,23 +1120,14 @@ function generateBill(tabName, date, transId,
         detail: 'Please select items to complete this transaction'
       });
     } else {
-      let aggregatedSales = [];
-      let aggregatedSalesMap = aggregateSalesEntries(salesEntries);
-      for (let aggregateEntry of aggregatedSalesMap.values()) {
-        aggregateEntry.items = [];
-        let namesMap = aggregateItemNames(aggregateEntry.ItemNames);
-        for (let name of namesMap.keys()) {
-          aggregateEntry.items.push({name: name, qty: namesMap.get(name).count});
-        }
-        aggregatedSales.push(aggregateEntry);
-      }
-
+      let aggregatedSales = aggregateSalesEntries(salesEntries);
+      console.log(aggregatedSales);
       ipcRenderer.send('bill:create', {
         name: tabName,
         bill_date: formatDateSlash(date),
         bill_date_reverse: formatDateReverse(date),
         id: transId,
-        sales: aggregatedSales,
+        sales: aggregateSalesEntries(salesEntries),
         purchase: purchaseEntries,
         additional: additionalCharge,
         totals: totals,
