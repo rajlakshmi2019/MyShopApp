@@ -1,5 +1,6 @@
 const {ipcRenderer, remote} = require("electron");
 const {createHtmlElement, addTableHeader, addTableData, getDesiNumber, getFromDesiRupeeNumber} = require("./../utils.js");
+const {calculateGSTAppliedTotals} = require("./../ShopCalculator.js");
 
 // bill entries and options
 let configs = remote.getCurrentWindow().configs;
@@ -8,10 +9,20 @@ let configs = remote.getCurrentWindow().configs;
 let printButtonDiv = createHtmlElement("div", "no-print", "print-button-div", null, null);
 document.getElementById("bill-menu").appendChild(printButtonDiv);
 
-let printButton = createHtmlElement("button", null, "print-button", null, "print");
+let printButton = createHtmlElement("button", null, "print-button", null, "Print");
 printButtonDiv.appendChild(printButton);
 printButton.addEventListener("click", () => {
   window.print();
+});
+
+let gstButton = createHtmlElement("button", null, "gst-button", null, "GST");
+printButtonDiv.appendChild(gstButton);
+gstButton.addEventListener("click", () => {
+  if (document.getElementById("top-center-header").textContent === "ESTIMATE ONLY") {
+    applyGST()
+  } else if (document.getElementById("top-center-header").textContent === "TAX INVOICE") {
+    applyEstimate()
+  }
 });
 
 // populate header
@@ -77,14 +88,14 @@ if (configs.sales.length > 0 || configs.additional > 0) {
   }
 
   // sales total
-  let salesTotal = createHtmlElement("div", "td-align-right section-close", null, null, null);
-  salesTotal.innerHTML = configs.totals.sales;
+  let salesTotal = createHtmlElement("div", "td-align-right section-close", null, null, configs.totals.sales);
   document.getElementById("bill-sales").appendChild(salesTotal);
 }
 
 // purchase table
 if (configs.purchase.length > 0) {
   configs.purchase = configs.purchase.sort(compare);
+  document.getElementById("bill-purchase").classList.add("display-block");
 
   let purchaseBillTable = createHtmlElement("table", "bill-table print-friendly", null, null, null);
   document.getElementById("bill-purchase").appendChild(purchaseBillTable);
@@ -112,20 +123,78 @@ if (configs.purchase.length > 0) {
   }
 
   // purchase total
-  let purchaseTotal = createHtmlElement("div", "td-align-right section-close", null, null, null);
-  purchaseTotal.innerHTML = configs.totals.purchase;
+  let purchaseTotal = createHtmlElement("div", "td-align-right section-close", null, null, configs.totals.purchase);
   document.getElementById("bill-purchase").appendChild(purchaseTotal);
+
+  // add purchase block at end in gst bills with page break
+  document.getElementById("bill-purchase-gst").classList.add("display-block");
+  document.getElementById("bill-purchase-gst").appendChild(purchaseBillTable.cloneNode(true));
+
+  let purchaseTotalClone = createHtmlElement("div", "td-align-right section-middle", null, null, configs.totals.purchase);
+  document.getElementById("bill-purchase-gst").appendChild(purchaseTotalClone);
+
+  let netTotalSection = createHtmlElement("div", "section-close", null, null, null);
+  netTotalSection.appendChild(createHtmlElement("div", "float-left custom-box", null, null, "GST Total"));
+  netTotalSection.appendChild(createHtmlElement("div", "td-align-right custom-box", "purchase-gst-total", null, null));
+  netTotalSection.appendChild(createHtmlElement("div", "float-left custom-box", null, null, "Net Total"));
+  netTotalSection.appendChild(createHtmlElement("div", "td-align-right custom-box", null, null, configs.totals.total_bill));
+  document.getElementById("bill-purchase-gst").appendChild(netTotalSection);
 }
 
-// net totals
+// net estimate totals
 document.getElementById("sub-total").innerHTML = configs.totals.sub_total;
 document.getElementById("discount").innerHTML = configs.totals.discount;
 document.getElementById("total-bill").innerHTML = configs.totals.total_bill;
 if (configs.totals.pending_as === "Due"
   && getFromDesiRupeeNumber(configs.totals.pending_amount) > 0) {
     document.getElementById("due-total").classList.add("display-block");
-    document.getElementById("payment-done").innerHTML = configs.totals.paid_amount;
     document.getElementById("payment-due").innerHTML = configs.totals.pending_amount;
+}
+
+// gst totals
+let cgstPercentage = 1.5
+let sgstPercentage = 1.5
+let sellingPrice = getFromDesiRupeeNumber(configs.totals.sales);
+let discount = getFromDesiRupeeNumber(configs.totals.discount);
+let gstTotals = calculateGSTAppliedTotals(sellingPrice, discount, cgstPercentage, sgstPercentage);
+
+document.getElementById("sub-total-gst").innerHTML = configs.totals.sales;
+document.getElementById("discount-gst").innerHTML = "₹ " + getDesiNumber(gstTotals.adjustedDiscount);
+document.getElementById("cgst-header").innerHTML = "CGST @ " + cgstPercentage + "%";
+document.getElementById("cgst-applied").innerHTML = "₹ " + getDesiNumber(gstTotals.cgstApplied);
+document.getElementById("sgst-header").innerHTML = "SGST @ " + sgstPercentage + "%";
+document.getElementById("sgst-applied").innerHTML = "₹ " + getDesiNumber(gstTotals.sgstApplied);
+document.getElementById("total-bill-gst").innerHTML = "₹ " + getDesiNumber(gstTotals.totalPrice);
+document.getElementById("purchase-gst-total").innerHTML = "₹ " + getDesiNumber(gstTotals.totalPrice);
+
+// apply gst
+function applyGST() {
+  let gstEntries = document.getElementsByClassName("gst-invoice");
+  for (let i=0; i<gstEntries.length; i++) {
+    gstEntries[i].classList.remove("display-none")
+  }
+  let estimateEntries = document.getElementsByClassName("estimate-invoice");
+  for (let i=0; i<estimateEntries.length; i++) {
+    estimateEntries[i].classList.add("display-none")
+  }
+  document.getElementById("top-left-header").textContent = "GSTIN: 20AKXPD1609D1ZN";
+  document.getElementById("top-center-header").textContent = "TAX INVOICE";
+  document.getElementById("gst-button").textContent = "EST";
+}
+
+// apply estimate
+function applyEstimate() {
+  let gstEntries = document.getElementsByClassName("gst-invoice");
+  for (let i=0; i<gstEntries.length; i++) {
+    gstEntries[i].classList.add("display-none")
+  }
+  let estimateEntries = document.getElementsByClassName("estimate-invoice");
+  for (let i=0; i<estimateEntries.length; i++) {
+    estimateEntries[i].classList.remove("display-none")
+  }
+  document.getElementById("top-left-header").textContent = "";
+  document.getElementById("top-center-header").textContent = "ESTIMATE ONLY";
+  document.getElementById("gst-button").textContent = "GST";
 }
 
 // helper functions

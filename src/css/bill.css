@@ -113,7 +113,15 @@ tr.purchase-row td:nth-child(4) {
 
 .section-close {
   padding-right: 2px;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
+  border-left: 1px solid black;
+  border-right: 1px solid black;
+  border-bottom: 1px solid black;
+}
+
+.section-middle {
+  margin-bottom: 0;
+  padding-right: 2px;
   border-left: 1px solid black;
   border-right: 1px solid black;
   border-bottom: 1px solid black;
@@ -147,7 +155,7 @@ tr.purchase-row td:nth-child(4) {
 }
 
 .due-box {
-  padding-top: 4px;
+  padding-top: 2px;
   border-top: 1px solid black;
 }
 
@@ -161,7 +169,7 @@ tr.purchase-row td:nth-child(4) {
 }
 
 .upper-margin {
-  margin-top: 12px;
+  margin-top: 25px;
 }
 
 .td-align-left {
@@ -189,15 +197,19 @@ tr.purchase-row td:nth-child(4) {
 }
 
 .split-forty {
-  width: calc(38% - 1px);
+  width: calc(38% - 2px);
 }
 
-.display-none {
+.default-none {
   display: none;
 }
 
 .display-block {
   display: block;
+}
+
+.display-none {
+  display: none;
 }
 
 .overflow-hidden {
@@ -210,6 +222,10 @@ table.print-friendly tr {
 
 .avoid-break-inside {
   break-inside: avoid-page;
+}
+
+.page-break-before {
+  page-break-before: always;
 }
 
 @media print {
@@ -229,17 +245,27 @@ table.print-friendly tr {
   z-index: 2;
   cursor: pointer;
   padding: 1px 5px;
-  margin-bottom: 10px;
   outline: none;
   border-radius: 5px;
   color: black;
   background-color: white;
   border: 1px solid black;
+  font-size: 11px;
 }
 
-#top-left-header {
-  font-weight: bold;
-  padding-top: 4px;
+#gst-button {
+  position:fixed;
+  top: 2px;
+  left: 2px;
+  z-index: 2;
+  cursor: pointer;
+  padding: 1px 5px;
+  outline: none;
+  border-radius: 5px;
+  color: black;
+  background-color: white;
+  border: 1px solid black;
+  font-size: 11px;
 }
 
 #bill-header {
@@ -249,6 +275,12 @@ table.print-friendly tr {
 #bill-top-header {
   overflow: hidden;
   font-size: 12px;
+}
+
+#top-left-header {
+  font-size: 10px;
+  padding-top: 2px;
+  padding-left: 2px;
 }
 
 #top-right-header {

@@ -29,6 +29,33 @@ function calculateCostPrice(weight, costRate, afterWastage) {
   return weight * costRate * afterWastage;
 }
 
+function calculateGSTAppliedTotals(
+  sellingPrice, discount, cgstPercentage, sgstPercentage) {
+    let finalPrice = sellingPrice - discount;
+    let taxedAmount = Math.round(finalPrice / (1 + 0.01 * (cgstPercentage + sgstPercentage)));
+    let gstApplied = finalPrice - taxedAmount;
+    let cgstApplied = Math.floor(taxedAmount * 0.01 * cgstPercentage);
+    let sgstApplied = Math.floor(taxedAmount * 0.01 * sgstPercentage);
+    let gstDiff = gstApplied - cgstApplied - sgstApplied;
+    if (gstDiff == 1) {
+      cgstApplied += 0.5;
+      sgstApplied += 0.5;
+    } else if (gstDiff == 2) {
+      cgstApplied += 1;
+      sgstApplied += 1;
+    }
+
+    let totalPrice = taxedAmount + cgstApplied + sgstApplied;
+    let adjustedDiscount = sellingPrice - taxedAmount;
+    return {
+      taxedAmount,
+      cgstApplied,
+      sgstApplied,
+      totalPrice,
+      adjustedDiscount
+    };
+}
+
 module.exports = {
   calculateMetalPrice,
   calculateGradeMakingRate,
@@ -37,4 +64,5 @@ module.exports = {
   calculateMetalPurchaseRate,
   calculateMetalPurchaseRateDiff,
   calculateCostPrice,
+  calculateGSTAppliedTotals
 };

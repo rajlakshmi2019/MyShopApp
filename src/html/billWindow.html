@@ -76,33 +76,38 @@
       <br>
       <div class="wrapper-div bill-contents">
         <div class="wrapper-div" id="bill-sales"></div>
-        <div class="wrapper-div avoid-break-inside" id="bill-purchase"></div>
+        <div class="wrapper-div avoid-break-inside default-none estimate-invoice" id="bill-purchase"></div>
         <div class="overflow-hidden total-box avoid-break-inside" id="bill-total">
           <div class="float-left custom-box">
             Sub Total
           </div>
-          <div class="td-align-right custom-box" id="sub-total"></div>
+          <div class="td-align-right custom-box estimate-invoice" id="sub-total"></div>
+          <div class="td-align-right custom-box gst-invoice display-none" id="sub-total-gst">Rs 14565</div>
 
           <div class="float-left custom-box">
             Discount
           </div>
-          <div class="td-align-right custom-box" id="discount"></div>
+          <div class="td-align-right custom-box estimate-invoice" id="discount"></div>
+          <div class="td-align-right custom-box gst-invoice display-none" id="discount-gst">Rs 570</div>
+
+          <div class="float-left custom-box gst-invoice display-none" id="cgst-header"></div>
+          <div class="td-align-right custom-box gst-invoice display-none" id="cgst-applied">Rs 450</div>
+          <div class="float-left custom-box gst-invoice display-none" id="sgst-header"></div>
+          <div class="td-align-right custom-box gst-invoice display-none" id="sgst-applied">Rs 450</div>
           <br>
           <div class="float-left custom-box">
             Total Bill
           </div>
-          <div class="td-align-right custom-box" id="total-bill"></div>
-          <div class="overflow-hidden due-box display-none" id="due-total">
-            <div class="float-left custom-box">
-              Paid
-            </div>
-            <div class="td-align-right custom-box" id="payment-done"></div>
+          <div class="td-align-right custom-box estimate-invoice" id="total-bill"></div>
+          <div class="td-align-right custom-box gst-invoice display-none" id="total-bill-gst">Rs 15100</div>
 
+          <div class="overflow-hidden due-box default-none estimate-invoice" id="due-total">
             <div class="float-left custom-box">
               Due
             </div>
             <div class="td-align-right custom-box" id="payment-due"></div>
           </div>
+
           <div class="overflow-hidden td-align-center" id="bill-footer">
             Purity is our Speciality
           </div>
@@ -110,6 +115,8 @@
             Cash Refund 90% on Market Purchase Rate
           </div>
         </div>
+        <div id="bill-purchase-gst"
+          class="wrapper-div upper-margin page-break-before default-none gst-invoice display-none"></div>
       </div>
     </div>
   </body>
