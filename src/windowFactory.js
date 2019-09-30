@@ -47,6 +47,7 @@ function createGoldSellForm(backgroundColor) {
     frame: false,
     backgroundColor: backgroundColor,
     parent: mainWindow,
+    show: false,
     webPreferences: {nodeIntegration: true}
   });
   goldSellForm.loadURL(url.format({
@@ -54,6 +55,9 @@ function createGoldSellForm(backgroundColor) {
     protocol: 'file:',
     slashes: true
   }));
+  goldSellForm.once('ready-to-show', () => {
+    goldSellForm.show()
+  });
   goldSellForm.on('close', () => {
     goldSellForm = null;
   });
@@ -70,6 +74,7 @@ function createGoldExchangeForm() {
     frame: false,
     backgroundColor: "#363A42",
     parent: mainWindow,
+    show: false,
     webPreferences: {nodeIntegration: true}
   });
   goldExchangeForm.loadURL(url.format({
@@ -77,6 +82,9 @@ function createGoldExchangeForm() {
     protocol: 'file:',
     slashes: true
   }));
+  goldExchangeForm.once('ready-to-show', () => {
+    goldExchangeForm.show()
+  });
   goldExchangeForm.on('close', () => {
     goldExchangeForm = null;
   });
@@ -93,6 +101,7 @@ function createEditTrayItemForm(item) {
     frame: false,
     backgroundColor:'#205081',
     parent: mainWindow,
+    show: false,
     webPreferences: {nodeIntegration: true}
   });
   editTrayItemForm.windowItem = item;
@@ -101,6 +110,9 @@ function createEditTrayItemForm(item) {
     protocol: 'file:',
     slashes: true
   }));
+  editTrayItemForm.once('ready-to-show', () => {
+    editTrayItemForm.show()
+  });
   editTrayItemForm.on('close', () => {
     editTrayItemForm = null;
   });
@@ -117,6 +129,7 @@ function createPriceCardView(priceCardDetails) {
     frame: false,
     backgroundColor:'#205081',
     parent: mainWindow,
+    show: false,
     webPreferences: {nodeIntegration: true}
   });
   priceCardView.priceCardDetails = priceCardDetails;
@@ -125,6 +138,9 @@ function createPriceCardView(priceCardDetails) {
     protocol: 'file:',
     slashes: true
   }));
+  priceCardView.once('ready-to-show', () => {
+    priceCardView.show()
+  });
   priceCardView.on('close', () => {
     priceCardView = null;
   });
@@ -141,6 +157,7 @@ function createGradePickerWindow() {
     frame: false,
     backgroundColor:'#205081',
     parent: mainWindow,
+    show: false,
     webPreferences: {nodeIntegration: true}
   });
   gradePickerWindow.loadURL(url.format({
@@ -148,6 +165,9 @@ function createGradePickerWindow() {
     protocol: 'file:',
     slashes: true
   }));
+  gradePickerWindow.once('ready-to-show', () => {
+    gradePickerWindow.show()
+  });
   gradePickerWindow.on('close', () => {
     gradePickerWindow = null;
   });
@@ -164,6 +184,7 @@ function createUpdateConfigsWindow() {
     frame: false,
     backgroundColor:'#363A42',
     parent: mainWindow,
+    show: false,
     webPreferences: {nodeIntegration: true}
   });
   updateConfigsWindow.loadURL(url.format({
@@ -171,6 +192,9 @@ function createUpdateConfigsWindow() {
     protocol: 'file:',
     slashes: true
   }));
+  updateConfigsWindow.once('ready-to-show', () => {
+    updateConfigsWindow.show()
+  });
   updateConfigsWindow.on('close', () => {
     updateConfigsWindow = null;
   });
@@ -186,6 +210,7 @@ function createBillWindow(configs) {
     height: 600,
     backgroundColor:'white',
     parent: mainWindow,
+    show: false,
     webPreferences: {nodeIntegration: true}
   });
   billWindow.configs = configs;
@@ -194,6 +219,9 @@ function createBillWindow(configs) {
     protocol: 'file:',
     slashes: true
   }));
+  billWindow.once('ready-to-show', () => {
+    billWindow.show()
+  });
   billWindow.on('close', () => {
     billWindow = null;
   });
@@ -210,6 +238,7 @@ function createPaymentAcceptForm(configs) {
     frame: false,
     backgroundColor:'#205081',
     parent: mainWindow,
+    show: false,
     webPreferences: {nodeIntegration: true}
   });
   paymentAcceptWindow.configs = configs;
@@ -218,6 +247,9 @@ function createPaymentAcceptForm(configs) {
     protocol: 'file:',
     slashes: true
   }));
+  paymentAcceptWindow.once('ready-to-show', () => {
+    paymentAcceptWindow.show()
+  });
   paymentAcceptWindow.on('close', () => {
     paymentAcceptWindow = null;
   });
