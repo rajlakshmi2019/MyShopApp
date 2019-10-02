@@ -87,9 +87,8 @@ function addItemForms(metal, itemType, itemNameList) {
     inputHeaderDiv.textContent = "Weight In Grams";
     rightInputBox.appendChild(inputHeaderDiv);
     let inputTextArea = document.createElement('textarea');
-    inputTextArea.className = "input-text input-weights";
-    inputTextArea.rows = "5";
-    inputTextArea.cols = "19";
+    inputTextArea.className = "input-textarea input-weights";
+    inputTextArea.rows = "4";
     rightInputBox.appendChild(inputTextArea);
     rightFormDiv.appendChild(rightInputBox);
     formDiv.appendChild(rightFormDiv);

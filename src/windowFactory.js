@@ -46,8 +46,8 @@ function getMainWindow() {
 
 function createGoldSellForm(backgroundColor) {
   goldSellForm = new BrowserWindow({
-    width: 1000,
-    height: 800,
+    width: 1400,
+    height: 1000,
     frame: false,
     backgroundColor: backgroundColor,
     parent: mainWindow,
