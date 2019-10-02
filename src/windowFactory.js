@@ -7,7 +7,11 @@ let priceCardView, gradePickerWindow, billWindow, paymentAcceptWindow;
 let updateConfigsWindow;
 
 function createMainWindow() {
-  mainWindow = new BrowserWindow({backgroundColor:'#363A42', webPreferences: {nodeIntegration: true}});
+  mainWindow = new BrowserWindow({
+    backgroundColor:'#363A42',
+    show: false,
+    webPreferences: {nodeIntegration: true}
+  });
   mainWindow.setMenu(mainMenu);
   mainWindow.maximize();
   mainWindow.once('ready-to-show', () => {
@@ -261,7 +265,7 @@ function getPaymentAcceptForm() {
 
 const mainMenuTemplate = [
   {
-    label: 'Service',
+    label: 'Services',
     submenu: [
       {
         label: 'Sell',
