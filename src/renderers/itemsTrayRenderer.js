@@ -1038,9 +1038,7 @@ function getOtherTransactionEntry(price) {
 
 function getSalesRateKey(entry) {
   let entryKey = [entry.Metal, entry.Rate_Per_Gram, entry.Making_Per_Gram, entry.Making];
-  if (entry.Item === "Fancy Payal") {
-    entry.Item = entry.Item + " " + (
-      Dao.getMappedItem(["Silver", entry.Item].toString()).APPLIED * 1000)
+  if (entry.Item.startsWith("Fancy")) {
     entryKey.push(entry.Item);
   }
 
@@ -1074,15 +1072,14 @@ function aggregateSalesEntries(salesEntries) {
     let salesEntryKey = getSalesEntryKey(entry).toString();
     if (aggregatedSalesMap.has(salesEntryKey)) {
       let aggregateEntry = aggregatedSalesMap.get(salesEntryKey);
-      aggregateEntry.Item += "," + entry.Item;
       aggregateEntry.ItemNames.push(entry.Item);
       aggregateEntry.Weight_In_Gram += entry.Weight_In_Gram;
       aggregateEntry.Weights.push(entry.Weight_In_Gram);
       aggregateEntry.Price += entry.Price;
       aggregateEntry.Quantity += 1;
     } else {
-      aggregatedSalesMap.set(salesEntryKey,
-        {...entry, Quantity: 1, ItemNames: [entry.Item], Weights: [entry.Weight_In_Gram]});
+      salesEntry = {...entry, Quantity: 1, ItemNames: [entry.Item], Weights: [entry.Weight_In_Gram]}
+      aggregatedSalesMap.set(salesEntryKey, salesEntry);
     }
   }
 
@@ -1092,7 +1089,7 @@ function aggregateSalesEntries(salesEntries) {
 function aggregateItemNames(itemNames) {
   let itemNamesMap = new Map();
   for (let itemName of itemNames) {
-    if (itemName == "Fancy Payal") {
+    if (itemName == "Fancy") {
       itemName = itemName + " " + (
         Dao.getMappedItem(["Silver", itemName].toString()).APPLIED * 1000);
     }
@@ -1120,8 +1117,6 @@ function generateBill(tabName, date, transId,
         detail: 'Please select items to complete this transaction'
       });
     } else {
-      let aggregatedSales = aggregateSalesEntries(salesEntries);
-      console.log(aggregatedSales);
       ipcRenderer.send('bill:create', {
         name: tabName,
         bill_date: formatDateSlash(date),
@@ -1330,14 +1325,15 @@ function closeTab(tabButton) {
 }
 
 function showTransactionInProgressError() {
-  remote.dialog.showMessageBox(null, {
-    type: 'error',
-    buttons: ['Ok'],
-    defaultId: 0,
-    title: 'Transaction in progress',
-    message: 'Cannot close this tab!!',
-    detail: 'Please unselect items or complete this transaction'
-  });
+  // remote.dialog.showMessageBox(null, {
+  //   type: 'error',
+  //   buttons: ['Ok'],
+  //   defaultId: 0,
+  //   title: 'Transaction in progress',
+  //   message: 'Cannot close this tab!!',
+  //   detail: 'Please unselect items or complete this transaction'
+  // });
+  alert('Please unselect items or complete this transaction');
 }
 
 function maxTabIndex() {

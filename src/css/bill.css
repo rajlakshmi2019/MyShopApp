@@ -1,6 +1,6 @@
 /* Bill window styles */
 body {
-  margin: 0 7px 0 5px;
+  margin: 3px 2px 5px 5px;
 }
 
 @media print {
@@ -97,7 +97,7 @@ tr.purchase-row td:nth-child(4) {
 .bill-container {
   padding: 0;
   color: black;
-  font-size: 12px;
+  font-size: 14px;
   background-color: white;
 }
 
@@ -130,7 +130,7 @@ tr.purchase-row td:nth-child(4) {
 .title-large {
   margin-bottom: 0;
   text-align: center;
-  font-size: 28px;
+  font-size: 35px;
 }
 
 @font-face {
@@ -141,12 +141,12 @@ tr.purchase-row td:nth-child(4) {
 .sub-title {
   margin-bottom: 0;
   text-align: center;
-  font-size: 18px;
+  font-size: 22px;
   font-family: gabriele;
 }
 
 .bill-contents {
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .total-box {
@@ -250,7 +250,7 @@ table.print-friendly tr {
   color: black;
   background-color: white;
   border: 1px solid black;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 #gst-button {
@@ -265,7 +265,7 @@ table.print-friendly tr {
   color: black;
   background-color: white;
   border: 1px solid black;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 #bill-header {
@@ -274,17 +274,17 @@ table.print-friendly tr {
 
 #bill-top-header {
   overflow: hidden;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 #top-left-header {
-  font-size: 10px;
+  font-size: 12px;
   padding-top: 2px;
   padding-left: 2px;
 }
 
 #top-right-header {
-  font-size: 10px;
+  font-size: 12px;
   padding-top: 2px;
   padding-right: 2px;
 }
@@ -294,20 +294,28 @@ table.print-friendly tr {
   width: 24%;
   color: white;
   background-color: black;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: normal;
   font-family:"Courier New", Courier, monospace;
 }
 
 #name-header-div {
-  width: 63%;
+  width: 70%;
 }
 
 #bill-footer {
   color: white;
   background-color: black;
   margin: 2px 0;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: bold;
   font-style: italic;
+}
+
+#rj-img {
+  width: 80px;
+}
+
+#hallmark-img {
+  width: 77px;
 }

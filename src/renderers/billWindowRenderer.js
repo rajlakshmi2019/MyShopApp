@@ -1,6 +1,7 @@
 const {ipcRenderer, remote} = require("electron");
 const {createHtmlElement, addTableHeader, addTableData, getDesiNumber, getFromDesiRupeeNumber} = require("./../utils.js");
 const {calculateGSTAppliedTotals} = require("./../ShopCalculator.js");
+const Dao = remote.require("./Dao.js");
 
 // bill entries and options
 let configs = remote.getCurrentWindow().configs;
@@ -49,6 +50,11 @@ if (configs.sales.length > 0 || configs.additional > 0) {
     entry.items = entry.items.sort(compare);
     for (let j=0; j<entry.items.length; j++) {
       let item = entry.items[j].Item;
+      if (entry.items[j].Item.startsWith("Fancy")) {
+        console.log(["Silver", entry.items[j].Item].toString());
+        item += " " + (Dao.getMappedItem(["Silver", entry.items[j].Item].toString()).APPLIED * 1000);
+      }
+
       let qty = entry.items[j].Quantity;
       let weight = parseFloat(Math.round(entry.items[j].Weight_In_Gram * 100) / 100).toFixed(2) + "g";
       let price = "₹ " + getDesiNumber(entry.items[j].Price);
@@ -108,10 +114,15 @@ if (configs.purchase.length > 0) {
     let entry = configs.purchase[i];
     let tableRow = [
       wrapTableData(document.createTextNode(entry.Metal), "left"),
-      wrapTableData(document.createTextNode(entry.Weight_In_Gram + "g"), "right"),
-      wrapTableData(document.createTextNode(entry.Metal.charAt(0) + " " +
-        entry.Purchase_Rate_Per_Gram + "/g" + " @" + entry.Purity), "right"),
+      wrapTableData(" ", "right"),
+      wrapTableData(" ", "right"),
       wrapTableData(document.createTextNode("₹ " + getDesiNumber(entry.Price)), "right")];
+    // let tableRow = [
+    //   wrapTableData(document.createTextNode(entry.Metal), "left"),
+    //   wrapTableData(document.createTextNode(entry.Weight_In_Gram + "g"), "right"),
+    //   wrapTableData(document.createTextNode(entry.Metal.charAt(0) + " " +
+    //     entry.Purchase_Rate_Per_Gram + "/g" + " @" + entry.Purity), "right"),
+    //   wrapTableData(document.createTextNode("₹ " + getDesiNumber(entry.Price)), "right")];
 
     let cl = "purchase-row";
     if (i == configs.purchase.length - 1) {

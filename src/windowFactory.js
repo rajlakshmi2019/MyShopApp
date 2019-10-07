@@ -210,8 +210,8 @@ function getUpdateConfigsWindow() {
 
 function createBillWindow(configs) {
   billWindow = new BrowserWindow({
-    width: 440,
-    height: 600,
+    width: 595,
+    height: 842,
     backgroundColor:'white',
     parent: mainWindow,
     show: false,
