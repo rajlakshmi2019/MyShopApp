@@ -487,9 +487,24 @@ function addExchangeCard(exchangeWindow, metal) {
 
   /* change event listeners for input box */
   weightInput.addEventListener('keyup', function() {
-    let purchasePrice = updatePurchasePrice(
-      exchangeCardPriceLabel, Number(weightInput.value), Number(sellRateInput.value), Number(sellPercentagePurityInput.value));
-    purchasePercentagePurityInput.value = calculateImpliedPurity(purchasePrice, Number(weightInput.value), Number(purchaseRateInput.value));
+    console.log(Number(sellPercentagePurityInput.value));
+    console.log(Number(purchasePercentagePurityInput.value));
+    console.log(isNaN(Number(sellPercentagePurityInput.value)));
+    console.log(isNaN(Number(purchasePercentagePurityInput.value)));
+    if(sellPercentagePurityInput.value !== '' && !isNaN(Number(sellPercentagePurityInput.value))) {
+      let purchasePrice = updatePurchasePrice(
+        exchangeCardPriceLabel, Number(weightInput.value), Number(sellRateInput.value), Number(sellPercentagePurityInput.value));
+      if (purchasePercentagePurityInput.value === '' || isNaN(Number(purchasePercentagePurityInput.value))) {
+        purchasePercentagePurityInput.value = calculateImpliedPurity(purchasePrice, Number(weightInput.value), Number(purchaseRateInput.value));
+      }
+    } else if (purchasePercentagePurityInput.value !== '' && !isNaN(Number(purchasePercentagePurityInput.value))) {
+      let purchasePrice = updatePurchasePrice(
+        exchangeCardPriceLabel, Number(weightInput.value), Number(purchaseRateInput.value), Number(purchasePercentagePurityInput.value));
+      if (sellPercentagePurityInput.value === '' || isNaN(Number(sellPercentagePurityInput.value))) {
+        sellPercentagePurityInput.value = calculateImpliedPurity(purchasePrice, Number(weightInput.value), Number(sellRateInput.value));
+      }
+    }
+
     updateTotalPurchasePrice(tabIndex);
   });
 
@@ -556,22 +571,30 @@ function populateRateFields(metal, exchangeCard, weightInput,
     let todaysRate = metaData == null || metaData.sellingRate == null ||
       metaData.sellingRate[metal] == null ? Dao.getTodaysRate()[metal] : metaData.sellingRate[metal];
 
-    weightInput.value = "0.00"
+    weightInput.value = ""
     sellRateInput.value = todaysRate;
-    sellPercentagePurityInput.value = "0.00";
+    sellPercentagePurityInput.value = "";
     purchaseRateInput.value = metaData == null || metaData.sellingRate == null ||
       metaData.purchaseRate[metal] == null ? ShopCalculator.calculateMetalPurchaseRate(
         Number(todaysRate), Dao.getPurchaseRateDiff()[metal]) : metaData.purchaseRate[metal];
-    purchasePercentagePurityInput.value = "0.00";
+    purchasePercentagePurityInput.value = "";
 }
 
 function updatePurchasePrice(purchasePriceLabel, weight, metalRate, purityPercentage) {
-  let purchasePrice = Math.round(metalRate * weight * purityPercentage * 0.01);
+  let purchasePrice = 0;
+  if (!isNaN(weight) && !isNaN(purityPercentage)) {
+    purchasePrice = Math.round(metalRate * weight * purityPercentage * 0.01);
+  }
+
   purchasePriceLabel.innerHTML = decodeURI("&#8377;") + " " + getDesiNumber(purchasePrice);
   return purchasePrice;
 }
 
 function calculateImpliedPurity(purchasePrice, weight, ratePerGram) {
+  if (isNaN(weight) || weight == 0) {
+    return ''
+  }
+
   return (purchasePrice * 100 / (weight * ratePerGram)).toFixed(2);
 }
 

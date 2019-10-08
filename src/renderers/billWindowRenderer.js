@@ -107,15 +107,15 @@ if (configs.purchase.length > 0) {
   document.getElementById("bill-purchase").appendChild(purchaseBillTable);
 
   let thr = addTableHeader(
-    purchaseBillTable, ["Exchange", "Weight", "Breakup", "Price"]);
+    purchaseBillTable, ["Exchange", "", "", "Price"]);
   thr.className = "purchase-header";
 
   for (let i=0; i<configs.purchase.length; i++) {
     let entry = configs.purchase[i];
     let tableRow = [
-      wrapTableData(document.createTextNode(entry.Metal), "left"),
-      wrapTableData(" ", "right"),
-      wrapTableData(" ", "right"),
+      wrapTableData(document.createTextNode("Old " + entry.Metal), "left"),
+      wrapTableData(document.createTextNode(" "), "right"),
+      wrapTableData(document.createTextNode(" "), "right"),
       wrapTableData(document.createTextNode("₹ " + getDesiNumber(entry.Price)), "right")];
     // let tableRow = [
     //   wrapTableData(document.createTextNode(entry.Metal), "left"),
