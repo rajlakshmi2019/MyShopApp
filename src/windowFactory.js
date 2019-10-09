@@ -50,7 +50,7 @@ function createGoldSellForm(backgroundColor) {
     height: 1000,
     frame: false,
     backgroundColor: backgroundColor,
-    parent: mainWindow,
+    parent: mainWindow, modal:true,
     show: false,
     webPreferences: {nodeIntegration: true}
   });
@@ -77,7 +77,7 @@ function createGoldExchangeForm() {
     height: 460,
     frame: false,
     backgroundColor: "#363A42",
-    parent: mainWindow,
+    parent: mainWindow, modal:true,
     show: false,
     webPreferences: {nodeIntegration: true}
   });
@@ -104,7 +104,7 @@ function createEditTrayItemForm(item) {
     height: 310,
     frame: false,
     backgroundColor:'#205081',
-    parent: mainWindow,
+    parent: mainWindow, modal:true,
     show: false,
     webPreferences: {nodeIntegration: true}
   });
@@ -132,7 +132,7 @@ function createPriceCardView(priceCardDetails) {
     height: 600,
     frame: false,
     backgroundColor:'#205081',
-    parent: mainWindow,
+    parent: mainWindow, modal:true,
     show: false,
     webPreferences: {nodeIntegration: true}
   });
@@ -160,7 +160,7 @@ function createGradePickerWindow() {
     height: 270,
     frame: false,
     backgroundColor:'#205081',
-    parent: mainWindow,
+    parent: mainWindow, modal:true,
     show: false,
     webPreferences: {nodeIntegration: true}
   });
@@ -187,7 +187,7 @@ function createUpdateConfigsWindow() {
     height: 340,
     frame: false,
     backgroundColor:'#363A42',
-    parent: mainWindow,
+    parent: mainWindow, modal:true,
     show: false,
     webPreferences: {nodeIntegration: true}
   });
@@ -213,7 +213,7 @@ function createBillWindow(configs) {
     width: 595,
     height: 842,
     backgroundColor:'white',
-    parent: mainWindow,
+    parent: mainWindow, modal:true,
     show: false,
     webPreferences: {nodeIntegration: true}
   });
@@ -241,7 +241,7 @@ function createPaymentAcceptForm(configs) {
     height: 350,
     frame: false,
     backgroundColor:'#205081',
-    parent: mainWindow,
+    parent: mainWindow, modal:true,
     show: false,
     webPreferences: {nodeIntegration: true}
   });

@@ -121,18 +121,21 @@ function addTab(tabType, set) {
     .addEventListener("click", () => {
       let netTotal = document.getElementById("net-total-display-" + tabIndex).innerHTML
       if (netTotal.startsWith("- ₹")) {
-        remote.dialog.showMessageBox(null, {
-          type: 'question',
-          buttons: ['Yes', 'No'],
-          defaultId: 1,
-          title: 'Remember to add the discount',
-          message: 'Mark this transaction completed?',
-          detail: 'Amount to be paid to the customer ' + netTotal.substring(2)
-        }, (response) => {
-          if (response == 0) {
-            finishTransaction(tabIndex, {});
-          }
-        });
+        remote.dialog.showMessageBox(
+          remote.getCurrentWindow(),
+          {
+            type: 'question',
+            buttons: ['Yes', 'No'],
+            defaultId: 1,
+            title: 'Remember to add the discount',
+            message: 'Mark this transaction completed?',
+            detail: 'Amount to be paid to the customer ' + netTotal.substring(2)
+          },
+          (response) => {
+            if (response == 0) {
+              finishTransaction(tabIndex, {});
+            }
+          });
       } else {
         ipcRenderer.send('payment:accept', {
           tabIndex: tabIndex,
@@ -207,7 +210,7 @@ function buildSellTrayContainer(tabContent, set) {
   let topDisplay = createHtmlElement("div", "top-display align-right", null, null, null);
   trayControlsContainer.appendChild(topDisplay);
   let priceGradeDisplay = createHtmlElement(
-    "div", "total-price-display number-font metal-price float-left align-right", "applied-price-grade-" + tabIndex, null, "A");
+    "div", "total-price-display number-font metal-price float-left align-right", "applied-price-grade-" + tabIndex, null, "B");
   topDisplay.appendChild(priceGradeDisplay);
   let totalPriceDisplay = createHtmlElement(
     "div", "total-price-display number-font money-green float-right align-right", "total-price-display-" + tabIndex, null, decodeURI("&#8377;") + " 0");
@@ -354,24 +357,27 @@ function addPriceLabels(item, priceCardContainer, appliedPricingGrade, newPricin
       priceCard.querySelector(".metal-rate").innerHTML = "₹ " + getDesiNumber(item.ratePerGram) +" /g";
       priceCard.querySelector(".min-making-charge").innerHTML = "₹ " + getDesiNumber(
         ShopCalculator.calculateGradeMakingRate(item.minimumMakingCharge,
-          gradeMakingRateDiff[appliedPricingGrade][mappedItem.METAL].MM_DIFF,
-          gradeMakingRateDiff[newPricingGrade][mappedItem.METAL].MM_DIFF));
+          (gradeMakingRateDiff[appliedPricingGrade][mappedItem.METAL].MM_DIFF * mappedItem.MM_DIFF_UNIT),
+          (gradeMakingRateDiff[newPricingGrade][mappedItem.METAL].MM_DIFF * mappedItem.MM_DIFF_UNIT)));
       priceCard.querySelector(".making-rate").innerHTML = "₹ " + getDesiNumber(
         ShopCalculator.calculateGradeMakingRate(item.makingPerGram,
-          gradeMakingRateDiff[appliedPricingGrade][mappedItem.METAL].DIFF,
-          gradeMakingRateDiff[newPricingGrade][mappedItem.METAL].DIFF)) + " /g";
+          (gradeMakingRateDiff[appliedPricingGrade][mappedItem.METAL].DIFF * mappedItem.DIFF_UNIT),
+          (gradeMakingRateDiff[newPricingGrade][mappedItem.METAL].DIFF  * mappedItem.DIFF_UNIT))) + " /g";
     } else {
       let weight = parseFloat(priceCard.querySelector(".item-label").textContent);
       priceCard.querySelector(".money-green").innerHTML = "₹ " + getDesiNumber(
         ShopCalculator.calculateGardePrice(weight, item.ratePerGram,
           item.makingPerGram, item.minimumMakingCharge, mappedItem.APPLIED,
           gradeMakingRateDiff[appliedPricingGrade][mappedItem.METAL],
-          gradeMakingRateDiff[newPricingGrade][mappedItem.METAL]));
+          gradeMakingRateDiff[newPricingGrade][mappedItem.METAL],
+          mappedItem.DIFF_UNIT, mappedItem.MM_DIFF_UNIT));
       priceCard.querySelector(".metal-price").innerHTML = "₹ " + getDesiNumber(
         ShopCalculator.calculateMetalPrice(weight, item.ratePerGram, mappedItem.APPLIED));
       priceCard.querySelector(".making-charge").innerHTML = "₹ " + getDesiNumber(
         ShopCalculator.calculateGradeMakingCharge(weight, item.makingPerGram, item.minimumMakingCharge,
-          gradeMakingRateDiff[appliedPricingGrade][mappedItem.METAL], gradeMakingRateDiff[newPricingGrade][mappedItem.METAL]));
+          gradeMakingRateDiff[appliedPricingGrade][mappedItem.METAL],
+          gradeMakingRateDiff[newPricingGrade][mappedItem.METAL],
+          mappedItem.DIFF_UNIT, mappedItem.MM_DIFF_UNIT));
     }
   }
 
@@ -487,10 +493,6 @@ function addExchangeCard(exchangeWindow, metal) {
 
   /* change event listeners for input box */
   weightInput.addEventListener('keyup', function() {
-    console.log(Number(sellPercentagePurityInput.value));
-    console.log(Number(purchasePercentagePurityInput.value));
-    console.log(isNaN(Number(sellPercentagePurityInput.value)));
-    console.log(isNaN(Number(purchasePercentagePurityInput.value)));
     if(sellPercentagePurityInput.value !== '' && !isNaN(Number(sellPercentagePurityInput.value))) {
       let purchasePrice = updatePurchasePrice(
         exchangeCardPriceLabel, Number(weightInput.value), Number(sellRateInput.value), Number(sellPercentagePurityInput.value));
@@ -509,9 +511,8 @@ function addExchangeCard(exchangeWindow, metal) {
   });
 
   sellRateInput.addEventListener('keyup', function() {
-    let purchasePrice = updatePurchasePrice(
-      exchangeCardPriceLabel, Number(weightInput.value), Number(sellRateInput.value), Number(sellPercentagePurityInput.value));
-    purchasePercentagePurityInput.value = calculateImpliedPurity(purchasePrice, Number(weightInput.value), Number(purchaseRateInput.value));
+    let purchasePrice = getFromDesiRupeeNumber(exchangeCardPriceLabel.innerHTML);
+    sellPercentagePurityInput.value = calculateImpliedPurity(purchasePrice, Number(weightInput.value), Number(sellRateInput.value));
     updateTotalPurchasePrice(tabIndex);
   });
 
@@ -523,8 +524,7 @@ function addExchangeCard(exchangeWindow, metal) {
   });
 
   purchaseRateInput.addEventListener('keyup', function(event) {
-    let purchasePrice = updatePurchasePrice(
-      exchangeCardPriceLabel, Number(weightInput.value), Number(sellRateInput.value), Number(sellPercentagePurityInput.value));
+    let purchasePrice = getFromDesiRupeeNumber(exchangeCardPriceLabel.innerHTML);
     purchasePercentagePurityInput.value = calculateImpliedPurity(purchasePrice, Number(weightInput.value), Number(purchaseRateInput.value));
     updateTotalPurchasePrice(tabIndex);
   });
@@ -655,7 +655,7 @@ function buildNetTotalContainer(tabContent, set) {
 
   let additionalChargeInputBox = createHtmlElement("div", "wrapper-div table-top-label", null, null, null);
   discountDiv.appendChild(additionalChargeInputBox);
-  let additionalChargeInputHeader = createHtmlElement("div", "input-header", null, null, "Munga/Moti/Mala");
+  let additionalChargeInputHeader = createHtmlElement("div", "input-header", null, null, "Miscellaneous");
   additionalChargeInputBox.appendChild(additionalChargeInputHeader);
   let additionalChargeInputText = createHtmlElement("input", "discount-input input-text rupee-background", "additional-charge-input-" + tabIndex, null, null);
   additionalChargeInputText.type = "text";
@@ -1061,7 +1061,7 @@ function getOtherTransactionEntry(price) {
 
 function getSalesRateKey(entry) {
   let entryKey = [entry.Metal, entry.Rate_Per_Gram, entry.Making_Per_Gram, entry.Making];
-  if (entry.Item.startsWith("Fancy")) {
+  if (entry.Item.startsWith("Fancy") || entry.Item.startsWith("Dulhan")) {
     entryKey.push(entry.Item);
   }
 
@@ -1131,14 +1131,15 @@ function aggregateItemNames(itemNames) {
 function generateBill(tabName, date, transId,
   salesEntries, purchaseEntries, additionalCharge, totals, savable) {
     if (salesEntries.length == 0 && purchaseEntries.length == 0 && additionalCharge == 0) {
-      remote.dialog.showMessageBox(null, {
-        type: 'error',
-        buttons: ['Ok'],
-        defaultId: 0,
-        title: 'No item selected',
-        message: 'Cannot generate empty bill!!',
-        detail: 'Please select items to complete this transaction'
-      });
+      // remote.dialog.showMessageBox(remote.getCurrentWindow(), {
+      //   type: 'error',
+      //   buttons: ['Ok'],
+      //   defaultId: 0,
+      //   title: 'No item selected',
+      //   message: 'Cannot generate empty bill!!',
+      //   detail: 'Please select items to complete this transaction'
+      // });
+      alert('No item selected. Please select items to complete this transaction.');
     } else {
       ipcRenderer.send('bill:create', {
         name: tabName,
@@ -1189,14 +1190,15 @@ function finishTransaction(tabId, additionalConfigs) {
   // persist transaction entries
   if (salesEntries.length == 0 && purchaseEntries.length == 0
     && additionalChargeEntry.length == 0) {
-      remote.dialog.showMessageBox(null, {
-        type: 'error',
-        buttons: ['Ok'],
-        defaultId: 0,
-        title: 'No item selected',
-        message: 'Cannot complete empty transaction!!',
-        detail: 'Please select items to mark this transaction complete'
-      });
+      // remote.dialog.showMessageBox(remote.getCurrentWindow(), {
+      //   type: 'error',
+      //   buttons: ['Ok'],
+      //   defaultId: 0,
+      //   title: 'No item selected',
+      //   message: 'Cannot complete empty transaction!!',
+      //   detail: 'Please select items to mark this transaction complete'
+      // });
+      alert('No item selected. Please select items to complete this transaction.');
   } else {
     Dao
       .persistTransactionEntries(date, consolidateEntries(allTransactionEntries))
@@ -1235,7 +1237,7 @@ function getTotals(tabId) {
   return {
     sales: "₹ " + getDesiNumber(salesTotal),
     purchase: document.getElementById("breakup-purchase-total-" + tabId).innerHTML,
-    sub_total: (subTotalVal.startsWith("- ₹") ? "- ₹ " : "₹ ") + getDesiNumber(Math.abs(subTotal)),
+    sub_total: (subTotal < 0 ? "- ₹ " : "₹ ") + getDesiNumber(Math.abs(subTotal)),
     discount: "₹ " + getDesiNumber(getAppliedDiscount(tabId)),
     total_bill: document.getElementById("net-total-display-" + tabId).innerHTML
   }
@@ -1348,7 +1350,7 @@ function closeTab(tabButton) {
 }
 
 function showTransactionInProgressError() {
-  // remote.dialog.showMessageBox(null, {
+  // remote.dialog.showMessageBox(remote.getCurrentWindow(), {
   //   type: 'error',
   //   buttons: ['Ok'],
   //   defaultId: 0,

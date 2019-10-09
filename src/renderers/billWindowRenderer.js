@@ -50,7 +50,7 @@ if (configs.sales.length > 0 || configs.additional > 0) {
     entry.items = entry.items.sort(compare);
     for (let j=0; j<entry.items.length; j++) {
       let item = entry.items[j].Item;
-      if (entry.items[j].Item.startsWith("Fancy")) {
+      if (entry.items[j].Item.startsWith("Fancy") || entry.items[j].Item.startsWith("Dulhan")) {
         console.log(["Silver", entry.items[j].Item].toString());
         item += " " + (Dao.getMappedItem(["Silver", entry.items[j].Item].toString()).APPLIED * 1000);
       }
@@ -80,10 +80,10 @@ if (configs.sales.length > 0 || configs.additional > 0) {
     }
   }
 
-  // additional charge for Munga/Moti/Mala
+  // additional charge for Munga/Moti/Mala/Others
   if (configs.additional > 0) {
     let tableRow = [
-      wrapTableData(document.createTextNode("Munga/Moti/Mala"), "left"),
+      wrapTableData(document.createTextNode("Other Accessories"), "left"),
       wrapTableData(document.createTextNode(""), "right"),
       wrapTableData(document.createTextNode(""), "right"),
       wrapTableData(document.createTextNode(""), "right"),

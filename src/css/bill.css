@@ -228,6 +228,18 @@ table.print-friendly tr {
   page-break-before: always;
 }
 
+.fixed-width {
+  width: 30%;
+}
+
+.fixed-width-twenty {
+  width: 24%;
+}
+
+.hindi-bold {
+  padding-top: 2px;
+}
+
 @media print {
   .no-print, .no-print * {
     display: none !important;
