@@ -1218,7 +1218,7 @@ function finishTransaction(tabId, additionalConfigs) {
 
           // generate bills
           generateBill(tabName, date, transId, salesEntries, purchaseEntries,
-            getAdditionalCharge(tabId), billTotals, true);
+            getAdditionalCharge(tabId), billTotals, false);
 
           // finally close the tab
           closeTab(tabButton);
