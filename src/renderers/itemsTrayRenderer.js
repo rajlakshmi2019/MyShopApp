@@ -117,7 +117,7 @@ function addTab(tabType, set) {
       }
     });
 
-  netTotalContainer.querySelector(".proceed-button")
+  netTotalContainer.querySelector(".finish-transaction-button")
     .addEventListener("click", () => {
       let netTotal = document.getElementById("net-total-display-" + tabIndex).innerHTML
       if (netTotal.startsWith("- ₹")) {
@@ -197,7 +197,7 @@ function buildSellTrayContainer(tabContent, set) {
   });
   trayControlsContainer.appendChild(addItemsButton);
   let changePriceGrade =
-    createHtmlElement("button", "tray-window-button controller-button change-price-grade-button float-left", "proceed-button-" + tabIndex, null, null);
+    createHtmlElement("button", "tray-window-button controller-button change-price-grade-button float-left", "price-grade-" + tabIndex, null, null);
   changePriceGrade.addEventListener("click", () => {
     ipcRenderer.send('change:tray:grade', {tabIndex: tabIndex, appliedPriceGrade: getAppliedPriceGrade(tabIndex)});
   });
@@ -632,12 +632,12 @@ function buildNetTotalContainer(tabContent, set) {
       getAdditionalCharge(tabIndex), getTotals(tabIndex), false);
   });
   trayControlsContainer.appendChild(billButton);
-  let proceedButton =
-    createHtmlElement("button", "tray-window-button controller-button proceed-button float-left", "exchange-proceed-button-" + tabIndex, null, null);
-  trayControlsContainer.appendChild(proceedButton);
   let netTotalDisplay = createHtmlElement(
     "div", "total-price-display number-font money-green float-right align-right", "net-total-display-" + tabIndex, null, decodeURI("&#8377;") + " 0");
   trayControlsContainer.appendChild(netTotalDisplay);
+  let proceedButton =
+    createHtmlElement("button", "tray-window-button finish-transaction-button float-right", "finish-transaction-button-" + tabIndex, "Payment", null);
+  trayControlsContainer.appendChild(proceedButton);
 
   let fullWindowContainer = createHtmlElement("div", "net-windows-wrapper", null, null, null);
   netTotalContainer.appendChild(fullWindowContainer);
@@ -669,7 +669,7 @@ function buildNetTotalContainer(tabContent, set) {
 
   let additionalChargeInputBox = createHtmlElement("div", "wrapper-div table-top-label", null, null, null);
   discountDiv.appendChild(additionalChargeInputBox);
-  let additionalChargeInputHeader = createHtmlElement("div", "input-header", null, null, "Miscellaneous");
+  let additionalChargeInputHeader = createHtmlElement("div", "input-header", null, null, "Other Accessories");
   additionalChargeInputBox.appendChild(additionalChargeInputHeader);
   let additionalChargeInputText = createHtmlElement("input", "discount-input input-text rupee-background", "additional-charge-input-" + tabIndex, null, null);
   additionalChargeInputText.type = "text";

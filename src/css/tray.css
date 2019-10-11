@@ -159,6 +159,19 @@ input[type="radio"]
   box-shadow: 0 2px 4px 0 #FFDF00;
 }
 
+.finish-transaction-button {
+  margin-top: 15px;
+  padding-top: 5px;
+  width: 125px;
+  height: 40px;
+  border-radius: 4px;
+  font-size: 22px;
+  font-weight: bold;
+  color: #363A42;
+  background-color: #48DB48;
+  box-shadow: 0 2px 4px 0 #FFDF00;
+}
+
 .add-more-items-button {
   background-image: url('../resource/round_add_white_36.png');
 }
