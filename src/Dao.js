@@ -18,6 +18,10 @@ let loadAppConfigs = async function() {
 }
 
 let persistTransactionEntries = async function(transactionDate, transactionEntries) {
+  // Empty place holder to temprorily disable persistance of transaction entries
+}
+
+let persistTransactionEntriesEnabled = async function(transactionDate, transactionEntries) {
 
   // build transaction string
   let transaction = "";
