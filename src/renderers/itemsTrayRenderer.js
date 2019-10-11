@@ -40,12 +40,12 @@ ipcRenderer.on('add:set', (event, set) => {
   // if nothing added select exchange tab
   let sellTrayContainer = document.getElementById("sell-tray-container-" + tabIndex);
   if (set.setItems.length == 0) {
-    if (sellTrayContainer.getElementsByClassName("price-card-box").length == 0) {
-      let exchangeTrayContainer = document.getElementById("exchange-tray-container-" + tabIndex);
-      selectTrayContainer(tabIndex, exchangeTrayContainer);
-    }
+    // if (sellTrayContainer.getElementsByClassName("price-card-box").length == 0) {
+    //   let exchangeTrayContainer = document.getElementById("exchange-tray-container-" + tabIndex);
+    //   selectTrayContainer(tabIndex, exchangeTrayContainer);
+    // }
   } else {
-    setUpSellTrayDisplay(sellTrayContainer, set.setItems, false);
+    setUpSellTrayDisplay(sellTrayContainer, set.setItems);
   }
 });
 
@@ -216,11 +216,11 @@ function buildSellTrayContainer(tabContent, set) {
     "div", "total-price-display number-font money-green float-right align-right", "total-price-display-" + tabIndex, null, decodeURI("&#8377;") + " 0");
   topDisplay.appendChild(totalPriceDisplay);
 
-  setUpSellTrayDisplay(sellTrayContainer, set.setItems, true);
+  setUpSellTrayDisplay(sellTrayContainer, set.setItems);
   return sellTrayContainer;
 }
 
-function setUpSellTrayDisplay(sellTrayContainer, itemsList, autoSelect) {
+function setUpSellTrayDisplay(sellTrayContainer, itemsList) {
   let tabIndex = getTabIndexFromId(sellTrayContainer.id);
   let trayContainerId = getIdString("tray-container " + tabIndex);
   let trayContainer = document.getElementById(trayContainerId);
@@ -230,7 +230,8 @@ function setUpSellTrayDisplay(sellTrayContainer, itemsList, autoSelect) {
   }
 
   // auto select price card when only one entry
-  autoSelectPriceCard = autoSelect && itemsList.length == 1 && itemsList[0].weightList.length == 1;
+  autoSelectPriceCard = sellTrayContainer.getElementsByClassName("price-card-box").length == 0
+    && itemsList.length == 1 && itemsList[0].weightList.length == 1;
   for (let i=0; i<itemsList.length; i++) {
     let item = itemsList[i];
     let itemName = item.itemName
@@ -301,10 +302,10 @@ function setUpSellTrayDisplay(sellTrayContainer, itemsList, autoSelect) {
       removeItemButton.addEventListener("click", function() {
         priceCardBox.remove();
         updateTotalSalesPrice(tabIndex);
-        if (sellTrayContainer.getElementsByClassName("price-card-box").length == 0) {
-          let tabName = document.getElementById("tab-button-" + tabIndex).textContent.slice(0, -1);
-          ipcRenderer.send('edit:tray:set', {tabIndex: tabIndex, tabName: tabName, metaData: getMetaData(tabIndex)});
-        }
+        // if (sellTrayContainer.getElementsByClassName("price-card-box").length == 0) {
+        //   let tabName = document.getElementById("tab-button-" + tabIndex).textContent.slice(0, -1);
+        //   ipcRenderer.send('edit:tray:set', {tabIndex: tabIndex, tabName: tabName, metaData: getMetaData(tabIndex)});
+        // }
       });
       priceCardBoxButtons.appendChild(removeItemButton);
     }
@@ -498,13 +499,13 @@ function addExchangeCard(exchangeWindow, metal) {
   weightInput.addEventListener('keyup', function() {
     if(sellPercentagePurityInput.value !== '' && !isNaN(Number(sellPercentagePurityInput.value))) {
       let purchasePrice = updatePurchasePrice(
-        exchangeCardPriceLabel, Number(weightInput.value), Number(sellRateInput.value), Number(sellPercentagePurityInput.value));
+        exchangeCard, Number(weightInput.value), Number(sellRateInput.value), Number(sellPercentagePurityInput.value));
       if (purchasePercentagePurityInput.value === '' || isNaN(Number(purchasePercentagePurityInput.value))) {
         purchasePercentagePurityInput.value = calculateImpliedPurity(purchasePrice, Number(weightInput.value), Number(purchaseRateInput.value));
       }
     } else if (purchasePercentagePurityInput.value !== '' && !isNaN(Number(purchasePercentagePurityInput.value))) {
       let purchasePrice = updatePurchasePrice(
-        exchangeCardPriceLabel, Number(weightInput.value), Number(purchaseRateInput.value), Number(purchasePercentagePurityInput.value));
+        exchangeCard, Number(weightInput.value), Number(purchaseRateInput.value), Number(purchasePercentagePurityInput.value));
       if (sellPercentagePurityInput.value === '' || isNaN(Number(sellPercentagePurityInput.value))) {
         sellPercentagePurityInput.value = calculateImpliedPurity(purchasePrice, Number(weightInput.value), Number(sellRateInput.value));
       }
@@ -521,7 +522,7 @@ function addExchangeCard(exchangeWindow, metal) {
 
   sellPercentagePurityInput.addEventListener('keyup', function() {
     let purchasePrice = updatePurchasePrice(
-      exchangeCardPriceLabel, Number(weightInput.value), Number(sellRateInput.value), Number(sellPercentagePurityInput.value));
+      exchangeCard, Number(weightInput.value), Number(sellRateInput.value), Number(sellPercentagePurityInput.value));
     purchasePercentagePurityInput.value = calculateImpliedPurity(purchasePrice, Number(weightInput.value), Number(purchaseRateInput.value));
     updateTotalPurchasePrice(tabIndex);
   });
@@ -534,7 +535,7 @@ function addExchangeCard(exchangeWindow, metal) {
 
   purchasePercentagePurityInput.addEventListener('keyup', function() {
     let purchasePrice = updatePurchasePrice(
-      exchangeCardPriceLabel, Number(weightInput.value), Number(purchaseRateInput.value), Number(purchasePercentagePurityInput.value));
+      exchangeCard, Number(weightInput.value), Number(purchaseRateInput.value), Number(purchasePercentagePurityInput.value));
     sellPercentagePurityInput.value = calculateImpliedPurity(purchasePrice, Number(weightInput.value), Number(sellRateInput.value));
     updateTotalPurchasePrice(tabIndex);
   });
@@ -543,8 +544,8 @@ function addExchangeCard(exchangeWindow, metal) {
 function createExchangeCardChip(className, color, label) {
   let exchangeCardChip = createHtmlElement("div", className + " exchange-card-chip " + color + "-full-background " + color +"-border", null, null, null);
 
-  let chipHeader = createHtmlElement("div", "chip-header input-header", null, null, label);
-  exchangeCardChip.appendChild(chipHeader);
+  // let chipHeader = createHtmlElement("div", "chip-header input-header", null, null, label);
+  // exchangeCardChip.appendChild(chipHeader);
 
   let rateInputBox = createHtmlElement("div", "float-left sixty-width", null, null, null);
   exchangeCardChip.appendChild(rateInputBox);
@@ -557,7 +558,7 @@ function createExchangeCardChip(className, color, label) {
 
   let purityInputBox = createHtmlElement("div", "float-right forty-width", null, null, null);
   exchangeCardChip.appendChild(purityInputBox);
-  let purityInputHeader = createHtmlElement("div", "input-header align-right", null, null, "Purity %");
+  let purityInputHeader = createHtmlElement("div", "input-header align-right", null, null, "Percentage");
   purityInputBox.appendChild(purityInputHeader);
   let purityInputText = createHtmlElement("input", "purity-percentage input-text percentage-background align-right float-right", null, null, null);
   purityInputText.type = "text";
@@ -583,13 +584,21 @@ function populateRateFields(metal, exchangeCard, weightInput,
     purchasePercentagePurityInput.value = "";
 }
 
-function updatePurchasePrice(purchasePriceLabel, weight, metalRate, purityPercentage) {
+function updatePurchasePrice(exchangeCard, weight, metalRate, purityPercentage) {
   let purchasePrice = 0;
   if (!isNaN(weight) && !isNaN(purityPercentage)) {
     purchasePrice = Math.round(metalRate * weight * purityPercentage * 0.01);
   }
 
+  if (purchasePrice == 0 && exchangeCard.classList.contains("exchange-card-selected")) {
+    exchangeCard.classList.remove("exchange-card-selected");
+  } else if (purchasePrice != 0) {
+    exchangeCard.classList.add("exchange-card-selected");
+  }
+
+  let purchasePriceLabel = exchangeCard.querySelector(".exchange-card-label");
   purchasePriceLabel.innerHTML = decodeURI("&#8377;") + " " + getDesiNumber(purchasePrice);
+
   return purchasePrice;
 }
 
@@ -729,7 +738,7 @@ function buildNetTotalContainer(tabContent, set) {
   purchaseWindowDiv.appendChild(purchaseTotal);
   let purchaseTable = createHtmlElement("table", "purchase-table", "purchase-table-" + tabIndex, null, null);
   purchaseWindowDiv.appendChild(purchaseTable);
-  addTableHeader(purchaseTable, ["Metal", "Weight", "Purchase Rate", "Purity", "Price"]);
+  addTableHeader(purchaseTable, ["Metal", "Weight", "Purchase Rate", "Percentage", "Price"]);
 
   return netTotalContainer;
 }
@@ -1324,16 +1333,17 @@ function selectTab(tabButton) {
 
 function confirmAndCloseTab(tabButton) {
   let tabId = getTabIndexFromId(tabButton.id);
+  let sellTrayContainer = document.getElementById("sell-tray-container-" + tabId);
   if(calculateTotalSalesPrice(tabId) != 0) {
-    let sellTrayContainer = document.getElementById("sell-tray-container-" + tabId);
     selectTrayContainer(tabId, sellTrayContainer);
     selectTab(tabButton);
     showTransactionInProgressError();
-  } else if (calculateTotalPurchasePrice(tabId) != 0) {
-    let exchangeTrayContainer = document.getElementById("exchange-tray-container-" + tabId);
-    selectTrayContainer(tabId, exchangeTrayContainer);
-    selectTab(tabButton);
-    showTransactionInProgressError();
+  } else if (sellTrayContainer.getElementsByClassName("price-card-box").length == 0
+      && calculateTotalPurchasePrice(tabId) != 0) {
+        let exchangeTrayContainer = document.getElementById("exchange-tray-container-" + tabId);
+        selectTrayContainer(tabId, exchangeTrayContainer);
+        selectTab(tabButton);
+        showTransactionInProgressError();
   } else {
     closeTab(tabButton);
   }

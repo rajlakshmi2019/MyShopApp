@@ -430,6 +430,16 @@ input[type="radio"]
   overflow: hidden;
 }
 
+.exchange-card-label {
+  font-size: 32px;
+}
+
+.exchange-card-selected {
+  color: white !important;
+  background-color: #0079A5;
+  box-shadow: 0 4px 8px 0 white !important;
+}
+
 .chip-header {
   margin-bottom: 0;
 }
