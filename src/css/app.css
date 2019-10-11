@@ -231,11 +231,11 @@ hr.solid {
   cursor: pointer;
   border-radius: 4px;
   box-shadow: 0 1px 2px 0 #363A42;
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
   margin: 0 20px 20px 0;
   color: #363A42;
-  font-size: 14px;
+  font-size: 25px;
   font-weight: bold;
 }
 
@@ -305,6 +305,11 @@ hr.solid {
 .small-popups-div {
   color: #FFDF00;
   padding: 20px;
+}
+
+.radio-btn {
+  width: 1.35em;
+  height: 1.35em;
 }
 
 div, span, a, h2, h3, p {

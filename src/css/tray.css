@@ -143,8 +143,8 @@ input[type="radio"]
   outline: none;
   cursor: pointer;
   border-radius: 4px;
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
   margin: 5px;
 }
 
@@ -232,8 +232,8 @@ input[type="radio"]
 
 .price-card-box-buttons-container {
   color: inherit;
-  width: 40px;
-  margin: 20px;
+  width: 50px;
+  margin: 5px;
   overflow: hidden;
 }
 
@@ -372,26 +372,30 @@ input[type="radio"]
 
 .add-item-button {
   background-image: url('../resource/add-item-white.png');
-  background-position: 6px;
+  background-position: 10px;
   background-repeat: no-repeat;
+  background-size: 20px 20px;
 }
 
 .edit-item-button {
   background-image: url('../resource/edit-item-white.png');
-  background-position: 6px;
+  background-position: 10px;
   background-repeat: no-repeat;
+  background-size: 22px 22px;
 }
 
 .remove-item-button {
   background-image: url('../resource/remove-item-white.png');
-  background-position: 6px;
+  background-position: 10px;
   background-repeat: no-repeat;
+  background-size: 20px 20px;
 }
 
 .down-arrow-button {
   background-image: url('../resource/down-arrow-12.png');
-  background-position: 6px;
+  background-position: 10px;
   background-repeat: no-repeat;
+  background-size: 20px 20px;
 }
 
 /* exchange tray styles */

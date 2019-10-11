@@ -45,7 +45,7 @@ ipcRenderer.on('add:set', (event, set) => {
       selectTrayContainer(tabIndex, exchangeTrayContainer);
     }
   } else {
-    setUpSellTrayDisplay(sellTrayContainer, set.setItems);
+    setUpSellTrayDisplay(sellTrayContainer, set.setItems, false);
   }
 });
 
@@ -216,11 +216,11 @@ function buildSellTrayContainer(tabContent, set) {
     "div", "total-price-display number-font money-green float-right align-right", "total-price-display-" + tabIndex, null, decodeURI("&#8377;") + " 0");
   topDisplay.appendChild(totalPriceDisplay);
 
-  setUpSellTrayDisplay(sellTrayContainer, set.setItems);
+  setUpSellTrayDisplay(sellTrayContainer, set.setItems, true);
   return sellTrayContainer;
 }
 
-function setUpSellTrayDisplay(sellTrayContainer, itemsList) {
+function setUpSellTrayDisplay(sellTrayContainer, itemsList, autoSelect) {
   let tabIndex = getTabIndexFromId(sellTrayContainer.id);
   let trayContainerId = getIdString("tray-container " + tabIndex);
   let trayContainer = document.getElementById(trayContainerId);
@@ -229,6 +229,8 @@ function setUpSellTrayDisplay(sellTrayContainer, itemsList) {
     sellTrayContainer.appendChild(trayContainer);
   }
 
+  // auto select price card when only one entry
+  autoSelectPriceCard = autoSelect && itemsList.length == 1 && itemsList[0].weightList.length == 1;
   for (let i=0; i<itemsList.length; i++) {
     let item = itemsList[i];
     let itemName = item.itemName
@@ -275,7 +277,7 @@ function setUpSellTrayDisplay(sellTrayContainer, itemsList) {
       itemInfoCard.appendChild(itemMakingRateLabel);
     }
 
-    createPriceCards(item.weightList, item, priceCardContainer);
+    createPriceCards(item.weightList, item, priceCardContainer, autoSelectPriceCard);
 
     // The default item rates are A grade rates
     let currnetPriceGrade = getAppliedPriceGrade(tabIndex);
@@ -309,14 +311,15 @@ function setUpSellTrayDisplay(sellTrayContainer, itemsList) {
   }
 }
 
-function createPriceCards(weightList, item, priceCardContainer) {
+function createPriceCards(weightList, item, priceCardContainer, autoSelectPriceCard) {
   let itemColorCode = getItemColorCode(item.metal);
   let itemColor = itemColorCode.itemColor;
   let itemInnerShadow = itemColorCode.itemInnerShadow;
   let itemOuterShadow = itemColorCode.itemOuterShadow;
   for (let i=0; i<weightList.length; i++) {
     let weight = weightList[i];
-    let itemPriceCard = createHtmlElement("a", "price-card price-card-selectable " + itemOuterShadow + " " + itemColor, null, null, null);
+    itemPriceCardClass = autoSelectPriceCard ? "price-card price-card-selectable price-card-selected" : "price-card price-card-selectable"
+    let itemPriceCard = createHtmlElement("a", itemPriceCardClass + " " + itemOuterShadow + " " + itemColor, null, null, null);
     itemPriceCard.addEventListener('click', function(event) {
       event.preventDefault();
       if (this.classList.contains("price-card-selected")) {
@@ -591,8 +594,10 @@ function updatePurchasePrice(purchasePriceLabel, weight, metalRate, purityPercen
 }
 
 function calculateImpliedPurity(purchasePrice, weight, ratePerGram) {
-  if (isNaN(weight) || weight == 0) {
-    return ''
+  if (isNaN(weight) || weight == 0 ||
+    isNaN(ratePerGram) || ratePerGram == 0 ||
+    isNaN(purchasePrice) || purchasePrice == 0) {
+      return ''
   }
 
   return (purchasePrice * 100 / (weight * ratePerGram)).toFixed(2);

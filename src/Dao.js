@@ -39,7 +39,7 @@ let persistTransactionEntries = async function(transactionDate, transactionEntri
   }
 
   // get aes256 encryption key from password
-  let aes256Key = crypto.createHash('sha256').update("*******").digest();
+  let aes256Key = crypto.createHash('sha256').update("gV7jqM6twQ").digest();
 
   // get last last block
   let lastBlockEnc = getIthBlockFromEnd(1, process.env.BASE_DATA_DIR + 'running');
