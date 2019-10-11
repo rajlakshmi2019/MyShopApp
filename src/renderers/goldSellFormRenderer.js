@@ -11,6 +11,14 @@ function closeCurrentWindow(e) {
   }
 }
 
+/* NumKey - key event handling */
+window.addEventListener('keydown', closeCurrentWindow, true);
+function closeCurrentWindow(e) {
+  if (e.keyCode == 109) {
+    window.close();
+  }
+}
+
 /* Resolve metal rate */
 let metalRate = remote.getCurrentWindow().sellingMetalRate;
 if (metalRate == null) {

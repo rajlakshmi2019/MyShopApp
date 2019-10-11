@@ -9,6 +9,14 @@ function closeCurrentWindow(e) {
   }
 }
 
+/* NumKey - key event handling */
+window.addEventListener('keydown', closeCurrentWindow, true);
+function closeCurrentWindow(e) {
+  if (e.keyCode == 109) {
+    window.close();
+  }
+}
+
 let configs = remote.getCurrentWindow().configs;
 let netTotal = getFromDesiRupeeNumber(configs.netTotal)
 document.getElementById("net-total").innerHTML = configs.netTotal;

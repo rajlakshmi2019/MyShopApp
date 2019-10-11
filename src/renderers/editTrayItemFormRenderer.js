@@ -9,6 +9,14 @@ function closeCurrentWindow(e) {
   }
 }
 
+/* NumKey - key event handling */
+window.addEventListener('keydown', closeCurrentWindow, true);
+function closeCurrentWindow(e) {
+  if (e.keyCode == 109) {
+    window.close();
+  }
+}
+
 let item = remote.getCurrentWindow().windowItem;
 let itemColor = "others-color";
 if (item.metal === 'Gold') {
