@@ -39,7 +39,7 @@ input[type="radio"]
 }
 
 .tab-button {
-  color: #595F68;
+  color: #FF4D4D;
   margin: 1px 0 0;
   border-top-left-radius: 6px;
   border-top-right-radius: 6px;
@@ -47,7 +47,7 @@ input[type="radio"]
 }
 
 .tab-button:hover {
-  color: #ADB2BA;
+  color: #FF4D4D;
 }
 
 .tab-add-buttons {
@@ -66,21 +66,21 @@ input[type="radio"]
 }
 
 #tab-add-sell:hover {
-  background-color: #6AFC6A;
+  background-color: #3BB83B;
 }
 
 #tab-add-buy:hover {
-  background-color: #FF4D4D;
+  background-color: #D90202;
 }
 
 .tab-button-selected {
   border: 1px solid #363A42;
   background-color: #363A42;
-  color: #DEE4ED;
+  color: #6AFC6A;
 }
 
 .tab-button-selected:hover {
-  color: #DEE4ED;
+  color: #6AFC6A;
 }
 
 .select-tab {
@@ -161,6 +161,7 @@ input[type="radio"]
 
 .finish-transaction-button {
   margin-top: 15px;
+  margin-left: 10px;
   padding-top: 5px;
   width: 125px;
   height: 40px;
@@ -170,6 +171,27 @@ input[type="radio"]
   color: #363A42;
   background-color: #48DB48;
   box-shadow: 0 2px 4px 0 #FFDF00;
+}
+
+.finish-transaction-button:hover {
+  background-color: #3BB83B;
+}
+
+.convert-to-a-button {
+  margin-top: 15px;
+  padding-top: 5px;
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  font-size: 22px;
+  font-weight: bold;
+  color: #363A42;
+  background-color: #48DB48;
+  box-shadow: 0 2px 4px 0 #FFDF00;
+}
+
+.convert-to-a-button:hover {
+  background-color: #3BB83B;
 }
 
 .add-more-items-button {

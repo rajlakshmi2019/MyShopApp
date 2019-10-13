@@ -50,19 +50,7 @@ ipcRenderer.on('add:set', (event, set) => {
 });
 
 ipcRenderer.on('grade:update', (event, grade) => {
-  let tabContent = document.getElementById("tab-content-" + grade.tabIndex);
-  let priceCardContainers = tabContent.getElementsByClassName("price-card-container");
-  for(let i=0; i<priceCardContainers.length; i++) {
-    let priceCardContainer = priceCardContainers[i];
-    let itemInfoCard = priceCardContainer.querySelector(".item-info-card");
-    let currentItem = getCurentItem({
-      itemName: itemInfoCard.querySelector(".item-label").textContent,
-      metal: getItemType(itemInfoCard.classList)
-    }, itemInfoCard);
-    addPriceLabels(currentItem, priceCardContainer, getAppliedPriceGrade(grade.tabIndex), grade.newGrade);
-  }
-
-  document.getElementById("applied-price-grade-" + grade.tabIndex).textContent = grade.newGrade;
+  updateSellTrayGrade(grade.tabIndex, grade.newGrade);
 });
 
 ipcRenderer.on('mark:pending', (event, configs) => {
@@ -143,6 +131,20 @@ function addTab(tabType, set) {
         });
       }
     });
+
+    netTotalContainer.querySelector(".convert-to-a-button")
+      .addEventListener("click", function() {
+        console.log(this);
+        if (this.textContent == "A") {
+          updateSellTrayGrade(tabIndex, "A");
+          populateNetTotalContainer(tabIndex);
+          this.textContent = "B";
+        } else if (this.textContent == "B") {
+          updateSellTrayGrade(tabIndex, "B");
+          populateNetTotalContainer(tabIndex);
+          this.textContent = "A";
+        }
+      });
 
   /* Select tray and tab */
   if (tabType === "sell") {
@@ -229,9 +231,6 @@ function setUpSellTrayDisplay(sellTrayContainer, itemsList) {
     sellTrayContainer.appendChild(trayContainer);
   }
 
-  // auto select price card when only one entry
-  autoSelectPriceCard = sellTrayContainer.getElementsByClassName("price-card-box").length == 0
-    && itemsList.length == 1 && itemsList[0].weightList.length == 1;
   for (let i=0; i<itemsList.length; i++) {
     let item = itemsList[i];
     let itemName = item.itemName
@@ -240,11 +239,15 @@ function setUpSellTrayDisplay(sellTrayContainer, itemsList) {
     let itemInnerShadow = itemColorCode.itemInnerShadow;
     let itemOuterShadow = itemColorCode.itemOuterShadow;
 
+    // auto select price card when only one entry
+    let autoSelectPriceCard = false;
+
     let itemPriceCardBoxId = getItemIdString("price-card-box", itemName, tabIndex);
     let priceCardBox = document.getElementById(itemPriceCardBoxId);
     if (priceCardBox == null) {
       priceCardBox = createHtmlElement("div", "price-card-box " + itemInnerShadow, itemPriceCardBoxId, null, null);
       trayContainer.appendChild(priceCardBox);
+      autoSelectPriceCard = true;
     }
 
     let itemPriceCardContainerId = getItemIdString("price-card-container", itemName, tabIndex);
@@ -252,6 +255,7 @@ function setUpSellTrayDisplay(sellTrayContainer, itemsList) {
     if (priceCardContainer == null) {
       priceCardContainer = createHtmlElement("div", "price-card-container foat-left", itemPriceCardContainerId, null, null);
       priceCardBox.appendChild(priceCardContainer);
+      autoSelectPriceCard = true;
     }
 
     let itemInfoCardId = getItemIdString("info-card", itemName, tabIndex);
@@ -276,9 +280,10 @@ function setUpSellTrayDisplay(sellTrayContainer, itemsList) {
       itemInfoCard.appendChild(itemMinMakingLabel);
       let itemMakingRateLabel = createHtmlElement("div", "number-font making-rate align-right", null, null, null);
       itemInfoCard.appendChild(itemMakingRateLabel);
+      autoSelectPriceCard = true;
     }
 
-    createPriceCards(item.weightList, item, priceCardContainer, autoSelectPriceCard);
+    createPriceCards(item.weightList, item, priceCardContainer, autoSelectPriceCard && item.weightList.length == 1);
 
     // The default item rates are A grade rates
     let currnetPriceGrade = getAppliedPriceGrade(tabIndex);
@@ -386,6 +391,22 @@ function addPriceLabels(item, priceCardContainer, appliedPricingGrade, newPricin
   }
 
   updateTotalSalesPrice(getTabIndexFromId(priceCardContainer.id));
+}
+
+function updateSellTrayGrade(tabIndex, newGrade) {
+  let tabContent = document.getElementById("tab-content-" + tabIndex);
+  let priceCardContainers = tabContent.getElementsByClassName("price-card-container");
+  for(let i=0; i<priceCardContainers.length; i++) {
+    let priceCardContainer = priceCardContainers[i];
+    let itemInfoCard = priceCardContainer.querySelector(".item-info-card");
+    let currentItem = getCurentItem({
+      itemName: itemInfoCard.querySelector(".item-label").textContent,
+      metal: getItemType(itemInfoCard.classList)
+    }, itemInfoCard);
+    addPriceLabels(currentItem, priceCardContainer, getAppliedPriceGrade(tabIndex), newGrade);
+  }
+
+  document.getElementById("applied-price-grade-" + tabIndex).textContent = newGrade;
 }
 
 /* Exchange tray set up methods */
@@ -638,6 +659,9 @@ function buildNetTotalContainer(tabContent, set) {
   let proceedButton =
     createHtmlElement("button", "tray-window-button finish-transaction-button float-right", "finish-transaction-button-" + tabIndex, "Payment", null);
   trayControlsContainer.appendChild(proceedButton);
+  let convertToAButton =
+    createHtmlElement("button", "tray-window-button convert-to-a-button float-right", "convert-to-a-button-" + tabIndex, "A", null);
+  trayControlsContainer.appendChild(convertToAButton);
 
   let fullWindowContainer = createHtmlElement("div", "net-windows-wrapper", null, null, null);
   netTotalContainer.appendChild(fullWindowContainer);
@@ -1355,6 +1379,7 @@ function closeTab(tabButton) {
     let neighbouringTabIndex = getPreviousOrNextTabIndex(getTabIndexFromId(tabButton.id));
     if (neighbouringTabIndex == -1) {
       ipcRenderer.send('close:tray', null);
+      return;
     }
     selectTab(document.getElementById("tab-button-" + neighbouringTabIndex));
   }
