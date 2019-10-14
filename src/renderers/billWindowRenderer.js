@@ -191,6 +191,7 @@ function applyGST() {
   document.getElementById("top-left-header").textContent = "GSTIN: 20AKXPD1609D1ZN";
   document.getElementById("top-center-header").textContent = "TAX INVOICE";
   document.getElementById("gst-button").textContent = "EST";
+  document.getElementById("bill-no-text").textContent = "INVOICE NO.";
 }
 
 // apply estimate
@@ -206,6 +207,7 @@ function applyEstimate() {
   document.getElementById("top-left-header").textContent = "";
   document.getElementById("top-center-header").textContent = "ESTIMATE ONLY";
   document.getElementById("gst-button").textContent = "GST";
+  document.getElementById("bill-no-text").textContent = "ESTIMATE NO.";
 }
 
 // helper functions

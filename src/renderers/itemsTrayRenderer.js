@@ -522,13 +522,15 @@ function addExchangeCard(exchangeWindow, metal) {
       let purchasePrice = updatePurchasePrice(
         exchangeCard, Number(weightInput.value), Number(sellRateInput.value), Number(sellPercentagePurityInput.value));
       if (purchasePercentagePurityInput.value === '' || isNaN(Number(purchasePercentagePurityInput.value))) {
-        purchasePercentagePurityInput.value = calculateImpliedPurity(purchasePrice, Number(weightInput.value), Number(purchaseRateInput.value));
+        purchasePercentagePurityInput.value = calculateImpliedPurity(purchasePrice, Number(weightInput.value),
+          Number(purchaseRateInput.value), Number(sellRateInput.value), Number(sellPercentagePurityInput.value));
       }
     } else if (purchasePercentagePurityInput.value !== '' && !isNaN(Number(purchasePercentagePurityInput.value))) {
       let purchasePrice = updatePurchasePrice(
         exchangeCard, Number(weightInput.value), Number(purchaseRateInput.value), Number(purchasePercentagePurityInput.value));
       if (sellPercentagePurityInput.value === '' || isNaN(Number(sellPercentagePurityInput.value))) {
-        sellPercentagePurityInput.value = calculateImpliedPurity(purchasePrice, Number(weightInput.value), Number(sellRateInput.value));
+        sellPercentagePurityInput.value = calculateImpliedPurity(purchasePrice, Number(weightInput.value),
+          Number(sellRateInput.value), Number(purchaseRateInput.value), Number(purchasePercentagePurityInput.value));
       }
     }
 
@@ -536,28 +538,34 @@ function addExchangeCard(exchangeWindow, metal) {
   });
 
   sellRateInput.addEventListener('keyup', function() {
-    let purchasePrice = getFromDesiRupeeNumber(exchangeCardPriceLabel.innerHTML);
-    sellPercentagePurityInput.value = calculateImpliedPurity(purchasePrice, Number(weightInput.value), Number(sellRateInput.value));
+    let purchasePrice = updatePurchasePrice(
+      exchangeCard, Number(weightInput.value), Number(sellRateInput.value), Number(sellPercentagePurityInput.value));
+    purchasePercentagePurityInput.value = calculateImpliedPurity(purchasePrice, Number(weightInput.value),
+      Number(purchaseRateInput.value), Number(sellRateInput.value), Number(sellPercentagePurityInput.value));
     updateTotalPurchasePrice(tabIndex);
   });
 
   sellPercentagePurityInput.addEventListener('keyup', function() {
     let purchasePrice = updatePurchasePrice(
       exchangeCard, Number(weightInput.value), Number(sellRateInput.value), Number(sellPercentagePurityInput.value));
-    purchasePercentagePurityInput.value = calculateImpliedPurity(purchasePrice, Number(weightInput.value), Number(purchaseRateInput.value));
+    purchasePercentagePurityInput.value = calculateImpliedPurity(purchasePrice, Number(weightInput.value),
+      Number(purchaseRateInput.value), Number(sellRateInput.value), Number(sellPercentagePurityInput.value));
     updateTotalPurchasePrice(tabIndex);
   });
 
   purchaseRateInput.addEventListener('keyup', function(event) {
-    let purchasePrice = getFromDesiRupeeNumber(exchangeCardPriceLabel.innerHTML);
-    purchasePercentagePurityInput.value = calculateImpliedPurity(purchasePrice, Number(weightInput.value), Number(purchaseRateInput.value));
+    let purchasePrice = updatePurchasePrice(
+      exchangeCard, Number(weightInput.value), Number(purchaseRateInput.value), Number(purchasePercentagePurityInput.value));
+    sellPercentagePurityInput.value = calculateImpliedPurity(purchasePrice, Number(weightInput.value),
+      Number(sellRateInput.value), Number(purchaseRateInput.value), Number(purchasePercentagePurityInput.value));
     updateTotalPurchasePrice(tabIndex);
   });
 
   purchasePercentagePurityInput.addEventListener('keyup', function() {
     let purchasePrice = updatePurchasePrice(
       exchangeCard, Number(weightInput.value), Number(purchaseRateInput.value), Number(purchasePercentagePurityInput.value));
-    sellPercentagePurityInput.value = calculateImpliedPurity(purchasePrice, Number(weightInput.value), Number(sellRateInput.value));
+    sellPercentagePurityInput.value = calculateImpliedPurity(purchasePrice, Number(weightInput.value),
+      Number(sellRateInput.value), Number(purchaseRateInput.value), Number(purchasePercentagePurityInput.value));
     updateTotalPurchasePrice(tabIndex);
   });
 }
@@ -599,10 +607,20 @@ function populateRateFields(metal, exchangeCard, weightInput,
     weightInput.value = ""
     sellRateInput.value = todaysRate;
     sellPercentagePurityInput.value = "";
-    purchaseRateInput.value = metaData == null || metaData.sellingRate == null ||
+
+    let todaysPurchaseRate = metaData == null || metaData.sellingRate == null ||
       metaData.purchaseRate[metal] == null ? ShopCalculator.calculateMetalPurchaseRate(
         Number(todaysRate), Dao.getPurchaseRateDiff()[metal]) : metaData.purchaseRate[metal];
+    purchaseRateInput.value = todaysPurchaseRate;
     purchasePercentagePurityInput.value = "";
+
+    if (metal === "Gold") {
+      sellPercentagePurityInput.value = 75;
+      purchasePercentagePurityInput.value = calculateImpliedPurity(0, 0, todaysPurchaseRate, todaysRate, 75);
+    } else if (metal === "Silver") {
+      purchasePercentagePurityInput.value = 85;
+      sellPercentagePurityInput.value = calculateImpliedPurity(0, 0, todaysRate, todaysPurchaseRate, 85);
+    }
 }
 
 function updatePurchasePrice(exchangeCard, weight, metalRate, purityPercentage) {
@@ -623,14 +641,22 @@ function updatePurchasePrice(exchangeCard, weight, metalRate, purityPercentage) 
   return purchasePrice;
 }
 
-function calculateImpliedPurity(purchasePrice, weight, ratePerGram) {
-  if (isNaN(weight) || weight == 0 ||
-    isNaN(ratePerGram) || ratePerGram == 0 ||
-    isNaN(purchasePrice) || purchasePrice == 0) {
+function calculateImpliedPurity(purchasePrice, weight, ratePerGram, secondRate, secondPercentage) {
+  if (isNaN(weight) || isNaN(ratePerGram) || ratePerGram == 0 || isNaN(purchasePrice)) {
       return ''
   }
 
-  return (purchasePrice * 100 / (weight * ratePerGram)).toFixed(2);
+  let rounded = 0, fixed = 0;
+  if (weight == 0 && purchasePrice == 0) {
+    rounded = Math.round((secondRate * secondPercentage) / ratePerGram);
+    fixed = ((secondRate * secondPercentage) / ratePerGram).toFixed(2);
+  } else {
+    rounded = Math.round(purchasePrice * 100 / (weight * ratePerGram));
+    fixed = (purchasePrice * 100 / (weight * ratePerGram)).toFixed(2);
+  }
+
+  let result = rounded == fixed ? rounded : fixed;
+  return result == 0 ? '' : result;
 }
 
 /* Net total display */
