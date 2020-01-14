@@ -32,6 +32,22 @@ function calculateCostPrice(weight, costRate, afterWastage) {
 
 function calculateGSTAppliedTotals(
   sellingPrice, discount, cgstPercentage, sgstPercentage) {
+    let taxedAmount = sellingPrice - discount;
+    let cgstApplied = Math.floor(taxedAmount * 0.01 * cgstPercentage);
+    let sgstApplied = Math.floor(taxedAmount * 0.01 * sgstPercentage);
+    let totalPrice = taxedAmount + cgstApplied + sgstApplied;
+    let adjustedDiscount = discount;
+    return {
+      taxedAmount,
+      cgstApplied,
+      sgstApplied,
+      totalPrice,
+      adjustedDiscount
+    };
+  }
+
+function calculateGSTInplaceTotals(
+  sellingPrice, discount, cgstPercentage, sgstPercentage) {
     let finalPrice = sellingPrice - discount;
     let taxedAmount = Math.round(finalPrice / (1 + 0.01 * (cgstPercentage + sgstPercentage)));
     let gstApplied = finalPrice - taxedAmount;
@@ -65,5 +81,6 @@ module.exports = {
   calculateMetalPurchaseRate,
   calculateMetalPurchaseRateDiff,
   calculateCostPrice,
-  calculateGSTAppliedTotals
+  calculateGSTAppliedTotals,
+  calculateGSTInplaceTotals
 };

@@ -56,16 +56,21 @@ if (configs.sales.length > 0 || configs.additional > 0) {
       }
 
       let qty = entry.items[j].Quantity;
-      let weight = parseFloat(Math.round(entry.items[j].Weight_In_Gram * 100) / 100).toFixed(2) + "g";
+      let weight = entry.items[j].Metal === "Accessories" ? "" :
+        parseFloat(Math.round(entry.items[j].Weight_In_Gram * 100) / 100).toFixed(2) + "g";
       let price = "₹ " + getDesiNumber(entry.items[j].Price);
 
       var cl = "sales-row", breakup = "";
       if (j == entry.items.length - 1) {
         cl += " section-end";
-        var rate = entry.Metal.charAt(0) + " " + entry.Rate_Per_Gram + "/g";
-        var making = (entry.Making_Per_Gram == null ?
-          entry.Making + "/pc" : entry.Making_Per_Gram + "/g");
-        breakup = rate + " + " + making;
+        if (entry.items[j].Metal === "Accessories") {
+          breakup = ""
+        } else {
+          var rate = entry.Metal.charAt(0) + " " + entry.Rate_Per_Gram + "/g";
+          var making = (entry.Making_Per_Gram == null ?
+            entry.Making + "/pc" : entry.Making_Per_Gram + "/g");
+          breakup = rate + " + " + making;
+        }
       }
 
       let tableRow = [
@@ -218,11 +223,19 @@ function wrapTableData(element, lr) {
 }
 
 function compare(a, b) {
+  if (a.Metal < b.Metal && a.Metal === "Accessories") {
+    return 1;
+  }
+
+  if (a.Metal > b.Metal && b.Metal === "Accessories") {
+    return -1;
+  }
+
   if (a.Metal < b.Metal) {
     return -1;
   }
 
-  if (a.Metal > b.Metal){
+  if (a.Metal > b.Metal) {
     return 1;
   }
 

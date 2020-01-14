@@ -115,6 +115,10 @@ let getSilverItemTypes = function() {
   return appConfigs.itemTypes.Silver;
 }
 
+let getAccessoriesItemTypes = function() {
+  return appConfigs.itemTypes.Accessories;
+}
+
 let getMappedItem = function(itemKey) {
   return appConfigs.itemConfigs.get(itemKey);
 }
@@ -254,6 +258,7 @@ module.exports = {
   getGradesList,
   getGoldItemTypes,
   getSilverItemTypes,
+  getAccessoriesItemTypes,
   getMappedItem,
   updateMetalRate
 }

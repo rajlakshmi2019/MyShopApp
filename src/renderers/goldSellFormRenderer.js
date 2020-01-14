@@ -37,6 +37,7 @@ if (tabName != null) {
 /* Type Items Map */
 let goldItemsMap = Dao.getGoldItemTypes();
 let silverItemsMap = Dao.getSilverItemTypes();
+let accessoriesItemsMap = Dao.getAccessoriesItemTypes();
 
 goldItemsMap.forEach((value, key, map) => {
   addItemForms('Gold', key, value);
@@ -44,6 +45,10 @@ goldItemsMap.forEach((value, key, map) => {
 
 silverItemsMap.forEach((value, key, map) => {
   addItemForms('Silver', key, value);
+});
+
+accessoriesItemsMap.forEach((value, key, map) => {
+  addItemForms('Accessories', key, value);
 });
 
 /* Add content for collapsible-option */
@@ -93,6 +98,9 @@ function addItemForms(metal, itemType, itemNameList) {
     let inputHeaderDiv = document.createElement('div');
     inputHeaderDiv.className = "input-header";
     inputHeaderDiv.textContent = "Weight In Grams";
+    if (metal === "Accessories") {
+      inputHeaderDiv.textContent = "Price";
+    }
     rightInputBox.appendChild(inputHeaderDiv);
     let inputTextArea = document.createElement('textarea');
     inputTextArea.className = "input-textarea input-weights";

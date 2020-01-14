@@ -134,7 +134,6 @@ function addTab(tabType, set) {
 
     netTotalContainer.querySelector(".convert-to-a-button")
       .addEventListener("click", function() {
-        console.log(this);
         if (this.textContent == "A") {
           updateSellTrayGrade(tabIndex, "A");
           populateNetTotalContainer(tabIndex);
@@ -283,7 +282,8 @@ function setUpSellTrayDisplay(sellTrayContainer, itemsList) {
       autoSelectPriceCard = true;
     }
 
-    createPriceCards(item.weightList, item, priceCardContainer, autoSelectPriceCard && item.weightList.length == 1);
+    createPriceCards(item.weightList, item, priceCardContainer,
+      (autoSelectPriceCard && item.weightList.length == 1) || item.metal === "Accessories");
 
     // The default item rates are A grade rates
     let currnetPriceGrade = getAppliedPriceGrade(tabIndex);
@@ -338,17 +338,26 @@ function createPriceCards(weightList, item, priceCardContainer, autoSelectPriceC
     });
     itemPriceCard.addEventListener("dblclick", (event) => {
       event.preventDefault();
-      let itemInfoCard = priceCardContainer.querySelector(".item-info-card");
-      let currentItem = getCurentItem(item, itemInfoCard);
-      let priceCardDetails = {...currentItem, weight: weight};
-      ipcRenderer.send('view:price:card', priceCardDetails);
+      if (item.metal !== "Accessories") {
+        let itemInfoCard = priceCardContainer.querySelector(".item-info-card");
+        let currentItem = getCurentItem(item, itemInfoCard);
+        let priceCardDetails = {...currentItem, weight: weight};
+        ipcRenderer.send('view:price:card', priceCardDetails);
+      }
       clearSelection();
     });
     priceCardContainer.appendChild(itemPriceCard);
     let cardWeightLabel = createHtmlElement("h3", "item-label", null, weight.toString() + " g", null);
-    itemPriceCard.appendChild(cardWeightLabel);
     let cardPriceLabel = createHtmlElement("h2", "number-font money-green align-right padding-top-fifteen", null, null, null);
-    itemPriceCard.appendChild(cardPriceLabel);
+    if (item.metal === "Accessories") {
+      cardWeightLabel.textContent = null
+      cardPriceLabel.innerHTML = "₹ " + weight.toString();
+      itemPriceCard.appendChild(cardPriceLabel);
+      itemPriceCard.appendChild(cardWeightLabel);
+    } else {
+      itemPriceCard.appendChild(cardWeightLabel);
+      itemPriceCard.appendChild(cardPriceLabel);
+    }
     let cardMetalPriceLabel = createHtmlElement("div", "number-font metal-price float-left", null, null, null);
     itemPriceCard.appendChild(cardMetalPriceLabel);
     let cardMakingPriceLabel = createHtmlElement("div", "number-font making-charge align-right", null, null, null);
@@ -357,36 +366,38 @@ function createPriceCards(weightList, item, priceCardContainer, autoSelectPriceC
 }
 
 function addPriceLabels(item, priceCardContainer, appliedPricingGrade, newPricingGrade) {
-  let gradeMakingRateDiff = Dao.getGradeMakingRateDiff();
-  let mappedItem = Dao.getMappedItem([item.metal, item.itemName].toString());
-  let priceCards = priceCardContainer.getElementsByClassName("price-card");
-  for(let i=0; i<priceCards.length; i++) {
-    priceCard = priceCards[i];
-    if (i == 0) {
-      priceCard.querySelector(".metal-rate").innerHTML = "₹ " + getDesiNumber(item.ratePerGram) +" /g";
-      priceCard.querySelector(".min-making-charge").innerHTML = "₹ " + getDesiNumber(
-        ShopCalculator.calculateGradeMakingRate(item.minimumMakingCharge,
-          (gradeMakingRateDiff[appliedPricingGrade][mappedItem.METAL].MM_DIFF * mappedItem.MM_DIFF_UNIT),
-          (gradeMakingRateDiff[newPricingGrade][mappedItem.METAL].MM_DIFF * mappedItem.MM_DIFF_UNIT)));
-      priceCard.querySelector(".making-rate").innerHTML = "₹ " + getDesiNumber(
-        ShopCalculator.calculateGradeMakingRate(item.makingPerGram,
-          (gradeMakingRateDiff[appliedPricingGrade][mappedItem.METAL].DIFF * mappedItem.DIFF_UNIT),
-          (gradeMakingRateDiff[newPricingGrade][mappedItem.METAL].DIFF  * mappedItem.DIFF_UNIT))) + " /g";
-    } else {
-      let weight = parseFloat(priceCard.querySelector(".item-label").textContent);
-      priceCard.querySelector(".money-green").innerHTML = "₹ " + getDesiNumber(
-        ShopCalculator.calculateGardePrice(weight, item.ratePerGram,
-          item.makingPerGram, item.minimumMakingCharge, mappedItem.APPLIED,
-          gradeMakingRateDiff[appliedPricingGrade][mappedItem.METAL],
-          gradeMakingRateDiff[newPricingGrade][mappedItem.METAL],
-          mappedItem.DIFF_UNIT, mappedItem.MM_DIFF_UNIT));
-      priceCard.querySelector(".metal-price").innerHTML = "₹ " + getDesiNumber(
-        ShopCalculator.calculateMetalPrice(weight, item.ratePerGram, mappedItem.APPLIED));
-      priceCard.querySelector(".making-charge").innerHTML = "₹ " + getDesiNumber(
-        ShopCalculator.calculateGradeMakingCharge(weight, item.makingPerGram, item.minimumMakingCharge,
-          gradeMakingRateDiff[appliedPricingGrade][mappedItem.METAL],
-          gradeMakingRateDiff[newPricingGrade][mappedItem.METAL],
-          mappedItem.DIFF_UNIT, mappedItem.MM_DIFF_UNIT));
+  if (item.metal !== "Accessories") {
+    let gradeMakingRateDiff = Dao.getGradeMakingRateDiff();
+    let mappedItem = Dao.getMappedItem([item.metal, item.itemName].toString());
+    let priceCards = priceCardContainer.getElementsByClassName("price-card");
+    for(let i=0; i<priceCards.length; i++) {
+      priceCard = priceCards[i];
+      if (i == 0) {
+        priceCard.querySelector(".metal-rate").innerHTML = "₹ " + getDesiNumber(item.ratePerGram) +" /g";
+        priceCard.querySelector(".min-making-charge").innerHTML = "₹ " + getDesiNumber(
+          ShopCalculator.calculateGradeMakingRate(item.minimumMakingCharge,
+            (gradeMakingRateDiff[appliedPricingGrade][mappedItem.METAL].MM_DIFF * mappedItem.MM_DIFF_UNIT),
+            (gradeMakingRateDiff[newPricingGrade][mappedItem.METAL].MM_DIFF * mappedItem.MM_DIFF_UNIT)));
+        priceCard.querySelector(".making-rate").innerHTML = "₹ " + getDesiNumber(
+          ShopCalculator.calculateGradeMakingRate(item.makingPerGram,
+            (gradeMakingRateDiff[appliedPricingGrade][mappedItem.METAL].DIFF * mappedItem.DIFF_UNIT),
+            (gradeMakingRateDiff[newPricingGrade][mappedItem.METAL].DIFF  * mappedItem.DIFF_UNIT))) + " /g";
+      } else {
+        let weight = parseFloat(priceCard.querySelector(".item-label").textContent);
+        priceCard.querySelector(".money-green").innerHTML = "₹ " + getDesiNumber(
+          ShopCalculator.calculateGardePrice(weight, item.ratePerGram,
+            item.makingPerGram, item.minimumMakingCharge, mappedItem.APPLIED,
+            gradeMakingRateDiff[appliedPricingGrade][mappedItem.METAL],
+            gradeMakingRateDiff[newPricingGrade][mappedItem.METAL],
+            mappedItem.DIFF_UNIT, mappedItem.MM_DIFF_UNIT));
+        priceCard.querySelector(".metal-price").innerHTML = "₹ " + getDesiNumber(
+          ShopCalculator.calculateMetalPrice(weight, item.ratePerGram, mappedItem.APPLIED));
+        priceCard.querySelector(".making-charge").innerHTML = "₹ " + getDesiNumber(
+          ShopCalculator.calculateGradeMakingCharge(weight, item.makingPerGram, item.minimumMakingCharge,
+            gradeMakingRateDiff[appliedPricingGrade][mappedItem.METAL],
+            gradeMakingRateDiff[newPricingGrade][mappedItem.METAL],
+            mappedItem.DIFF_UNIT, mappedItem.MM_DIFF_UNIT));
+      }
     }
   }
 
@@ -441,7 +452,7 @@ function buildExchangeTrayContainer(tabContent, set) {
 function setupExchangeWindow(metal, exchangeTrayContainer) {
   let tabIndex = getTabIndexFromId(exchangeTrayContainer.id);
 
-  let color = "others";
+  let color = "accessories";
   let floatType = "middle";
   if (metal === "Gold") {
     color = "gold";
@@ -470,7 +481,7 @@ function setupExchangeWindow(metal, exchangeTrayContainer) {
 function addExchangeCard(exchangeWindow, metal) {
   let tabIndex = getTabIndexFromId(exchangeWindow.id);
 
-  let color = "others";
+  let color = "accessories";
   if (metal === "Gold") {
     color = "gold";
   } else if (metal === "Silver") {
@@ -799,18 +810,23 @@ function populateNetTotalContainer(tabIndex) {
   emptyTable(salesTable);
   for (let i=0; i<salesItems.length; i++) {
     let salesItem = salesItems[i];
-    let color = salesItem.metal === "Gold" ? "gold" : "silver";
+    let color = "accessories";
+    if (salesItem.metal === "Gold") {
+      color = "gold";
+    } else if (salesItem.metal === "Silver") {
+      color = "silver";
+    }
     let tableDataElements = [];
     tableDataElements.push(
       wrapTableData(color, document.createTextNode(salesItem.metal)));
     tableDataElements.push(
       wrapTableData(color, document.createTextNode(salesItem.itemName)));
     tableDataElements.push(
-      wrapTableData(color, document.createTextNode(salesItem.weight + " g")));
+      wrapTableData(color, document.createTextNode(salesItem.metal === "Accessories" ? "-" : salesItem.weight + " g")));
     tableDataElements.push(
-      wrapTableData(color, document.createTextNode("₹ " + getDesiNumber(salesItem.ratePerGram) + " /g")));
+      wrapTableData(color, document.createTextNode(salesItem.metal === "Accessories" ? "-" : "₹ " + getDesiNumber(salesItem.ratePerGram) + " /g")));
     tableDataElements.push(
-      wrapTableData(color, document.createTextNode("₹ " + (salesItem.making == salesItem.minimumMakingCharge
+      wrapTableData(color, document.createTextNode(salesItem.metal === "Accessories" ? "-" : "₹ " + (salesItem.making == salesItem.minimumMakingCharge
         ? getDesiNumber(salesItem.minimumMakingCharge) : getDesiNumber(salesItem.makingPerGram) + " /g"))));
     tableDataElements.push(
       wrapTableData(color, document.createTextNode("₹ " + getDesiNumber(salesItem.price))));
@@ -855,8 +871,12 @@ function populateTotals(tabIndex, salesItems, purchaseItems) {
     let salesItem = salesItems[i];
     salesTotal = salesTotal + salesItem.price;
     for (let j=0; j<salesItem.grades.length; j++) {
-      salesGradesTotal[salesItem.grades[j]] =
-        salesGradesTotal[salesItem.grades[j]] + salesItem.gradePrices[salesItem.grades[j]];
+      if (salesItem.metal === "Accessories") {
+        salesGradesTotal[salesItem.grades[j]] = salesGradesTotal[salesItem.grades[j]] + salesItem.price;
+      } else {
+        salesGradesTotal[salesItem.grades[j]] =
+          salesGradesTotal[salesItem.grades[j]] + salesItem.gradePrices[salesItem.grades[j]];
+      }
     }
   }
 
@@ -995,9 +1015,13 @@ function getSelectedSalesItems(tabIndex) {
       item.gradePrices = {};
       for (let i=0; i<item.grades.length; i++) {
         let grade = item.grades[i];
-        item.gradePrices[grade] = ShopCalculator.calculateGardePrice(item.weight, item.ratePerGram,
-          item.makingPerGram, item.minimumMakingCharge, Dao.getMappedItem([item.metal, item.itemName].toString()).APPLIED,
-          gradeMakingRateDiff[item.appliedPriceGrade][item.metal], gradeMakingRateDiff[grade][item.metal]);
+        if (item.metal === "Accessories") {
+          item.gradePrices[grade] = item.price;
+        } else {
+          item.gradePrices[grade] = ShopCalculator.calculateGardePrice(item.weight, item.ratePerGram,
+            item.makingPerGram, item.minimumMakingCharge, Dao.getMappedItem([item.metal, item.itemName].toString()).APPLIED,
+            gradeMakingRateDiff[item.appliedPriceGrade][item.metal], gradeMakingRateDiff[grade][item.metal]);
+        }
       }
 
       selectedItemsList.push(item);
@@ -1024,7 +1048,13 @@ function getExchangeItems(tabIndex) {
 
 function getCurentItem(item, itemInfoCard) {
   let currentItem = {...item};
-  currentItem.metal = itemInfoCard.classList.contains("gold-color") ? "Gold" : "Silver";
+
+  currentItem.metal = "Accessories";
+  if (itemInfoCard.classList.contains("gold-color")) {
+    currentItem.metal = "Gold";
+  } else if (itemInfoCard.classList.contains("silver-color")) {
+    currentItem.metal = "Silver";
+  }
   currentItem.itemName = itemInfoCard.querySelector(".item-label").textContent;
   currentItem.ratePerGram = getFromDesiRupeeNumber(itemInfoCard.querySelector(".metal-rate").textContent.replace(" /g", ""));
   currentItem.makingPerGram = getFromDesiRupeeNumber(itemInfoCard.querySelector(".making-rate").textContent.replace(" /g", ""));
@@ -1330,9 +1360,9 @@ function wrapTableData(color, element) {
 
 function getItemColorCode(metal) {
   let colorCode = {
-    itemColor: "others-color",
-    itemInnerShadow : "others-inner-shadow",
-    itemOuterShadow : "others-outer-shadow"
+    itemColor: "accessories-color",
+    itemInnerShadow : "accessories-inner-shadow",
+    itemOuterShadow : "accessories-outer-shadow"
   };
   if (metal === 'Gold') {
     colorCode.itemColor = "gold-color";

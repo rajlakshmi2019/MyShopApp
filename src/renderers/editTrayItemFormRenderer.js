@@ -18,11 +18,13 @@ function closeCurrentWindow(e) {
 }
 
 let item = remote.getCurrentWindow().windowItem;
-let itemColor = "others-color";
+let itemColor = "accessories-color";
 if (item.metal === 'Gold') {
   itemColor = "gold-color";
 } else if (item.metal === 'Silver') {
   itemColor = "silver-color";
+} else if (item.metal === 'Accessories') {
+  document.getElementById("weight-input-header").textContent = "Price";
 }
 
 document.querySelector(".form-edit-tray-div").classList.add(itemColor);

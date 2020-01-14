@@ -32,7 +32,7 @@ submitButton.addEventListener("dblclick", (event) => {
 });
 
 let prices = remote.getCurrentWindow().priceCardDetails;
-let itemColor = "others-color";
+let itemColor = "accessories-color";
 if (prices.metal === 'Gold') {
   itemColor = "gold-color";
 } else if (prices.metal === 'Silver') {

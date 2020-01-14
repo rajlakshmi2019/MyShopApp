@@ -353,17 +353,17 @@ div, span, a, h2, h3, p {
   opacity: .9;
 }
 
-#others-btn {
-  background: #CFE3F7;
+#accessories-btn {
+  background: #82C0FF;
 }
 
-#others-btn:hover {
-  background: #D7E4F2;
+#accessories-btn:hover {
+  background: #91C8FF;
 }
 
-#others-content, .others-background {
-  background: #D7E4F2;
-  opacity: .9;
+#accessories-content, .accessories-background {
+  background: #82C0FF;
+  opacity: .84;
 }
 
 #grade-picker-div {
