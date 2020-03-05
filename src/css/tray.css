@@ -10,10 +10,15 @@ table {
   border: 2px solid #1EB4FF;
 }
 
+tr {
+  border: 2px solid #1EB4FF;
+}
+
 th, td {
   padding: 6px;
   vertical-align: bottom;
-  border: 2px solid #1EB4FF;
+  border-left: 2px solid #1EB4FF;
+  border-right: 2px solid #1EB4FF;
 }
 
 th.silver-border, td.silver-border {
@@ -23,6 +28,29 @@ th.silver-border, td.silver-border {
 input[type="radio"]
 {
   cursor: pointer;
+}
+
+/* checkbox styles */
+.checkbox-div {
+  padding-top: 6px;
+  padding-left: 2px;
+  padding-right: 2px;
+  text-align: center;
+  vertical-align: bottom;
+}
+
+.checked-row {
+  background-color: #363A42;
+}
+
+.unchecked-row {
+  background-color: #7A040A;
+}
+
+.checkbox-row, .checkbox-header {
+  cursor: pointer;
+  height: 15px;
+  width: 15px;
 }
 
 /* Tab window styles */

@@ -1,7 +1,8 @@
 const {ipcRenderer, remote} = require("electron");
 const {clearSelection, createHtmlElement, addTableHeader, addTableData,
-  emptyTable, parseTable, getDesiNumber, consolidateEntries, getFromDesiRupeeNumber,
-  generateTransactionId, formatDate, formatDateSlash, formatDateReverse} = require("./../utils.js");
+  addTableHeaderWithCheckbox, addTableDataWithCheckbox, emptyTable, parseTable,
+  getDesiNumber, consolidateEntries, getFromDesiRupeeNumber, generateTransactionId,
+  formatDate, formatDateSlash, formatDateReverse} = require("./../utils.js");
 const ShopCalculator = require("./../ShopCalculator.js");
 const Dao = remote.require("./Dao.js");
 
@@ -136,11 +137,11 @@ function addTab(tabType, set) {
       .addEventListener("click", function() {
         if (this.textContent == "A") {
           updateSellTrayGrade(tabIndex, "A");
-          populateNetTotalContainer(tabIndex);
+          updateNetTotalContainer(tabIndex);
           this.textContent = "B";
         } else if (this.textContent == "B") {
           updateSellTrayGrade(tabIndex, "B");
-          populateNetTotalContainer(tabIndex);
+          updateNetTotalContainer(tabIndex);
           this.textContent = "A";
         }
       });
@@ -584,9 +585,6 @@ function addExchangeCard(exchangeWindow, metal) {
 function createExchangeCardChip(className, color, label) {
   let exchangeCardChip = createHtmlElement("div", className + " exchange-card-chip " + color + "-full-background " + color +"-border", null, null, null);
 
-  // let chipHeader = createHtmlElement("div", "chip-header input-header", null, null, label);
-  // exchangeCardChip.appendChild(chipHeader);
-
   let rateInputBox = createHtmlElement("div", "float-left sixty-width", null, null, null);
   exchangeCardChip.appendChild(rateInputBox);
   let rateInputHeader = createHtmlElement("div", "input-header", null, null, "Rate Per Gram");
@@ -684,9 +682,9 @@ function buildNetTotalContainer(tabContent, set) {
   trayControlsContainer.appendChild(backButton);
   let billButton = createHtmlElement("button", "tray-window-button controller-button bill-button float-left", "bill-button-" + tabIndex, null, null);
   billButton.addEventListener("click", () => {
-    generateBill(getTabButton(tabIndex).textContent.slice(0, -1), new Date(), ".................",
-      parseTable(document.getElementById("sales-table-" + tabIndex)),
-      parseTable(document.getElementById("purchase-table-" + tabIndex)),
+    generateBill(getTabButton(tabIndex).textContent.slice(0, -1), new Date(), "......................",
+      parseTable(document.getElementById("sales-table-" + tabIndex), true),
+      parseTable(document.getElementById("purchase-table-" + tabIndex), true),
       getAdditionalCharge(tabIndex), getTotals(tabIndex), false);
   });
   trayControlsContainer.appendChild(billButton);
@@ -716,7 +714,7 @@ function buildNetTotalContainer(tabContent, set) {
   salesWindowDiv.appendChild(salesTotal);
   let salesTable = createHtmlElement("table", "sales-table", "sales-table-" + tabIndex, null, null);
   salesWindowDiv.appendChild(salesTable);
-  addTableHeader(salesTable, ["Metal", "Item", "Weight", "Rate", "Making", "Price", "Grade"]);
+  addTableHeaderWithCheckbox(salesTable, ["Metal", "Item", "Weight", "Rate", "Making", "Price", "Grade"]);
 
 
   let totalDetailsDiv = createHtmlElement("div", "total-window net-window-div table-header-color gold-inner-shadow", null, null, null);
@@ -799,7 +797,7 @@ function buildNetTotalContainer(tabContent, set) {
   purchaseWindowDiv.appendChild(purchaseTotal);
   let purchaseTable = createHtmlElement("table", "purchase-table", "purchase-table-" + tabIndex, null, null);
   purchaseWindowDiv.appendChild(purchaseTable);
-  addTableHeader(purchaseTable, ["Metal", "Weight", "Purchase Rate", "Percentage", "Price"]);
+  addTableHeaderWithCheckbox(purchaseTable, ["Metal", "Weight", "Purchase Rate", "Percentage", "Price"]);
 
   return netTotalContainer;
 }
@@ -832,7 +830,9 @@ function populateNetTotalContainer(tabIndex) {
       wrapTableData(color, document.createTextNode("₹ " + getDesiNumber(salesItem.price))));
     tableDataElements.push(
       wrapTableData(color, document.createTextNode(salesItem.appliedPriceGrade)));
-    addTableData(salesTable, tableDataElements);
+    addTableDataWithCheckbox(salesTable, tableDataElements, () => {
+      populateTotals(tabIndex, salesTable, purchaseTable);
+    });
   }
 
   let purchaseItems = getExchangeItems(tabIndex);
@@ -852,42 +852,57 @@ function populateNetTotalContainer(tabIndex) {
       wrapTableData(color, document.createTextNode(purchaseItem.purchaseRatePurity + " %")));
     tableDataElements.push(
       wrapTableData(color, document.createTextNode("₹ " + getDesiNumber(purchaseItem.price))));
-    addTableData(purchaseTable, tableDataElements);
+    addTableDataWithCheckbox(purchaseTable, tableDataElements, () => {
+      populateTotals(tabIndex, salesTable, purchaseTable);
+    });
   }
 
-  populateTotals(tabIndex, salesItems, purchaseItems);
+  populateTotals(tabIndex, salesTable, purchaseTable);
 }
 
-function populateTotals(tabIndex, salesItems, purchaseItems) {
+function updateNetTotalContainer(tabIndex) {
+  let salesItems = getSelectedSalesItems(tabIndex);
+  let salesTable = document.getElementById("sales-table-" + tabIndex);
+  let salesRows = salesTable.getElementsByClassName("data-row");
+  for (let i=0; i<salesRows.length; i++) {
+    let salesRow = salesRows[i];
+    let salesItem = salesItems[i];
+    let salesDataColumns = salesRow.getElementsByClassName("table-data-div");
+    if (salesItem.metal !== "Accessories") {
+      salesDataColumns[2].textContent = salesItem.weight + " g";
+      salesDataColumns[3].textContent = "₹ " + getDesiNumber(salesItem.ratePerGram) + " /g";
+      salesDataColumns[4].textContent = "₹ " + (salesItem.making == salesItem.minimumMakingCharge
+        ? getDesiNumber(salesItem.minimumMakingCharge) : getDesiNumber(salesItem.makingPerGram) + " /g");
+      salesDataColumns[5].textContent = "₹ " + getDesiNumber(salesItem.price);
+    }
+    salesDataColumns[6].textContent = salesItem.appliedPriceGrade;
+  }
+
+  populateTotals(tabIndex, salesTable,
+    document.getElementById("purchase-table-" + tabIndex));
+}
+
+function populateTotals(tabIndex, salesTable, purchaseTable) {
 
   // populate sales totals
   let salesTotal = 0;
-  let salesGradesTotal = {};
-  let salesGrades = Dao.getGradesList();
-  for (let i=0; i<salesGrades.length; i++) {
-    salesGradesTotal[salesGrades[i]] = 0;
-  }
-  for (let i=0; i<salesItems.length; i++) {
-    let salesItem = salesItems[i];
-    salesTotal = salesTotal + salesItem.price;
-    for (let j=0; j<salesItem.grades.length; j++) {
-      if (salesItem.metal === "Accessories") {
-        salesGradesTotal[salesItem.grades[j]] = salesGradesTotal[salesItem.grades[j]] + salesItem.price;
-      } else {
-        salesGradesTotal[salesItem.grades[j]] =
-          salesGradesTotal[salesItem.grades[j]] + salesItem.gradePrices[salesItem.grades[j]];
-      }
-    }
+  let salesRows = salesTable.getElementsByClassName("checked-row");
+  for (let i=0; i<salesRows.length; i++) {
+    let salesPriceCol = 5;
+    salesPrice = getFromDesiRupeeNumber(salesRows[i]
+      .getElementsByClassName("table-data-div")[salesPriceCol].innerHTML)
+    salesTotal = salesTotal + salesPrice;
   }
 
   document.getElementById("sales-total-" + tabIndex).innerHTML = "₹ " + getDesiNumber(salesTotal);
   document.getElementById("breakup-sales-total-" + tabIndex).innerHTML = "₹ " + getDesiNumber(salesTotal);
 
   // populate discount chart
+  let salesGrades = Dao.getGradesList();
   let discountChart = document.getElementById("discount-chart-" + tabIndex);
   emptyTable(discountChart);
   for (let i=0; i<salesGrades.length; i++) {
-    let discount = salesTotal - salesGradesTotal[salesGrades[i]];
+    let discount = 0;
     if (discount > 10) {
       addTableData(discountChart, [
         wrapTableData("gold", document.createTextNode(salesGrades[i])),
@@ -897,9 +912,12 @@ function populateTotals(tabIndex, salesItems, purchaseItems) {
 
   // populate purchase totals
   let purchaseTotal = 0;
-  for (let i=0; i<purchaseItems.length; i++) {
-    let purchaseItem = purchaseItems[i];
-    purchaseTotal = purchaseTotal + purchaseItem.price;
+  let purchaseRows = purchaseTable.getElementsByClassName("checked-row");
+  for (let i=0; i<purchaseRows.length; i++) {
+    let purchasePriceCol = 4;
+    purchasePrice = getFromDesiRupeeNumber(purchaseRows[i]
+      .getElementsByClassName("table-data-div")[purchasePriceCol].innerHTML)
+    purchaseTotal = purchaseTotal + purchasePrice;
   }
 
   document.getElementById("purchase-total-" + tabIndex).innerHTML = "₹ " + getDesiNumber(purchaseTotal);
@@ -1225,14 +1243,6 @@ function aggregateItemNames(itemNames) {
 function generateBill(tabName, date, transId,
   salesEntries, purchaseEntries, additionalCharge, totals, savable) {
     if (salesEntries.length == 0 && purchaseEntries.length == 0 && additionalCharge == 0) {
-      // remote.dialog.showMessageBox(remote.getCurrentWindow(), {
-      //   type: 'error',
-      //   buttons: ['Ok'],
-      //   defaultId: 0,
-      //   title: 'No item selected',
-      //   message: 'Cannot generate empty bill!!',
-      //   detail: 'Please select items to complete this transaction'
-      // });
       alert('No item selected. Please select items to complete this transaction.');
     } else {
       ipcRenderer.send('bill:create', {
@@ -1259,9 +1269,13 @@ function finishTransaction(tabId, additionalConfigs) {
     totalDiscount += additionalConfigs.pending;
   }
 
+  // sales and purchase tables
+  let salesTable = document.getElementById("sales-table-" + tabId);
+  let purchaseTable = document.getElementById("purchase-table-" + tabId);
+
   // transaction entries
-  let salesEntries = parseTable(document.getElementById("sales-table-" + tabId));
-  let purchaseEntries = parseTable(document.getElementById("purchase-table-" + tabId));
+  let salesEntries = parseTable(salesTable, true);
+  let purchaseEntries = parseTable(purchaseTable, true);
   let additionalChargeEntry = getOtherTransactionEntry(getAdditionalCharge(tabId));
   let discountEntry = getOtherTransactionEntry(totalDiscount);
 
@@ -1281,17 +1295,13 @@ function finishTransaction(tabId, additionalConfigs) {
     }
   }
 
+  // check if entries unchecked
+  let entriesUnchecked = salesTable.getElementsByClassName("unchecked-row").length > 0
+    || purchaseTable.getElementsByClassName("unchecked-row").length > 0
+
   // persist transaction entries
   if (salesEntries.length == 0 && purchaseEntries.length == 0
     && additionalChargeEntry.length == 0) {
-      // remote.dialog.showMessageBox(remote.getCurrentWindow(), {
-      //   type: 'error',
-      //   buttons: ['Ok'],
-      //   defaultId: 0,
-      //   title: 'No item selected',
-      //   message: 'Cannot complete empty transaction!!',
-      //   detail: 'Please select items to mark this transaction complete'
-      // });
       alert('No item selected. Please select items to complete this transaction.');
   } else {
     Dao
@@ -1314,10 +1324,35 @@ function finishTransaction(tabId, additionalConfigs) {
           generateBill(tabName, date, transId, salesEntries, purchaseEntries,
             getAdditionalCharge(tabId), billTotals, false);
 
-          // finally close the tab
-          closeTab(tabButton);
+          if (entriesUnchecked) {
+            // remove checked entries from table and check the unchecked
+            removeCheckedRows(salesTable);
+            removeCheckedRows(purchaseTable);
+
+            // clear discount and additional charge input box
+            document.getElementById("additional-charge-input-" + tabId).value = "";
+            document.getElementById("discount-input-" + tabId).value = "";
+
+            // update totals
+            updateAdditionalCharges(tabId);
+            updateNetTotalPrice(tabId);
+          } else {
+            // finally close the tab
+            closeTab(tabButton);
+          }
         });
   }
+}
+
+function removeCheckedRows(table) {
+  let checkedRows = table.getElementsByClassName("checked-row");
+  while (checkedRows.length>0) {
+    checkedRows[0].remove();
+  }
+
+  headerCheckbox = table.querySelector(".checkbox-header");
+  headerCheckbox.checked = true;
+  headerCheckbox.dispatchEvent(new Event("change"));
 }
 
 function getTotals(tabId) {
@@ -1446,14 +1481,6 @@ function closeTab(tabButton) {
 }
 
 function showTransactionInProgressError() {
-  // remote.dialog.showMessageBox(remote.getCurrentWindow(), {
-  //   type: 'error',
-  //   buttons: ['Ok'],
-  //   defaultId: 0,
-  //   title: 'Transaction in progress',
-  //   message: 'Cannot close this tab!!',
-  //   detail: 'Please unselect items or complete this transaction'
-  // });
   alert('Please unselect items or complete this transaction');
 }
 

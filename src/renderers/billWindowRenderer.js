@@ -28,7 +28,7 @@ gstButton.addEventListener("click", () => {
 
 // populate header
 document.getElementById("top-center-header").textContent = "ESTIMATE ONLY";
-document.getElementById("top-right-header").textContent = "Mob: 9431156469, 8797558240";
+document.getElementById("top-right-header").textContent = "Mob: 9431156469, 8797858240";
 
 // general info
 document.getElementById("bill-no").textContent = configs.id;
@@ -122,12 +122,6 @@ if (configs.purchase.length > 0) {
       wrapTableData(document.createTextNode(" "), "right"),
       wrapTableData(document.createTextNode(" "), "right"),
       wrapTableData(document.createTextNode("₹ " + getDesiNumber(entry.Price)), "right")];
-    // let tableRow = [
-    //   wrapTableData(document.createTextNode(entry.Metal), "left"),
-    //   wrapTableData(document.createTextNode(entry.Weight_In_Gram + "g"), "right"),
-    //   wrapTableData(document.createTextNode(entry.Metal.charAt(0) + " " +
-    //     entry.Purchase_Rate_Per_Gram + "/g" + " @" + entry.Purity), "right"),
-    //   wrapTableData(document.createTextNode("₹ " + getDesiNumber(entry.Price)), "right")];
 
     let cl = "purchase-row";
     if (i == configs.purchase.length - 1) {
@@ -153,7 +147,7 @@ if (configs.purchase.length > 0) {
   netTotalSection.appendChild(createHtmlElement("div", "float-left custom-box", null, null, "GST Total"));
   netTotalSection.appendChild(createHtmlElement("div", "td-align-right custom-box", "purchase-gst-total", null, null));
   netTotalSection.appendChild(createHtmlElement("div", "float-left custom-box", null, null, "Net Total"));
-  netTotalSection.appendChild(createHtmlElement("div", "td-align-right custom-box", null, null, configs.totals.total_bill));
+  netTotalSection.appendChild(createHtmlElement("div", "td-align-right custom-box", "purchase-gst-net-total", null, null));
   document.getElementById("bill-purchase-gst").appendChild(netTotalSection);
 }
 
@@ -182,6 +176,12 @@ document.getElementById("sgst-header").innerHTML = "SGST @ " + sgstPercentage + 
 document.getElementById("sgst-applied").innerHTML = "₹ " + getDesiNumber(gstTotals.sgstApplied);
 document.getElementById("total-bill-gst").innerHTML = "₹ " + getDesiNumber(gstTotals.totalPrice);
 document.getElementById("purchase-gst-total").innerHTML = "₹ " + getDesiNumber(gstTotals.totalPrice);
+if (configs.purchase.length > 0) {
+  purchaseTotal = getFromDesiRupeeNumber(configs.totals.purchase.substring(2));
+  netTotal = gstTotals.totalPrice - purchaseTotal;
+  document.getElementById("purchase-gst-net-total").innerHTML =
+    (netTotal < 0 ? "- ₹ " : "₹ ") + getDesiNumber(Math.abs(netTotal));
+}
 
 // apply gst
 function applyGST() {
@@ -197,6 +197,7 @@ function applyGST() {
   document.getElementById("top-center-header").textContent = "TAX INVOICE";
   document.getElementById("gst-button").textContent = "EST";
   document.getElementById("bill-no-text").textContent = "INVOICE NO.";
+  document.getElementById("bill-no").textContent = "......................";
 }
 
 // apply estimate
@@ -213,6 +214,7 @@ function applyEstimate() {
   document.getElementById("top-center-header").textContent = "ESTIMATE ONLY";
   document.getElementById("gst-button").textContent = "GST";
   document.getElementById("bill-no-text").textContent = "ESTIMATE NO.";
+  document.getElementById("bill-no").textContent = configs.id;
 }
 
 // helper functions
