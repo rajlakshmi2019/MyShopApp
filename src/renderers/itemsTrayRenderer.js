@@ -1,8 +1,8 @@
 const {ipcRenderer, remote} = require("electron");
-const {clearSelection, createHtmlElement, addTableHeader, addTableData,
-  addTableHeaderWithCheckbox, addTableDataWithCheckbox, emptyTable, parseTable,
+const {clearSelection, createHtmlElement, addTableHeader, addTableData, addEquiColumnTableData,
+  addTableHeaderWithCheckbox, addTableDataWithCheckbox, emptyTable, emptyTableWithHeader,parseTable,
   getDesiNumber, consolidateEntries, getFromDesiRupeeNumber, generateTransactionId,
-  formatDate, formatDateSlash, formatDateReverse} = require("./../utils.js");
+  formatDate, formatDateSlash, formatDateReverse, isMobileNumber} = require("./../utils.js");
 const ShopCalculator = require("./../ShopCalculator.js");
 const Dao = remote.require("./Dao.js");
 
@@ -47,6 +47,7 @@ ipcRenderer.on('add:set', (event, set) => {
     // }
   } else {
     setUpSellTrayDisplay(sellTrayContainer, set.setItems);
+    scrollToBottom();
   }
 });
 
@@ -56,6 +57,15 @@ ipcRenderer.on('grade:update', (event, grade) => {
 
 ipcRenderer.on('mark:pending', (event, configs) => {
   finishTransaction(configs.tabIndex, configs);
+});
+
+ipcRenderer.on('tab-name:update', (event, params) => {
+  console.log(getTabButton(params.tabId).querySelector(".tab-name").textContent);
+  if (isMobileNumber(params.tabName)) {
+    getTabButton(params.tabId).querySelector(".tab-name").textContent = params.tabName;
+    Dao.saveMobileNo(params.tabName);
+  }
+  ipcRenderer.send('bill:create', params);
 });
 
 /* Build tab button and content */
@@ -164,7 +174,10 @@ function buildTab(tabIndex, set) {
     selectTab(this.parentElement);
   });
   tabButton.appendChild(tabSelectButton);
-  let tabName = createHtmlElement("label", "tab-name", null, set.setName + " " + (tabIndex+1), null);
+  let tabName = createHtmlElement("label", "tab-name", null, isMobileNumber(set.setName) ? set.setName : "Set " + (tabIndex+1), null);
+  if (isMobileNumber(set.setName)) {
+    Dao.saveMobileNo(set.setName);
+  }
   tabSelectButton.appendChild(tabName);
   let tabCloseButton = createHtmlElement("button", "close-tab", null, null, decodeURI("&times;"));
   tabCloseButton.addEventListener("click", function() {
@@ -245,7 +258,7 @@ function setUpSellTrayDisplay(sellTrayContainer, itemsList) {
     let itemPriceCardBoxId = getItemIdString("price-card-box", itemName, tabIndex);
     let priceCardBox = document.getElementById(itemPriceCardBoxId);
     if (priceCardBox == null) {
-      priceCardBox = createHtmlElement("div", "price-card-box " + itemInnerShadow, itemPriceCardBoxId, null, null);
+      priceCardBox = createHtmlElement("div", "price-card-box recently-added-inner-shadow " + itemInnerShadow, itemPriceCardBoxId, null, null);
       trayContainer.appendChild(priceCardBox);
       autoSelectPriceCard = true;
     }
@@ -315,6 +328,8 @@ function setUpSellTrayDisplay(sellTrayContainer, itemsList) {
       });
       priceCardBoxButtons.appendChild(removeItemButton);
     }
+
+    setTimeout(function() { priceCardBox.classList.remove("recently-added-inner-shadow"); }, 1800);
   }
 }
 
@@ -511,6 +526,13 @@ function addExchangeCard(exchangeWindow, metal) {
   weightInputBox.appendChild(weightInput);
   let weightInputHeader = createHtmlElement("div", "input-inline-header float-right align-bottom", null, null, "Weight");
   weightInputBox.appendChild(weightInputHeader);
+  let puritySwitchBox = createHtmlElement("label", "switch-box", null, null, null);
+  weightInputBox.appendChild(puritySwitchBox);
+  let puritySwitchInput = createHtmlElement("input", null, null, null, null);
+  puritySwitchInput.type = "checkbox";
+  puritySwitchBox.appendChild(puritySwitchInput);
+  let puritySwitchSlider = createHtmlElement("span", "switch-slider round", null, null, null);
+  puritySwitchBox.appendChild(puritySwitchSlider);
 
   let exchangeCardChipsDiv = createHtmlElement("div", "wrapper-div", null, null, null);
   exchangeCard.appendChild(exchangeCardChipsDiv);
@@ -526,7 +548,17 @@ function addExchangeCard(exchangeWindow, metal) {
   let purchasePercentagePurityInput = exchangeCardPurchasePriceChip.querySelector(".purity-percentage");
 
   /* pre populate fields */
-  populateRateFields(metal, exchangeCard, weightInput, sellRateInput, sellPercentagePurityInput, purchaseRateInput, purchasePercentagePurityInput);
+  puritySwitchInput.addEventListener('change', function() {
+    if (this.checked) {
+      populateRateFields(metal, exchangeCard, weightInput, sellRateInput, sellPercentagePurityInput, purchaseRateInput, purchasePercentagePurityInput, 70, 45);
+    } else {
+      populateRateFields(metal, exchangeCard, weightInput, sellRateInput, sellPercentagePurityInput, purchaseRateInput, purchasePercentagePurityInput, 75, 85);
+    }
+
+    updatePurchasePrice(exchangeCard, Number(weightInput.value), Number(sellRateInput.value), Number(sellPercentagePurityInput.value));
+    updateTotalPurchasePrice(tabIndex);
+  });
+  populateRateFields(metal, exchangeCard, weightInput, sellRateInput, sellPercentagePurityInput, purchaseRateInput, purchasePercentagePurityInput, 75, 85);
 
   /* change event listeners for input box */
   weightInput.addEventListener('keyup', function() {
@@ -606,14 +638,13 @@ function createExchangeCardChip(className, color, label) {
   return exchangeCardChip;
 }
 
-function populateRateFields(metal, exchangeCard, weightInput,
-  sellRateInput, sellPercentagePurityInput, purchaseRateInput, purchasePercentagePurityInput) {
+function populateRateFields(metal, exchangeCard, weightInput, sellRateInput, sellPercentagePurityInput,
+  purchaseRateInput, purchasePercentagePurityInput, goldPurity, silverPurity) {
     let tabIndex = getTabIndexFromId(exchangeCard.parentElement.id);
     let metaData = getMetaData(tabIndex);
     let todaysRate = metaData == null || metaData.sellingRate == null ||
       metaData.sellingRate[metal] == null ? Dao.getTodaysRate()[metal] : metaData.sellingRate[metal];
 
-    weightInput.value = ""
     sellRateInput.value = todaysRate;
     sellPercentagePurityInput.value = "";
 
@@ -624,11 +655,11 @@ function populateRateFields(metal, exchangeCard, weightInput,
     purchasePercentagePurityInput.value = "";
 
     if (metal === "Gold") {
-      sellPercentagePurityInput.value = 75;
-      purchasePercentagePurityInput.value = calculateImpliedPurity(0, 0, todaysPurchaseRate, todaysRate, 75);
+      sellPercentagePurityInput.value = goldPurity;
+      purchasePercentagePurityInput.value = calculateImpliedPurity(0, 0, todaysPurchaseRate, todaysRate, goldPurity);
     } else if (metal === "Silver") {
-      purchasePercentagePurityInput.value = 85;
-      sellPercentagePurityInput.value = calculateImpliedPurity(0, 0, todaysRate, todaysPurchaseRate, 85);
+      purchasePercentagePurityInput.value = silverPurity;
+      sellPercentagePurityInput.value = calculateImpliedPurity(0, 0, todaysRate, todaysPurchaseRate, silverPurity);
     }
 }
 
@@ -682,10 +713,11 @@ function buildNetTotalContainer(tabContent, set) {
   trayControlsContainer.appendChild(backButton);
   let billButton = createHtmlElement("button", "tray-window-button controller-button bill-button float-left", "bill-button-" + tabIndex, null, null);
   billButton.addEventListener("click", () => {
-    generateBill(getTabButton(tabIndex).textContent.slice(0, -1), new Date(), "......................",
+    generateBill(getTabButton(tabIndex).querySelector(".tab-name").textContent,
+      tabIndex, new Date(), "......................",
       parseTable(document.getElementById("sales-table-" + tabIndex), true),
       parseTable(document.getElementById("purchase-table-" + tabIndex), true),
-      getAdditionalCharge(tabIndex), getTotals(tabIndex), false);
+      getAdditionalCharge(tabIndex), getTotals(tabIndex), false, false);
   });
   trayControlsContainer.appendChild(billButton);
   let netTotalDisplay = createHtmlElement(
@@ -716,6 +748,8 @@ function buildNetTotalContainer(tabContent, set) {
   salesWindowDiv.appendChild(salesTable);
   addTableHeaderWithCheckbox(salesTable, ["Metal", "Item", "Weight", "Rate", "Making", "Price", "Grade"]);
 
+  let salesWeightTable = createHtmlElement("table", "weight-table", "sales-weight-table-" + tabIndex, null, null);
+  salesWindowDiv.appendChild(salesWeightTable);
 
   let totalDetailsDiv = createHtmlElement("div", "total-window net-window-div table-header-color gold-inner-shadow", null, null, null);
   rightWrapperDiv.appendChild(totalDetailsDiv);
@@ -799,6 +833,9 @@ function buildNetTotalContainer(tabContent, set) {
   purchaseWindowDiv.appendChild(purchaseTable);
   addTableHeaderWithCheckbox(purchaseTable, ["Metal", "Weight", "Purchase Rate", "Percentage", "Price"]);
 
+  let purchaseWeightTable = createHtmlElement("table", "weight-table", "purchase-weight-table-" + tabIndex, null, null);
+  purchaseWindowDiv.appendChild(purchaseWeightTable);
+
   return netTotalContainer;
 }
 
@@ -831,6 +868,7 @@ function populateNetTotalContainer(tabIndex) {
     tableDataElements.push(
       wrapTableData(color, document.createTextNode(salesItem.appliedPriceGrade)));
     addTableDataWithCheckbox(salesTable, tableDataElements, () => {
+      populateWeightTable(tabIndex, salesTable, purchaseTable);
       populateTotals(tabIndex, salesTable, purchaseTable);
     });
   }
@@ -853,10 +891,12 @@ function populateNetTotalContainer(tabIndex) {
     tableDataElements.push(
       wrapTableData(color, document.createTextNode("₹ " + getDesiNumber(purchaseItem.price))));
     addTableDataWithCheckbox(purchaseTable, tableDataElements, () => {
+      populateWeightTable(tabIndex, salesTable, purchaseTable);
       populateTotals(tabIndex, salesTable, purchaseTable);
     });
   }
 
+  populateWeightTable(tabIndex, salesTable, purchaseTable);
   populateTotals(tabIndex, salesTable, purchaseTable);
 }
 
@@ -943,6 +983,59 @@ function populateTotals(tabIndex, salesTable, purchaseTable) {
   updateNetTotalPrice(tabIndex);
 }
 
+function populateWeightTable(tabIndex, salesTable, purchaseTable) {
+  let goldWeight = 0;
+  let silverWeight = 0;
+  let salesRows = salesTable.getElementsByClassName("checked-row");
+  for (let i=0; i<salesRows.length; i++) {
+    let tableColumnDivs = salesRows[i].getElementsByClassName("table-data-div");
+    let metal = tableColumnDivs[0].innerHTML;
+    let metalWeight = Number(tableColumnDivs[2].innerHTML.replace(" g", ""));
+    let color = "accessories";
+    if ( metal === "Gold") {
+      color = "gold";
+      goldWeight = goldWeight + metalWeight;
+    } else if (metal === "Silver") {
+      color = "silver";
+      silverWeight = silverWeight + metalWeight;
+    }
+  }
+
+  let salesWeightTable = document.getElementById("sales-weight-table-" + tabIndex);
+  emptyTableWithHeader(salesWeightTable);
+  let tableDataElements = [
+    wrapTableData("gold", document.createTextNode(goldWeight.toFixed(2) + " g")),
+    wrapTableData("silver", document.createTextNode(silverWeight.toFixed(2) + " g"))
+  ];
+  addEquiColumnTableData(salesWeightTable, tableDataElements);
+
+  // purchase weight table
+  let goldPurchaseWeight = 0;
+  let silverPurchaseWeight = 0;
+  let purchaseRows = purchaseTable.getElementsByClassName("checked-row");
+  for (let i=0; i<purchaseRows.length; i++) {
+    let tableColumnDivs = purchaseRows[i].getElementsByClassName("table-data-div");
+    let metal = tableColumnDivs[0].innerHTML;
+    console.log(tableColumnDivs[1].innerHTML.replace(" g", ""));
+    let metalWeight = Number(tableColumnDivs[1].innerHTML.replace(" g", ""));
+    let color = "accessories";
+    if ( metal === "Gold") {
+      color = "gold";
+      goldPurchaseWeight = goldPurchaseWeight + metalWeight;
+    } else if (metal === "Silver") {
+      color = "silver";
+      silverPurchaseWeight = silverPurchaseWeight + metalWeight;
+    }
+  }
+
+  let purchaseWeightTable = document.getElementById("purchase-weight-table-" + tabIndex);
+  emptyTableWithHeader(purchaseWeightTable);
+  addEquiColumnTableData(purchaseWeightTable, [
+    wrapTableData("gold", document.createTextNode(goldPurchaseWeight.toFixed(2) + " g")),
+    wrapTableData("silver", document.createTextNode(silverPurchaseWeight.toFixed(2) + " g"))
+  ]);
+}
+
 /* Meta Data container */
 function buildMetaDataContainer(tabContent, set) {
   let tabIndex = getTabIndexFromId(tabContent.id);
@@ -999,6 +1092,16 @@ function getMetaData(tabIndex) {
 }
 
 /* Helper methods */
+
+function scrollToTop() {
+  let contentContainer = document.querySelector(".tab-contents-container");
+  contentContainer.scrollTop = 0;
+}
+
+function scrollToBottom() {
+  let contentContainer = document.querySelector(".tab-contents-container");
+  contentContainer.scrollTop = contentContainer.scrollHeight;
+}
 
 function selectTrayContainer(tabIndex, trayContainer) {
   let selectedTrayContainers = document.getElementsByClassName("full-tray-container-selected");
@@ -1240,22 +1343,26 @@ function aggregateItemNames(itemNames) {
   return itemNamesMap;
 }
 
-function generateBill(tabName, date, transId,
-  salesEntries, purchaseEntries, additionalCharge, totals, savable) {
+function generateBill(tabName, tabId, date, transId,
+  salesEntries, purchaseEntries, additionalCharge, totals, savable, force) {
+    let billParams = {
+      tabName: tabName,
+      tabId: tabId,
+      bill_date: formatDateSlash(date),
+      bill_date_reverse: formatDateReverse(date),
+      id: transId,
+      sales: aggregateSalesEntries(salesEntries),
+      purchase: purchaseEntries,
+      additional: additionalCharge,
+      totals: totals,
+      savable: savable
+    }
     if (salesEntries.length == 0 && purchaseEntries.length == 0 && additionalCharge == 0) {
       alert('No item selected. Please select items to complete this transaction.');
+    } else if (force || isMobileNumber(tabName)) {
+      ipcRenderer.send('bill:create', billParams);
     } else {
-      ipcRenderer.send('bill:create', {
-        name: tabName,
-        bill_date: formatDateSlash(date),
-        bill_date_reverse: formatDateReverse(date),
-        id: transId,
-        sales: aggregateSalesEntries(salesEntries),
-        purchase: purchaseEntries,
-        additional: additionalCharge,
-        totals: totals,
-        savable: savable
-      });
+      ipcRenderer.send('mobile-no:create', billParams);
     }
 }
 
@@ -1321,8 +1428,8 @@ function finishTransaction(tabId, additionalConfigs) {
           }
 
           // generate bills
-          generateBill(tabName, date, transId, salesEntries, purchaseEntries,
-            getAdditionalCharge(tabId), billTotals, false);
+          generateBill(tabName, tabId, date, transId, salesEntries, purchaseEntries,
+            getAdditionalCharge(tabId), billTotals, false, false);
 
           if (entriesUnchecked) {
             // remove checked entries from table and check the unchecked
@@ -1338,7 +1445,7 @@ function finishTransaction(tabId, additionalConfigs) {
             updateNetTotalPrice(tabId);
           } else {
             // finally close the tab
-            closeTab(tabButton);
+            // closeTab(tabButton);
           }
         });
   }
@@ -1447,21 +1554,22 @@ function selectTab(tabButton) {
 }
 
 function confirmAndCloseTab(tabButton) {
-  let tabId = getTabIndexFromId(tabButton.id);
-  let sellTrayContainer = document.getElementById("sell-tray-container-" + tabId);
-  if(calculateTotalSalesPrice(tabId) != 0) {
-    selectTrayContainer(tabId, sellTrayContainer);
-    selectTab(tabButton);
-    showTransactionInProgressError();
-  } else if (sellTrayContainer.getElementsByClassName("price-card-box").length == 0
-      && calculateTotalPurchasePrice(tabId) != 0) {
-        let exchangeTrayContainer = document.getElementById("exchange-tray-container-" + tabId);
-        selectTrayContainer(tabId, exchangeTrayContainer);
-        selectTab(tabButton);
-        showTransactionInProgressError();
-  } else {
-    closeTab(tabButton);
-  }
+  closeTab(tabButton);
+  // let tabId = getTabIndexFromId(tabButton.id);
+  // let sellTrayContainer = document.getElementById("sell-tray-container-" + tabId);
+  // if(calculateTotalSalesPrice(tabId) != 0) {
+  //   selectTrayContainer(tabId, sellTrayContainer);
+  //   selectTab(tabButton);
+  //   showTransactionInProgressError();
+  // } else if (sellTrayContainer.getElementsByClassName("price-card-box").length == 0
+  //     && calculateTotalPurchasePrice(tabId) != 0) {
+  //       let exchangeTrayContainer = document.getElementById("exchange-tray-container-" + tabId);
+  //       selectTrayContainer(tabId, exchangeTrayContainer);
+  //       selectTab(tabButton);
+  //       showTransactionInProgressError();
+  // } else {
+  //   closeTab(tabButton);
+  // }
 }
 
 function closeTab(tabButton) {

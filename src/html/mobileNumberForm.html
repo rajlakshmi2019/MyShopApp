@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Pick a grade</title>
+    <link rel="stylesheet" href="../css/app.css">
+    <link rel="stylesheet" href="../css/body.css">
+    <link rel="stylesheet" href="../css/tray.css">
+    <link rel="stylesheet" href="../css/done.css">
+  </head>
+  <body>
+    <div id="mobile-no-div">
+      <h1 class="big-header-margin">Enter WhatsApp Number</h1>
+      <div class="wrapper-div">
+        <div class="wrapper-div">
+          <input class="input-text" style="width: 100%" id="mobile-no-input">
+        </div>
+      </div>
+    </div>
+    <div class="form-submit-div">
+      <a class="form-submit">
+        <div class="done-button">
+          <div class="done-check-left"></div>
+          <div class="done-check-right"></div>
+        </div>
+        <div class='done-button-text'>
+          <span>Done</span>
+        </div>
+      </a>
+    </div>
+  </body>
+  <script type="text/javascript">
+    require('./../renderers/mobileNumberFormRenderer.js');
+  </script>
+</html>

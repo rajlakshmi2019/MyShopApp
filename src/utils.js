@@ -86,6 +86,17 @@ function addTableData(table, tableDataElements) {
   return trElement;
 }
 
+function addEquiColumnTableData(table, tableDataElements) {
+  let trElement = document.createElement("tr");
+  trElement.className = "data-row equi-column"
+  table.appendChild(trElement);
+
+  //Add column data
+  addColumnData(trElement, tableDataElements);
+
+  return trElement;
+}
+
 function addTableDataWithCheckbox(table, tableDataElements, checkboxCallback) {
     let trElement = document.createElement("tr");
     trElement.className = "data-row checked-row"
@@ -139,6 +150,12 @@ function addCheckboxColumn(trElement, checkboxClassName, callbackIfChecked,
 
 function emptyTable(table) {
   for (let i = table.rows.length - 1; i > 0; i--) {
+    table.deleteRow(i);
+  }
+}
+
+function emptyTableWithHeader(table) {
+  for (let i = table.rows.length - 1; i >= 0; i--) {
     table.deleteRow(i);
   }
 }
@@ -250,6 +267,10 @@ function consolidateEntries(entriesList) {
   return consolidatedEntries;
 }
 
+function isMobileNumber(text) {
+  return text.match(/^[5-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]$/) != null;
+}
+
 module.exports = {
   clearSelection,
   createHtmlElement,
@@ -257,8 +278,10 @@ module.exports = {
   addTableHeader,
   addTableHeaderWithCheckbox,
   addTableData,
+  addEquiColumnTableData,
   addTableDataWithCheckbox,
   emptyTable,
+  emptyTableWithHeader,
   parseTable,
   getInputTextFloatValue,
   getDesiNumber,
@@ -268,5 +291,6 @@ module.exports = {
   formatDate,
   formatDateSlash,
   formatDateReverse,
-  consolidateEntries
+  consolidateEntries,
+  isMobileNumber
 }

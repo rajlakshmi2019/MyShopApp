@@ -132,6 +132,10 @@ let updateMetalRate = async function(metalRate, purchaseRateDiff) {
     loadAppConfigs();
 }
 
+let saveMobileNo = async function(mobileNo) {
+  fs.appendFileSync(process.env.BASE_DATA_DIR + 'wa.csv', mobileNo + "\n")
+}
+
 // encryption/decryption utils
 function encryptAES256(key, iv, data) {
   var cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
@@ -241,7 +245,7 @@ function writeTransactionToFile(filepath, filename, transaction, errorCallback) 
   }
 
   // write to file
-  fs.appendFile(filepath + filename, transaction);
+  fs.appendFile(filepath + filename, transaction, errorCallback);
 }
 
 module.exports = {
@@ -260,5 +264,6 @@ module.exports = {
   getSilverItemTypes,
   getAccessoriesItemTypes,
   getMappedItem,
-  updateMetalRate
+  updateMetalRate,
+  saveMobileNo
 }

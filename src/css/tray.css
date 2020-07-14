@@ -25,6 +25,10 @@ th.silver-border, td.silver-border {
   border: 2px solid silver;
 }
 
+tr.equi-column td {
+  width: 50%;
+}
+
 input[type="radio"]
 {
   cursor: pointer;
@@ -304,6 +308,10 @@ input[type="radio"]
   margin: 50px 20px;
 }
 
+.weight-table {
+  margin-top: 20px;
+}
+
 .cost-price {
   margin: 0 20px 20px;
 }
@@ -407,6 +415,10 @@ input[type="radio"]
 
 .accessories-inner-shadow {
   box-shadow: inset 0 0 8px #82C0FF;
+}
+
+.recently-added-inner-shadow {
+  box-shadow: inset 0 0 12px #4FFF4F;
 }
 
 .gold-outer-shadow {
@@ -514,6 +526,65 @@ input[type="radio"]
 
 .weight-input-box {
   margin: 0 10px;
+}
+
+.switch-box {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 28px;
+}
+
+.switch-box input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switch-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .2s;
+  transition: .2s;
+}
+
+.switch-slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .2s;
+  transition: .2s;
+}
+
+input:checked + .switch-slider {
+  background-color: #010013;
+}
+
+input:focus + .switch-slider {
+  box-shadow: 0 0 1px #010013;
+}
+
+input:checked + .switch-slider:before {
+  -webkit-transform: translateX(20px);
+  -ms-transform: translateX(20px);
+  transform: translateX(20px);
+}
+
+.switch-slider.round {
+  border-radius: 28px;
+}
+
+.switch-slider.round:before {
+  border-radius: 50%;
 }
 
 .sixty-width {

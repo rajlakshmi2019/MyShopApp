@@ -4,7 +4,7 @@ const {app, BrowserWindow, Menu} = require('electron');
 
 let mainWindow, goldSellForm, goldExchangeForm, editTrayItemForm;
 let priceCardView, gradePickerWindow, billWindow, paymentAcceptWindow;
-let updateConfigsWindow;
+let updateConfigsWindow, mobileNumberForm;
 
 function createMainWindow() {
   mainWindow = new BrowserWindow({
@@ -263,6 +263,34 @@ function getPaymentAcceptForm() {
   return paymentAcceptWindow;
 }
 
+function createMobileNumberForm(params) {
+  mobileNumberForm = new BrowserWindow({
+    width: 275,
+    height: 310,
+    frame: false,
+    backgroundColor:'#205081',
+    parent: mainWindow, modal:true,
+    show: false,
+    webPreferences: {nodeIntegration: true}
+  });
+  mobileNumberForm.params = params;
+  mobileNumberForm.loadURL(url.format({
+    pathname: path.join(__dirname, 'html', 'mobileNumberForm.html'),
+    protocol: 'file:',
+    slashes: true
+  }));
+  mobileNumberForm.once('ready-to-show', () => {
+    mobileNumberForm.show()
+  });
+  mobileNumberForm.on('close', () => {
+    mobileNumberForm = null;
+  });
+}
+
+function getMobileNumberForm() {
+  return mobileNumberForm;
+}
+
 const mainMenuTemplate = [
   {
     label: 'Services',
@@ -341,5 +369,6 @@ module.exports = {
   createUpdateConfigsWindow,getUpdateConfigsWindow,
   createGradePickerWindow, getGradePickerWindow,
   createBillWindow, getBillWindow,
-  createPaymentAcceptForm, getPaymentAcceptForm
+  createPaymentAcceptForm, getPaymentAcceptForm,
+  createMobileNumberForm, getMobileNumberForm
 };

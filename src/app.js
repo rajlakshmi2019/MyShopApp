@@ -130,6 +130,17 @@ ipcMain.on('bill:create', (event, configs) => {
   });
 });
 
+ipcMain.on('mobile-no:create', (event, params) => {
+  if (windowFactory.getMobileNumberForm() == null) {
+    windowFactory.createMobileNumberForm(params);
+  }
+});
+
+ipcMain.on('mobile-no:update', (event, params) => {
+  windowFactory.getMainWindow().webContents.send('tab-name:update', params);
+  windowFactory.getMobileNumberForm().close();
+});
+
 /** Helper Methods **/
 function addFirstTrayTab() {
   let mainWindow = windowFactory.getMainWindow();
