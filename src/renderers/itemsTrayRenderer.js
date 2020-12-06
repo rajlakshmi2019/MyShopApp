@@ -25,8 +25,9 @@ ipcRenderer.on("add:exchange:tab", (event, emptySet) => {
 });
 
 ipcRenderer.on('item:update', (event, updateParams) => {
+  let itemId = updateParams.metal.toLowerCase() + '-' + updateParams.itemName;
   let priceCardContainer = document.getElementById(
-    getItemIdString("price-card-container", updateParams.itemName, updateParams.tabIndex));
+    getItemIdString("price-card-container", itemId, updateParams.tabIndex));
   createPriceCards(updateParams.weightList, updateParams, priceCardContainer);
 
   let currnetPriceGrade = getAppliedPriceGrade(getTabIndexFromId(priceCardContainer.id));
@@ -246,7 +247,8 @@ function setUpSellTrayDisplay(sellTrayContainer, itemsList) {
 
   for (let i=0; i<itemsList.length; i++) {
     let item = itemsList[i];
-    let itemName = item.itemName
+    let itemName = item.itemName;
+    let itemId = item.metal.toLowerCase() + '-' + itemName;
     let itemColorCode = getItemColorCode(item.metal);
     let itemColor = itemColorCode.itemColor;
     let itemInnerShadow = itemColorCode.itemInnerShadow;
@@ -255,7 +257,7 @@ function setUpSellTrayDisplay(sellTrayContainer, itemsList) {
     // auto select price card when only one entry
     let autoSelectPriceCard = false;
 
-    let itemPriceCardBoxId = getItemIdString("price-card-box", itemName, tabIndex);
+    let itemPriceCardBoxId = getItemIdString("price-card-box", itemId, tabIndex);
     let priceCardBox = document.getElementById(itemPriceCardBoxId);
     if (priceCardBox == null) {
       priceCardBox = createHtmlElement("div", "price-card-box recently-added-inner-shadow " + itemInnerShadow, itemPriceCardBoxId, null, null);
@@ -263,7 +265,7 @@ function setUpSellTrayDisplay(sellTrayContainer, itemsList) {
       autoSelectPriceCard = true;
     }
 
-    let itemPriceCardContainerId = getItemIdString("price-card-container", itemName, tabIndex);
+    let itemPriceCardContainerId = getItemIdString("price-card-container",  itemId, tabIndex);
     let priceCardContainer = document.getElementById(itemPriceCardContainerId);
     if (priceCardContainer == null) {
       priceCardContainer = createHtmlElement("div", "price-card-container foat-left", itemPriceCardContainerId, null, null);
@@ -271,7 +273,7 @@ function setUpSellTrayDisplay(sellTrayContainer, itemsList) {
       autoSelectPriceCard = true;
     }
 
-    let itemInfoCardId = getItemIdString("info-card", itemName, tabIndex);
+    let itemInfoCardId = getItemIdString("info-card", itemId, tabIndex);
     let itemInfoCard = document.getElementById(itemInfoCardId);
     if (itemInfoCard == null) {
       itemInfoCard = createHtmlElement("a", "price-card item-info-card " + itemOuterShadow + " " + itemColor, itemInfoCardId, null, null);
@@ -498,10 +500,18 @@ function addExchangeCard(exchangeWindow, metal) {
   let tabIndex = getTabIndexFromId(exchangeWindow.id);
 
   let color = "accessories";
+  let checkedSellRatePurity = null;
+  let uncheckedSellRatePurity = null;
+  let checkedPurchaseRatePurity = null;
+  let uncheckedPurchaseRatePurity = null;
   if (metal === "Gold") {
     color = "gold";
+    uncheckedSellRatePurity = 75;
+    checkedPurchaseRatePurity = 75;
   } else if (metal === "Silver") {
     color = "silver";
+    checkedPurchaseRatePurity = 45;
+    uncheckedPurchaseRatePurity = 85;
   }
 
   let exchangeCard = createHtmlElement("div", "exchange-price-card exchange-card " + color + "-outer-shadow " + color + "-color", null, null, null);
@@ -548,17 +558,18 @@ function addExchangeCard(exchangeWindow, metal) {
   let purchasePercentagePurityInput = exchangeCardPurchasePriceChip.querySelector(".purity-percentage");
 
   /* pre populate fields */
+
   puritySwitchInput.addEventListener('change', function() {
     if (this.checked) {
-      populateRateFields(metal, exchangeCard, weightInput, sellRateInput, sellPercentagePurityInput, purchaseRateInput, purchasePercentagePurityInput, 70, 45);
+      populateRateFields(metal, exchangeCard, weightInput, sellRateInput, sellPercentagePurityInput, purchaseRateInput, purchasePercentagePurityInput, checkedSellRatePurity, checkedPurchaseRatePurity);
     } else {
-      populateRateFields(metal, exchangeCard, weightInput, sellRateInput, sellPercentagePurityInput, purchaseRateInput, purchasePercentagePurityInput, 75, 85);
+      populateRateFields(metal, exchangeCard, weightInput, sellRateInput, sellPercentagePurityInput, purchaseRateInput, purchasePercentagePurityInput, uncheckedSellRatePurity, uncheckedPurchaseRatePurity);
     }
 
     updatePurchasePrice(exchangeCard, Number(weightInput.value), Number(sellRateInput.value), Number(sellPercentagePurityInput.value));
     updateTotalPurchasePrice(tabIndex);
   });
-  populateRateFields(metal, exchangeCard, weightInput, sellRateInput, sellPercentagePurityInput, purchaseRateInput, purchasePercentagePurityInput, 75, 85);
+  populateRateFields(metal, exchangeCard, weightInput, sellRateInput, sellPercentagePurityInput, purchaseRateInput, purchasePercentagePurityInput, uncheckedSellRatePurity, uncheckedPurchaseRatePurity);
 
   /* change event listeners for input box */
   weightInput.addEventListener('keyup', function() {
@@ -639,27 +650,27 @@ function createExchangeCardChip(className, color, label) {
 }
 
 function populateRateFields(metal, exchangeCard, weightInput, sellRateInput, sellPercentagePurityInput,
-  purchaseRateInput, purchasePercentagePurityInput, goldPurity, silverPurity) {
+  purchaseRateInput, purchasePercentagePurityInput, sellRatePurity, purchaseRatePurity) {
     let tabIndex = getTabIndexFromId(exchangeCard.parentElement.id);
     let metaData = getMetaData(tabIndex);
-    let todaysRate = metaData == null || metaData.sellingRate == null ||
-      metaData.sellingRate[metal] == null ? Dao.getTodaysRate()[metal] : metaData.sellingRate[metal];
+    let todaysRate = isNaN(Number(sellRateInput.value)) || Number(sellRateInput.value) == 0 ? (metaData == null || metaData.sellingRate == null ||
+      metaData.sellingRate[metal] == null ? Dao.getTodaysRate()[metal] : metaData.sellingRate[metal]) : Number(sellRateInput.value);
 
     sellRateInput.value = todaysRate;
     sellPercentagePurityInput.value = "";
 
-    let todaysPurchaseRate = metaData == null || metaData.sellingRate == null ||
-      metaData.purchaseRate[metal] == null ? ShopCalculator.calculateMetalPurchaseRate(
-        Number(todaysRate), Dao.getPurchaseRateDiff()[metal]) : metaData.purchaseRate[metal];
+    let todaysPurchaseRate = isNaN(Number(purchaseRateInput.value)) || Number(purchaseRateInput.value) == 0 ?
+      (metaData == null || metaData.sellingRate == null || metaData.purchaseRate[metal] == null ? ShopCalculator.calculateMetalPurchaseRate(
+          Number(todaysRate), Dao.getPurchaseRateDiff()[metal]) : metaData.purchaseRate[metal]) : Number(purchaseRateInput.value);
     purchaseRateInput.value = todaysPurchaseRate;
     purchasePercentagePurityInput.value = "";
 
-    if (metal === "Gold") {
-      sellPercentagePurityInput.value = goldPurity;
-      purchasePercentagePurityInput.value = calculateImpliedPurity(0, 0, todaysPurchaseRate, todaysRate, goldPurity);
-    } else if (metal === "Silver") {
-      purchasePercentagePurityInput.value = silverPurity;
-      sellPercentagePurityInput.value = calculateImpliedPurity(0, 0, todaysRate, todaysPurchaseRate, silverPurity);
+    if (sellRatePurity !== null) {
+      sellPercentagePurityInput.value = sellRatePurity;
+      purchasePercentagePurityInput.value = calculateImpliedPurity(0, 0, todaysPurchaseRate, todaysRate, sellRatePurity);
+    } else if (purchaseRatePurity !== null) {
+      purchasePercentagePurityInput.value = purchaseRatePurity;
+      sellPercentagePurityInput.value = calculateImpliedPurity(0, 0, todaysRate, todaysPurchaseRate, purchaseRatePurity);
     }
 }
 
