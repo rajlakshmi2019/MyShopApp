@@ -246,6 +246,10 @@ table.print-friendly tr {
   }
 }
 
+#gst-rate-flag {
+  margin-bottom: 1px;
+}
+
 #print-button-div {
   overflow: hidden;
 }

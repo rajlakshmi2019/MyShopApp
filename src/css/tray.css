@@ -271,7 +271,7 @@ input[type="radio"]
 .price-card-box {
   margin: 20px;
   padding-left: 20px;
-  overflow: auto;
+  overflow: hidden;
 }
 
 .price-card {
@@ -293,7 +293,7 @@ input[type="radio"]
   box-shadow: 0 4px 8px 0 white !important;
 }
 
-.price-card-selected > *{
+.price-card-selected *{
   color: white !important;
 }
 
@@ -302,6 +302,28 @@ input[type="radio"]
   width: 50px;
   margin: 5px;
   overflow: hidden;
+}
+
+.price-card-tooltip {
+  margin: 0 20px;
+  visibility: hidden;
+  width: 150px;
+  height: 40px;
+  color: white;
+  background-color: black;
+  text-align: center;
+  padding: 5px 0;
+  border-radius: 8px;
+}
+
+.price-card:hover > .price-card-tooltip {
+  visibility: visible;
+}
+
+.sales-table-hidden {
+  height: 0px;
+  width: 0px;
+  visibility: hidden;
 }
 
 .price-table {
@@ -355,6 +377,14 @@ input[type="radio"]
 
 .table-top-label {
   margin: 10px 0;
+}
+
+.gst-applied {
+  color: #48DB48;
+  padding-top: 4px;
+  font-size: medium;
+  font-weight: bold;
+  font-family: Old Standard TT;
 }
 
 .making-charge {
@@ -626,7 +656,7 @@ input:checked + .switch-slider:before {
   color: #1EB4FF;
 }
 
-.discount-chart-button {
+.gst-chart-button {
   margin: 20px 0 10px;
   width: 200px;
   padding: 5px 0;
@@ -635,13 +665,41 @@ input:checked + .switch-slider:before {
   cursor: pointer;
 }
 
-.discount-chart-state {
+.gst-chart-state {
   font-weight: normal;
 }
 
-.discount-chart-content {
+.gst-chart-content {
   width: 200px;
   display: none;
+}
+
+.gst-details-tooltip {
+  position: absolute;
+  visibility: hidden;
+  top: 33%;
+  color: white;
+  background-color: black;
+  text-align: center;
+  margin: 0 10px;
+  padding: 5px 0;
+  width: 160px;
+  border-radius: 4px;
+}
+
+.gst-details-tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: black transparent transparent transparent;
+}
+
+.gst-chart-div:hover > .gst-details-tooltip {
+  visibility: visible !important;
 }
 
 hr.breakup-divide {

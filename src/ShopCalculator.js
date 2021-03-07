@@ -1,21 +1,32 @@
 function calculateMetalPrice(weight, metalRate, purity) {
-  return weight*metalRate*purity;
+  return Math.floor(weight*metalRate*purity);
 }
 
-function calculateGradeMakingRate(makingRate, appliedGradeMakingRateDiff, newGradeMakingRateDiff) {
+function calculateMakingRate(makingRate, appliedGradeMakingRateDiff, newGradeMakingRateDiff) {
   return makingRate - appliedGradeMakingRateDiff + newGradeMakingRateDiff;
 }
 
-function calculateGradeMakingCharge(weight, makingRate, minimumMaking,
+function calculateMakingCharge(weight, makingRate, minimumMaking,
   appliedGradeMakingDiff, newGradeMakingDiff, diffUnit, mmDiffUnit) {
-  return Math.max(weight*calculateGradeMakingRate(makingRate, appliedGradeMakingDiff["DIFF"] * diffUnit, newGradeMakingDiff["DIFF"] * diffUnit),
-    calculateGradeMakingRate(minimumMaking, appliedGradeMakingDiff["MM_DIFF"] * mmDiffUnit, newGradeMakingDiff["MM_DIFF"] * mmDiffUnit));
+  return Math.floor(Math.max(weight*calculateMakingRate(makingRate, appliedGradeMakingDiff["DIFF"] * diffUnit, newGradeMakingDiff["DIFF"] * diffUnit),
+    calculateMakingRate(minimumMaking, appliedGradeMakingDiff["MM_DIFF"] * mmDiffUnit, newGradeMakingDiff["MM_DIFF"] * mmDiffUnit)));
 }
 
-function calculateGardePrice(weight, metalRate, makingRate, minimumMaking, purity,
-  appliedGradeMakingDiff, newGradeMakingDiff, diffUnit, mmDiffUnit) {
-  return calculateMetalPrice(weight, metalRate, purity) + calculateGradeMakingCharge(weight, makingRate,
-    minimumMaking, appliedGradeMakingDiff, newGradeMakingDiff, diffUnit, mmDiffUnit);
+function calculatePrice(weight, metalRate, makingRate, minimumMaking, purity,
+  appliedGradeMakingDiff, newGradeMakingDiff, diffUnit, mmDiffUnit,
+  cgstPercentage, sgstPercentage) {
+  let metalPrice = calculateMetalPrice(weight, metalRate, purity);
+  let makingCharge = calculateMakingCharge(weight, makingRate, minimumMaking,
+    appliedGradeMakingDiff, newGradeMakingDiff, diffUnit, mmDiffUnit);
+  let gstApplied = calculateGST(metalPrice + makingCharge, cgstPercentage, sgstPercentage);
+  let totalPrice = metalPrice + makingCharge + gstApplied.total;
+
+  return {
+    totalPrice,
+    metalPrice,
+    makingCharge,
+    gstApplied
+  };
 }
 
 function calculateMetalPurchaseRate(metalRate, purchaseRateDiff) {
@@ -28,6 +39,17 @@ function calculateMetalPurchaseRateDiff(metalRate, purchaseRate) {
 
 function calculateCostPrice(weight, costRate, afterWastage) {
   return weight * costRate * afterWastage;
+}
+
+function calculateGST(taxedAmount, cgstPercentage, sgstPercentage) {
+  let cgst = Math.round(taxedAmount * 0.01 * cgstPercentage * 2) / 2;
+  let sgst = Math.round(taxedAmount * 0.01 * sgstPercentage * 2) / 2;
+  let total = cgst + sgst;
+  return {
+    total,
+    cgst,
+    sgst
+  }
 }
 
 function calculateGSTAppliedTotals(
@@ -75,9 +97,9 @@ function calculateGSTInplaceTotals(
 
 module.exports = {
   calculateMetalPrice,
-  calculateGradeMakingRate,
-  calculateGradeMakingCharge,
-  calculateGardePrice,
+  calculateMakingRate,
+  calculateMakingCharge,
+  calculatePrice,
   calculateMetalPurchaseRate,
   calculateMetalPurchaseRateDiff,
   calculateCostPrice,

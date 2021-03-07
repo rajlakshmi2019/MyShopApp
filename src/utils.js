@@ -203,18 +203,56 @@ function parseTable(table, checkedOnly) {
   return tableDataObjects;
 }
 
+function parseSalesTable(table, checkedOnly) {
+  let headers = [];
+  let headerElements = table.getElementsByTagName('th');
+  for (let i=0; i < headerElements.length; i++) {
+    headers.push(headerElements[i].textContent);
+  }
+
+  let tableDataObjects = [];
+  for(let i=1; i < table.rows.length; i++) {
+    let tableRow = table.rows[i];
+    if (!checkedOnly || tableRow.classList.contains("checked-row")) {
+      let tableDataElements = tableRow.getElementsByTagName('td');
+      let tableDataObject = {};
+      for (let i=0; i < tableDataElements.length; i++) {
+        let tableDataText = unWrapTableData(tableDataElements[i]).textContent;
+        if (headers[i] === "Weight") {
+          tableDataObject["Weight_In_Gram"] = Number(tableDataText.replace(" g", ""));
+        } else if (headers[i] === "Price") {
+          tableDataObject["Price"] = getFromDesiRupeeNumber(tableDataElements[i].querySelector(".sales-table-price").textContent);
+          tableDataObject["Price_Less_GST"] = Number(tableDataElements[i].querySelector(".sales-table-amount").textContent);
+        } else if(tableDataText.startsWith("₹ " )) {
+          if (tableDataText.endsWith(" /g")) {
+            tableDataObject[getKeyFromHeader(headers[i], true)] = getFromDesiRupeeNumber(tableDataText.replace(" /g", ""));
+          } else {
+            tableDataObject[getKeyFromHeader(headers[i], false)] = getFromDesiRupeeNumber(tableDataText);
+          }
+        } else {
+          tableDataObject[getKeyFromHeader(headers[i], false)] = isNaN(Number(tableDataText)) ? tableDataText : Number(tableDataText);
+        }
+      }
+
+      tableDataObjects.push(tableDataObject);
+    }
+  }
+
+  return tableDataObjects;
+}
+
 function getInputTextFloatValue(element) {
   return Number(element.querySelector(".input-text").value);
 }
 
 function getDesiNumber(number) {
   number = Math.floor(number);
-  let lastDegit = Math.abs(number%10);
-  let numberWithoutLastDegit = Math.floor(number/10);
-  if (numberWithoutLastDegit > 0) {
-    return numberWithoutLastDegit.toString().replace(/\B(?=(\d{2})+(?!\d))/g, ",") + lastDegit;
+  let lastDigit = Math.abs(number%10);
+  let numberWithoutLastDigit = Math.floor(number/10);
+  if (numberWithoutLastDigit > 0) {
+    return numberWithoutLastDigit.toString().replace(/\B(?=(\d{2})+(?!\d))/g, ",") + lastDigit;
   } else {
-    return "" + lastDegit;
+    return "" + lastDigit;
   }
 }
 
@@ -283,6 +321,7 @@ module.exports = {
   emptyTable,
   emptyTableWithHeader,
   parseTable,
+  parseSalesTable,
   getInputTextFloatValue,
   getDesiNumber,
   getFromDesiNumber,

@@ -71,17 +71,17 @@ for (let i=0; i<gradesList.length; i++) {
 
 function addGradePriceLabels(grade) {
 
-  let makingRate = ShopCalculator.calculateGradeMakingRate(prices.makingPerGram,
+  let makingRate = ShopCalculator.calculateMakingRate(prices.makingPerGram,
     gradeMakingRateDiff[appliedGrade][mappedItem.METAL].DIFF * mappedItem.DIFF_UNIT,
     gradeMakingRateDiff[grade][mappedItem.METAL].DIFF * mappedItem.DIFF_UNIT);
 
-  let makingCharge = ShopCalculator.calculateGradeMakingCharge(
+  let makingCharge = ShopCalculator.calculateMakingCharge(
     prices.weight, prices.makingPerGram, prices.minimumMakingCharge,
     gradeMakingRateDiff[appliedGrade][mappedItem.METAL],
     gradeMakingRateDiff[grade][mappedItem.METAL],
     mappedItem.DIFF_UNIT, mappedItem.MM_DIFF_UNIT);
 
-  let sellingPrice = ShopCalculator.calculateGardePrice(
+  let sellingPrice = ShopCalculator.calculatePrice(
     prices.weight, prices.ratePerGram, prices.makingPerGram, prices.minimumMakingCharge, mappedItem.APPLIED,
     gradeMakingRateDiff[appliedGrade][mappedItem.METAL],
     gradeMakingRateDiff[grade][mappedItem.METAL],

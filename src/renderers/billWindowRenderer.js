@@ -20,13 +20,13 @@ function createBillWindow() {
     window.print();
   });
 
-  let gstButton = createHtmlElement("button", null, "gst-button", null, "GST");
+  let gstButton = createHtmlElement("button", null, "gst-button", null, "EST");
   printButtonDiv.appendChild(gstButton);
   gstButton.addEventListener("click", () => {
-    if (document.getElementById("top-center-header").textContent === "ESTIMATE ONLY") {
-      applyGST()
-    } else if (document.getElementById("top-center-header").textContent === "TAX INVOICE") {
-      applyEstimate()
+    if (document.getElementById("gst-button").textContent === "GST") {
+      applyEstimateGST();
+    } else if (document.getElementById("gst-button").textContent === "EST") {
+      applyEstimate();
     }
   });
 
@@ -45,52 +45,20 @@ function createBillWindow() {
   if (configs.sales.length > 0 || configs.additional > 0) {
     configs.sales = configs.sales.sort(compare);
 
-    let salesBillTable = createHtmlElement("table", "bill-table print-friendly", null, null, null);
+    let salesBillTable = createHtmlElement("table", "bill-table sales-table print-friendly", "sales-table-default", null, null);
     document.getElementById("bill-sales").appendChild(salesBillTable);
+    let salesBillTableLessGST =
+      createHtmlElement("table", "bill-table sales-table display-none print-friendly", "sales-table-less-gst", null, null);
+    document.getElementById("bill-sales").appendChild(salesBillTableLessGST);
 
     let thr = addTableHeader(
       salesBillTable, ["Item", "Qty", "Weight", "Breakup", "Price"]);
     thr.className = "sales-header";
-
-    for (let i=0; i<configs.sales.length; i++) {
-      let entry = configs.sales[i];
-      entry.items = entry.items.sort(compare);
-      for (let j=0; j<entry.items.length; j++) {
-        let item = entry.items[j].Item;
-        if (entry.items[j].Item.startsWith("Fancy") || entry.items[j].Item.startsWith("Dulhan")) {
-          console.log(["Silver", entry.items[j].Item].toString());
-          item += " " + (Dao.getMappedItem(["Silver", entry.items[j].Item].toString()).APPLIED * 1000);
-        }
-
-        let qty = entry.items[j].Quantity;
-        let weight = entry.items[j].Metal === "Accessories" ? "" :
-          parseFloat(Math.round(entry.items[j].Weight_In_Gram * 100) / 100).toFixed(2) + "g";
-        let price = "₹ " + getDesiNumber(entry.items[j].Price);
-
-        var cl = "sales-row", breakup = "";
-        if (j == entry.items.length - 1) {
-          cl += " section-end";
-          if (entry.items[j].Metal === "Accessories") {
-            breakup = ""
-          } else {
-            var rate = entry.Metal.charAt(0) + " " + entry.Rate_Per_Gram + "/g";
-            var making = (entry.Making_Per_Gram == null ?
-              entry.Making + "/pc" : entry.Making_Per_Gram + "/g");
-            breakup = rate + " + " + making;
-          }
-        }
-
-        let tableRow = [
-          wrapTableData(document.createTextNode(item), "left"),
-          wrapTableData(document.createTextNode(qty), "right"),
-          wrapTableData(document.createTextNode(weight), "right"),
-          wrapTableData(document.createTextNode(breakup), "right"),
-          wrapTableData(document.createTextNode(price), "right")];
-
-        let tr = addTableData(salesBillTable, tableRow);
-        tr.className  = cl;
-      }
-    }
+    let thrLessGST = addTableHeader(
+      salesBillTableLessGST, ["Item", "Qty", "Weight", "Breakup", "Price"]);
+    thrLessGST.className = "sales-header";
+    populateSalesBillTable(salesBillTable, false);
+    populateSalesBillTable(salesBillTableLessGST, true);
 
     // additional charge for Munga/Moti/Mala/Others
     if (configs.additional > 0) {
@@ -106,7 +74,7 @@ function createBillWindow() {
     }
 
     // sales total
-    let salesTotal = createHtmlElement("div", "td-align-right section-close", null, null, configs.totals.sales);
+    let salesTotal = createHtmlElement("div", "td-align-right section-close", "sales-table-total", null, configs.totals.sales);
     document.getElementById("bill-sales").appendChild(salesTotal);
   }
 
@@ -191,6 +159,48 @@ function createBillWindow() {
   }
 }
 
+function populateSalesBillTable(salesBillTable, lessGST) {
+  for (let i=0; i<configs.sales.length; i++) {
+    let entry = configs.sales[i];
+    entry.items = entry.items.sort(compare);
+    for (let j=0; j<entry.items.length; j++) {
+      let item = entry.items[j].Item;
+      if (entry.items[j].Item.startsWith("Fancy") || entry.items[j].Item.startsWith("Dulhan")) {
+        console.log(["Silver", entry.items[j].Item].toString());
+        item += " " + (Dao.getMappedItem(["Silver", entry.items[j].Item].toString()).APPLIED * 1000);
+      }
+
+      let qty = entry.items[j].Quantity;
+      let weight = entry.items[j].Metal === "Accessories" ? "" :
+        parseFloat(Math.round(entry.items[j].Weight_In_Gram * 100) / 100).toFixed(2) + "g";
+      let price = lessGST ? "₹ " + getDesiNumber(entry.items[j].Price_Less_GST) : "₹ " + getDesiNumber(entry.items[j].Price);
+
+      var cl = "sales-row", breakup = "";
+      if (j == entry.items.length - 1) {
+        cl += " section-end";
+        if (entry.items[j].Metal === "Accessories") {
+          breakup = ""
+        } else {
+          var rate = entry.Metal.charAt(0) + " " + entry.Rate_Per_Gram + "/g";
+          var making = (entry.Making_Per_Gram == null ?
+            entry.Making + "/pc" : entry.Making_Per_Gram + "/g");
+          breakup = rate + " + " + making;
+        }
+      }
+
+      let tableRow = [
+        wrapTableData(document.createTextNode(item), "left"),
+        wrapTableData(document.createTextNode(qty), "right"),
+        wrapTableData(document.createTextNode(weight), "right"),
+        wrapTableData(document.createTextNode(breakup), "right"),
+        wrapTableData(document.createTextNode(price), "right")];
+
+      let tr = addTableData(salesBillTable, tableRow);
+      tr.className  = cl;
+    }
+  }
+}
+
 // apply gst
 function applyGST() {
   let gstEntries = document.getElementsByClassName("gst-invoice");
@@ -208,8 +218,32 @@ function applyGST() {
   document.getElementById("bill-no").textContent = "......................";
 }
 
+function applyEstimateGST() {
+  applyEstimateFormat();
+  document.getElementById("gst-button").textContent = "EST";
+  document.getElementById("sales-table-less-gst").classList.add("display-none");
+  document.getElementById("sales-table-default").classList.remove("display-none");
+  document.getElementById("gst-rate-flag").classList.remove("display-none");
+  document.getElementById("sales-table-total").innerHTML = configs.totals.sales;
+  document.getElementById("sub-total").innerHTML = configs.totals.sub_total;
+  document.getElementById("discount").innerHTML = configs.totals.discount;
+  document.getElementById("total-bill").innerHTML = configs.totals.total_bill;
+}
+
 // apply estimate
 function applyEstimate() {
+  applyEstimateFormat();
+  document.getElementById("gst-button").textContent = "GST";
+  document.getElementById("sales-table-default").classList.add("display-none");
+  document.getElementById("sales-table-less-gst").classList.remove("display-none");
+  document.getElementById("gst-rate-flag").classList.add("display-none");
+  document.getElementById("sales-table-total").innerHTML = configs.totals.sales_less_gst;
+  document.getElementById("sub-total").innerHTML = configs.totals.sub_total_less_gst;
+  document.getElementById("discount").innerHTML = configs.totals.discount_less_gst;
+  document.getElementById("total-bill").innerHTML = configs.totals.total_bill_less_gst;
+}
+
+function applyEstimateFormat() {
   let gstEntries = document.getElementsByClassName("gst-invoice");
   for (let i=0; i<gstEntries.length; i++) {
     gstEntries[i].classList.add("display-none")
@@ -220,7 +254,6 @@ function applyEstimate() {
   }
   document.getElementById("top-left-header").textContent = "";
   document.getElementById("top-center-header").textContent = "ESTIMATE ONLY";
-  document.getElementById("gst-button").textContent = "GST";
   document.getElementById("bill-no-text").textContent = "ESTIMATE NO.";
   document.getElementById("bill-no").textContent = configs.id;
 }

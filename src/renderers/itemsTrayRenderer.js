@@ -1,7 +1,7 @@
 const {ipcRenderer, remote} = require("electron");
 const {clearSelection, createHtmlElement, addTableHeader, addTableData, addEquiColumnTableData,
   addTableHeaderWithCheckbox, addTableDataWithCheckbox, emptyTable, emptyTableWithHeader,parseTable,
-  getDesiNumber, consolidateEntries, getFromDesiRupeeNumber, generateTransactionId,
+  parseSalesTable, getDesiNumber, consolidateEntries, getFromDesiRupeeNumber, generateTransactionId,
   formatDate, formatDateSlash, formatDateReverse, isMobileNumber} = require("./../utils.js");
 const ShopCalculator = require("./../ShopCalculator.js");
 const Dao = remote.require("./Dao.js");
@@ -365,22 +365,36 @@ function createPriceCards(weightList, item, priceCardContainer, autoSelectPriceC
       clearSelection();
     });
     priceCardContainer.appendChild(itemPriceCard);
-    let cardWeightLabel = createHtmlElement("h3", "item-label", null, weight.toString() + " g", null);
+    let cardMainLabel = createHtmlElement("div", "item-label overflow-hiden", null, null, null);
+    let cardWeightLabel = createHtmlElement("h3", "float-left", null, weight.toString() + " g", null);
+    cardMainLabel.appendChild(cardWeightLabel);
+    let gstAppliedLabel = createHtmlElement("div", "gst-applied align-right", null, null, null);
+    cardMainLabel.appendChild(gstAppliedLabel);
     let cardPriceLabel = createHtmlElement("h2", "number-font money-green align-right padding-top-fifteen", null, null, null);
     if (item.metal === "Accessories") {
       cardWeightLabel.textContent = null
       cardPriceLabel.innerHTML = "₹ " + weight.toString();
       itemPriceCard.appendChild(cardPriceLabel);
-      itemPriceCard.appendChild(cardWeightLabel);
+      itemPriceCard.appendChild(cardMainLabel);
     } else {
-      itemPriceCard.appendChild(cardWeightLabel);
+      itemPriceCard.appendChild(cardMainLabel);
       itemPriceCard.appendChild(cardPriceLabel);
     }
     let cardMetalPriceLabel = createHtmlElement("div", "number-font metal-price float-left", null, null, null);
     itemPriceCard.appendChild(cardMetalPriceLabel);
     let cardMakingPriceLabel = createHtmlElement("div", "number-font making-charge align-right", null, null, null);
     itemPriceCard.appendChild(cardMakingPriceLabel);
+    itemPriceCard.append(createPriceCardToolTip())
   }
+}
+
+function createPriceCardToolTip() {
+  let priceCardToolTip = createHtmlElement("div", "price-card-tooltip", null, null, null);
+  priceCardToolTip.appendChild(createHtmlElement("div", "tooltip-display-amount", null, null, null));
+  priceCardToolTip.appendChild(createHtmlElement("div", "tooltip-amount", null, null, null));
+  priceCardToolTip.appendChild(createHtmlElement("div", "tooltip-cgst", null, null, null));
+  priceCardToolTip.appendChild(createHtmlElement("div", "tooltip-sgst", null, null, null));
+  return priceCardToolTip;
 }
 
 function addPriceLabels(item, priceCardContainer, appliedPricingGrade, newPricingGrade) {
@@ -393,28 +407,28 @@ function addPriceLabels(item, priceCardContainer, appliedPricingGrade, newPricin
       if (i == 0) {
         priceCard.querySelector(".metal-rate").innerHTML = "₹ " + getDesiNumber(item.ratePerGram) +" /g";
         priceCard.querySelector(".min-making-charge").innerHTML = "₹ " + getDesiNumber(
-          ShopCalculator.calculateGradeMakingRate(item.minimumMakingCharge,
+          ShopCalculator.calculateMakingRate(item.minimumMakingCharge,
             (gradeMakingRateDiff[appliedPricingGrade][mappedItem.METAL].MM_DIFF * mappedItem.MM_DIFF_UNIT),
             (gradeMakingRateDiff[newPricingGrade][mappedItem.METAL].MM_DIFF * mappedItem.MM_DIFF_UNIT)));
         priceCard.querySelector(".making-rate").innerHTML = "₹ " + getDesiNumber(
-          ShopCalculator.calculateGradeMakingRate(item.makingPerGram,
+          ShopCalculator.calculateMakingRate(item.makingPerGram,
             (gradeMakingRateDiff[appliedPricingGrade][mappedItem.METAL].DIFF * mappedItem.DIFF_UNIT),
             (gradeMakingRateDiff[newPricingGrade][mappedItem.METAL].DIFF  * mappedItem.DIFF_UNIT))) + " /g";
       } else {
         let weight = parseFloat(priceCard.querySelector(".item-label").textContent);
-        priceCard.querySelector(".money-green").innerHTML = "₹ " + getDesiNumber(
-          ShopCalculator.calculateGardePrice(weight, item.ratePerGram,
-            item.makingPerGram, item.minimumMakingCharge, mappedItem.APPLIED,
-            gradeMakingRateDiff[appliedPricingGrade][mappedItem.METAL],
-            gradeMakingRateDiff[newPricingGrade][mappedItem.METAL],
-            mappedItem.DIFF_UNIT, mappedItem.MM_DIFF_UNIT));
-        priceCard.querySelector(".metal-price").innerHTML = "₹ " + getDesiNumber(
-          ShopCalculator.calculateMetalPrice(weight, item.ratePerGram, mappedItem.APPLIED));
-        priceCard.querySelector(".making-charge").innerHTML = "₹ " + getDesiNumber(
-          ShopCalculator.calculateGradeMakingCharge(weight, item.makingPerGram, item.minimumMakingCharge,
-            gradeMakingRateDiff[appliedPricingGrade][mappedItem.METAL],
-            gradeMakingRateDiff[newPricingGrade][mappedItem.METAL],
-            mappedItem.DIFF_UNIT, mappedItem.MM_DIFF_UNIT));
+        let priceDetails = ShopCalculator.calculatePrice(weight, item.ratePerGram,
+          item.makingPerGram, item.minimumMakingCharge, mappedItem.APPLIED,
+          gradeMakingRateDiff[appliedPricingGrade][mappedItem.METAL],
+          gradeMakingRateDiff[newPricingGrade][mappedItem.METAL],
+          mappedItem.DIFF_UNIT, mappedItem.MM_DIFF_UNIT, 1.5, 1.5);
+        priceCard.querySelector(".gst-applied").innerHTML = "₹ " + getDesiNumber(priceDetails.gstApplied.total);
+        priceCard.querySelector(".money-green").innerHTML = "₹ " + getDesiNumber(priceDetails.totalPrice);
+        priceCard.querySelector(".metal-price").innerHTML = "₹ " + getDesiNumber(priceDetails.metalPrice);
+        priceCard.querySelector(".making-charge").innerHTML = "₹ " + getDesiNumber(priceDetails.makingCharge);
+        priceCard.querySelector(".tooltip-display-amount").innerHTML = "Amount: " + getDesiNumber(priceDetails.metalPrice + priceDetails.makingCharge);
+        priceCard.querySelector(".tooltip-amount").innerHTML = priceDetails.metalPrice + priceDetails.makingCharge;
+        priceCard.querySelector(".tooltip-cgst").innerHTML = priceDetails.gstApplied.cgst;
+        priceCard.querySelector(".tooltip-sgst").innerHTML = priceDetails.gstApplied.sgst;
       }
     }
   }
@@ -506,8 +520,8 @@ function addExchangeCard(exchangeWindow, metal) {
   let uncheckedPurchaseRatePurity = null;
   if (metal === "Gold") {
     color = "gold";
+    checkedSellRatePurity = 70;
     uncheckedSellRatePurity = 75;
-    checkedPurchaseRatePurity = 75;
   } else if (metal === "Silver") {
     color = "silver";
     checkedPurchaseRatePurity = 45;
@@ -726,7 +740,7 @@ function buildNetTotalContainer(tabContent, set) {
   billButton.addEventListener("click", () => {
     generateBill(getTabButton(tabIndex).querySelector(".tab-name").textContent,
       tabIndex, new Date(), "......................",
-      parseTable(document.getElementById("sales-table-" + tabIndex), true),
+      parseSalesTable(document.getElementById("sales-table-" + tabIndex), true),
       parseTable(document.getElementById("purchase-table-" + tabIndex), true),
       getAdditionalCharge(tabIndex), getTotals(tabIndex), false, false);
   });
@@ -797,26 +811,30 @@ function buildNetTotalContainer(tabContent, set) {
   });
   discountInputBox.appendChild(discountInputText);
 
-  let discountChartButton = createHtmlElement("div", "discount-chart-button", null, null, "Discount Chart");
-  discountChartButton.addEventListener("click", function() {
+  let gstChartDiv = createHtmlElement("div", "overflow-hidden gst-chart-div", null, null, null);
+  discountDiv.appendChild(gstChartDiv);
+  let gstChartButton = createHtmlElement("div", "gst-chart-button", null, null, "Sales Amount Breakup");
+  gstChartButton.addEventListener("click", function() {
     let content = this.nextElementSibling;
-    let discountChartState = this.querySelector(".discount-chart-state");
+    let gstChartState = this.querySelector(".gst-chart-state");
     if (content.style.display === "block"){
       content.style.display = "none";
-      discountChartState.innerHTML = decodeURI("&#x25B6;");
+      gstChartState.innerHTML = decodeURI("&#x25B6;");
     } else {
       content.style.display = "block";
-      discountChartState.innerHTML = decodeURI("&#x25BC;");
+      gstChartState.innerHTML = decodeURI("&#x25BC;");
     }
   });
-  discountDiv.appendChild(discountChartButton);
-  let discountChartState = createHtmlElement("span", "float-right discount-chart-state", null, null, decodeURI("&#x25B6;"));
-  discountChartButton.appendChild(discountChartState);
-  let discountChartContent = createHtmlElement("div", "discount-chart-content", null, null, null);
-  discountDiv.appendChild(discountChartContent);
-  let discountChart = createHtmlElement("table", "discount-chart", "discount-chart-" + tabIndex, null, null);
-  discountChartContent.appendChild(discountChart);
-  addTableHeader(discountChart, ["Gr", "Discount Against"]);
+  gstChartDiv.appendChild(gstChartButton);
+  gstChartButton.appendChild(createHtmlElement("span", "float-right gst-chart-state", null, null, decodeURI("&#x25B6;")));
+  let gstChartContent = createHtmlElement("div", "gst-chart-content", null, null, null);
+  gstChartDiv.appendChild(gstChartContent);
+  let gstChart = createHtmlElement("table", "gst-chart", "gst-chart-" + tabIndex, null, null);
+  gstChartContent.appendChild(gstChart);
+  addTableHeader(gstChart, ["Amount", ""]);
+  addTableHeader(gstChart, ["CGST", ""]);
+  addTableHeader(gstChart, ["SGST", ""]);
+  gstChartDiv.appendChild(createHtmlElement("div", "gst-details-tooltip", "gst-chart-tooltip-" + tabIndex, null, null));
 
   let breakupSalesTotal = createHtmlElement("h1", "number-font money-green align-right", "breakup-sales-total-" + tabIndex, null, "₹ 0");
   breakupDiv.appendChild(breakupSalesTotal);
@@ -874,8 +892,17 @@ function populateNetTotalContainer(tabIndex) {
     tableDataElements.push(
       wrapTableData(color, document.createTextNode(salesItem.metal === "Accessories" ? "-" : "₹ " + (salesItem.making == salesItem.minimumMakingCharge
         ? getDesiNumber(salesItem.minimumMakingCharge) : getDesiNumber(salesItem.makingPerGram) + " /g"))));
-    tableDataElements.push(
-      wrapTableData(color, document.createTextNode("₹ " + getDesiNumber(salesItem.price))));
+
+    // hidden taxed-amount and gst details with price display
+    let priceTextDiv = createHtmlElement("div", "sales-table-price", null, "₹ " + getDesiNumber(salesItem.price), null);
+    let priceBoxDiv = wrapTableData(color, priceTextDiv);
+    let priceHiddenDiv = createHtmlElement("div", "sales-table-hidden", null, null, null);
+    priceHiddenDiv.appendChild(createHtmlElement("div", "sales-table-amount", null, salesItem.amount, null));
+    priceHiddenDiv.appendChild(createHtmlElement("div", "sales-table-cgst", null, salesItem.cgst, null));
+    priceHiddenDiv.appendChild(createHtmlElement("div", "sales-table-sgst", null, salesItem.sgst, null));
+    priceBoxDiv.appendChild(priceHiddenDiv);
+    tableDataElements.push(priceBoxDiv);
+
     tableDataElements.push(
       wrapTableData(color, document.createTextNode(salesItem.appliedPriceGrade)));
     addTableDataWithCheckbox(salesTable, tableDataElements, () => {
@@ -924,7 +951,10 @@ function updateNetTotalContainer(tabIndex) {
       salesDataColumns[3].textContent = "₹ " + getDesiNumber(salesItem.ratePerGram) + " /g";
       salesDataColumns[4].textContent = "₹ " + (salesItem.making == salesItem.minimumMakingCharge
         ? getDesiNumber(salesItem.minimumMakingCharge) : getDesiNumber(salesItem.makingPerGram) + " /g");
-      salesDataColumns[5].textContent = "₹ " + getDesiNumber(salesItem.price);
+      salesDataColumns[5].querySelector(".sales-table-price").textContent = "₹ " + getDesiNumber(salesItem.price);
+      salesDataColumns[5].querySelector(".sales-table-amount").textContent = salesItem.amount;
+      salesDataColumns[5].querySelector(".sales-table-cgst").textContent = salesItem.cgst;
+      salesDataColumns[5].querySelector(".sales-table-sgst").textContent = salesItem.sgst;
     }
     salesDataColumns[6].textContent = salesItem.appliedPriceGrade;
   }
@@ -937,29 +967,26 @@ function populateTotals(tabIndex, salesTable, purchaseTable) {
 
   // populate sales totals
   let salesTotal = 0;
+  let salesAmountTotal = 0;
+  let cgstTotal = 0;
+  let sgstTotal = 0;
   let salesRows = salesTable.getElementsByClassName("checked-row");
   for (let i=0; i<salesRows.length; i++) {
-    let salesPriceCol = 5;
-    salesPrice = getFromDesiRupeeNumber(salesRows[i]
-      .getElementsByClassName("table-data-div")[salesPriceCol].innerHTML)
-    salesTotal = salesTotal + salesPrice;
+    let salesPriceCol = salesRows[i].getElementsByClassName("table-data-div")[5];
+    salesTotal = salesTotal + getFromDesiRupeeNumber(salesPriceCol.querySelector(".sales-table-price").innerHTML);
+    salesAmountTotal = salesAmountTotal + Number(salesPriceCol.querySelector(".sales-table-amount").innerHTML);
+    cgstTotal = cgstTotal + Number(salesPriceCol.querySelector(".sales-table-cgst").innerHTML);
+    sgstTotal = sgstTotal + Number(salesPriceCol.querySelector(".sales-table-sgst").innerHTML);
   }
 
   document.getElementById("sales-total-" + tabIndex).innerHTML = "₹ " + getDesiNumber(salesTotal);
   document.getElementById("breakup-sales-total-" + tabIndex).innerHTML = "₹ " + getDesiNumber(salesTotal);
-
-  // populate discount chart
-  let salesGrades = Dao.getGradesList();
-  let discountChart = document.getElementById("discount-chart-" + tabIndex);
-  emptyTable(discountChart);
-  for (let i=0; i<salesGrades.length; i++) {
-    let discount = 0;
-    if (discount > 10) {
-      addTableData(discountChart, [
-        wrapTableData("gold", document.createTextNode(salesGrades[i])),
-        wrapTableData("gold", document.createTextNode("₹ " + getDesiNumber(discount)))]);
-    }
-  }
+  let gstChartRows = document.getElementById("gst-chart-" + tabIndex).childNodes;
+  gstChartRows[0].childNodes[1].innerHTML = "₹ " + getDesiNumber(salesAmountTotal);
+  gstChartRows[1].childNodes[1].innerHTML = "₹ " + cgstTotal;
+  gstChartRows[2].childNodes[1].innerHTML = "₹ " + sgstTotal;
+  document.getElementById("gst-chart-tooltip-" + tabIndex).innerHTML =
+    "₹ " + getDesiNumber(salesAmountTotal) + " + ₹ " + getDesiNumber(cgstTotal + sgstTotal);
 
   // populate purchase totals
   let purchaseTotal = 0;
@@ -1129,8 +1156,6 @@ function getSelectedSalesItems(tabIndex) {
   let selectedItemsList = [];
   let sellTrayContainer = document.getElementById("sell-tray-container-" + tabIndex);
   let priceCardBoxes = sellTrayContainer.getElementsByClassName("price-card-box");
-  let gradeMakingRateDiff = Dao.getGradeMakingRateDiff();
-  let gradesList = Dao.getGradesList();
   for (let i=0; i<priceCardBoxes.length; i++) {
     let priceCardBox = priceCardBoxes[i];
     let itemInfoCard = priceCardBox.querySelector(".item-info-card");
@@ -1140,22 +1165,17 @@ function getSelectedSalesItems(tabIndex) {
       let item = {
         "weight": parseFloat(selectedPriceCard.querySelector(".item-label").textContent),
         "price": getFromDesiRupeeNumber(selectedPriceCard.querySelector(".money-green").textContent),
-        "making": getFromDesiRupeeNumber(selectedPriceCard.querySelector(".making-charge").textContent)
+        "making": getFromDesiRupeeNumber(selectedPriceCard.querySelector(".making-charge").textContent),
+        "amount": selectedPriceCard.querySelector(".tooltip-amount").textContent,
+        "cgst": selectedPriceCard.querySelector(".tooltip-cgst").textContent,
+        "sgst": selectedPriceCard.querySelector(".tooltip-sgst").textContent
       };
       item = getCurentItem(item, itemInfoCard);
-      item.grades = gradesList;
-      item.gradePrices = {};
-      for (let i=0; i<item.grades.length; i++) {
-        let grade = item.grades[i];
-        if (item.metal === "Accessories") {
-          item.gradePrices[grade] = item.price;
-        } else {
-          item.gradePrices[grade] = ShopCalculator.calculateGardePrice(item.weight, item.ratePerGram,
-            item.makingPerGram, item.minimumMakingCharge, Dao.getMappedItem([item.metal, item.itemName].toString()).APPLIED,
-            gradeMakingRateDiff[item.appliedPriceGrade][item.metal], gradeMakingRateDiff[grade][item.metal]);
-        }
+      if (item.metal === "Accessories") {
+        item.amount = item.price;
+        item.cgst = 0;
+        item.sgst = 0;
       }
-
       selectedItemsList.push(item);
     }
   }
@@ -1325,6 +1345,7 @@ function aggregateSalesEntries(salesEntries) {
       aggregateEntry.Weight_In_Gram += entry.Weight_In_Gram;
       aggregateEntry.Weights.push(entry.Weight_In_Gram);
       aggregateEntry.Price += entry.Price;
+      aggregateEntry.Price_Less_GST += entry.Price_Less_GST;
       aggregateEntry.Quantity += 1;
     } else {
       salesEntry = {...entry, Quantity: 1, ItemNames: [entry.Item], Weights: [entry.Weight_In_Gram]}
@@ -1392,7 +1413,7 @@ function finishTransaction(tabId, additionalConfigs) {
   let purchaseTable = document.getElementById("purchase-table-" + tabId);
 
   // transaction entries
-  let salesEntries = parseTable(salesTable, true);
+  let salesEntries = parseSalesTable(salesTable, true);
   let purchaseEntries = parseTable(purchaseTable, true);
   let additionalChargeEntry = getOtherTransactionEntry(getAdditionalCharge(tabId));
   let discountEntry = getOtherTransactionEntry(totalDiscount);
@@ -1413,10 +1434,6 @@ function finishTransaction(tabId, additionalConfigs) {
     }
   }
 
-  // check if entries unchecked
-  let entriesUnchecked = salesTable.getElementsByClassName("unchecked-row").length > 0
-    || purchaseTable.getElementsByClassName("unchecked-row").length > 0
-
   // persist transaction entries
   if (salesEntries.length == 0 && purchaseEntries.length == 0
     && additionalChargeEntry.length == 0) {
@@ -1425,8 +1442,6 @@ function finishTransaction(tabId, additionalConfigs) {
     Dao
       .persistTransactionEntries(date, consolidateEntries(allTransactionEntries))
       .then(() => {
-          alert('Finished transaction for ' + tabName + '!!');
-
           // bill totals
           let billTotals = getTotals(tabId);
           billTotals.pending_as = additionalConfigs.markAs;
@@ -1436,57 +1451,48 @@ function finishTransaction(tabId, additionalConfigs) {
           if (billTotals.pending_as === "Discount") {
             // update total bill when discount is updated
             billTotals.total_bill = billTotals.paid_amount;
+
+            // Adjust for non-gst bill
+            if (additionalConfigs.paid < billTotals.total_bill_less_gst_val) {
+              billTotals.total_bill_less_gst = billTotals.paid_amount;
+              billTotals.discount_less_gst = "₹ " + getDesiNumber(billTotals.sub_total_less_gst_val - additionalConfigs.paid);
+            }
           }
 
           // generate bills
           generateBill(tabName, tabId, date, transId, salesEntries, purchaseEntries,
             getAdditionalCharge(tabId), billTotals, false, false);
-
-          if (entriesUnchecked) {
-            // remove checked entries from table and check the unchecked
-            removeCheckedRows(salesTable);
-            removeCheckedRows(purchaseTable);
-
-            // clear discount and additional charge input box
-            document.getElementById("additional-charge-input-" + tabId).value = "";
-            document.getElementById("discount-input-" + tabId).value = "";
-
-            // update totals
-            updateAdditionalCharges(tabId);
-            updateNetTotalPrice(tabId);
-          } else {
-            // finally close the tab
-            // closeTab(tabButton);
-          }
         });
   }
 }
 
-function removeCheckedRows(table) {
-  let checkedRows = table.getElementsByClassName("checked-row");
-  while (checkedRows.length>0) {
-    checkedRows[0].remove();
-  }
-
-  headerCheckbox = table.querySelector(".checkbox-header");
-  headerCheckbox.checked = true;
-  headerCheckbox.dispatchEvent(new Event("change"));
-}
-
 function getTotals(tabId) {
+  let discount = getAppliedDiscount(tabId);
   let salesTotal = getAdditionalCharge(tabId) +
     getFromDesiRupeeNumber(document.getElementById("breakup-sales-total-" + tabId).innerHTML);
-
+  let salesTotalLessGST = getAdditionalCharge(tabId) + getFromDesiRupeeNumber(
+    document.getElementById("gst-chart-" + tabId).childNodes[0].childNodes[1].innerHTML);
   let subTotalVal = document.getElementById("breakup-net-total-" + tabId).innerHTML;
   let subTotal = getAdditionalCharge(tabId) + (subTotalVal.startsWith("- ₹") ?
     -1 * getFromDesiRupeeNumber(subTotalVal.substring(2)) : getFromDesiRupeeNumber(subTotalVal));
+  let purchaseTotal = getFromDesiRupeeNumber(document.getElementById("purchase-total-" + tabId).innerHTML);
+  let subTotalLessGST = getAdditionalCharge(tabId) + salesTotalLessGST - purchaseTotal;
+  let discountLessGST = discount > (salesTotal - salesTotalLessGST) ? discount - salesTotal + salesTotalLessGST : 0;
+  let totalLessGST = subTotalLessGST - discountLessGST;
 
   return {
     sales: "₹ " + getDesiNumber(salesTotal),
-    purchase: document.getElementById("breakup-purchase-total-" + tabId).innerHTML,
+    sales_less_gst: "₹ " + getDesiNumber(salesTotalLessGST),
+    purchase: "- ₹ " + getDesiNumber(purchaseTotal),
     sub_total: (subTotal < 0 ? "- ₹ " : "₹ ") + getDesiNumber(Math.abs(subTotal)),
-    discount: "₹ " + getDesiNumber(getAppliedDiscount(tabId)),
-    total_bill: document.getElementById("net-total-display-" + tabId).innerHTML
+    sub_total_less_gst: (subTotalLessGST < 0 ? "- ₹ " : "₹ ") + getDesiNumber(Math.abs(subTotalLessGST)),
+    sub_total_less_gst_val: subTotalLessGST,
+    discount: "₹ " + getDesiNumber(discount),
+    discount_less_gst: "₹ " + getDesiNumber(discountLessGST),
+    discount_less_gst_val: discountLessGST,
+    total_bill: document.getElementById("net-total-display-" + tabId).innerHTML,
+    total_bill_less_gst: (totalLessGST < 0 ? "- ₹ " : "₹ ") + getDesiNumber(Math.abs(totalLessGST)),
+    total_bill_less_gst_val: totalLessGST
   }
 }
 
