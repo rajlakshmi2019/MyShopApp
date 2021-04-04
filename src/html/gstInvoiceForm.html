@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Pick a grade</title>
+    <link rel="stylesheet" href="../css/app.css">
+    <link rel="stylesheet" href="../css/body.css">
+    <link rel="stylesheet" href="../css/tray.css">
+  </head>
+  <body>
+    <div id="gst-invoice-form">
+      <h1 class="big-header-margin">GST Invoice Form</h1>
+      <div class="gst-breakup-div selected-section" id="first-section">
+        <div class="wrapper-div total-bill-div">
+          <h2 class="number-font-without-margin input-header float-left">Net Amount</h2>
+          <h2 class="gst-breakup-font input-header" id="net-total"></h2>
+          <div class="wrapper-div">
+            <input class="gst-input-text rupee-background" id="gst-payment-input">
+          </div>
+        </div>
+        <h1 class="upper-margin">Breakup</h1>
+        <div class="wrapper-div">
+          <h2 class="number-font-without-margin input-header float-left">Sales Amount</h2>
+          <h2 class="gst-breakup-font money-green input-header" id="sales-amount"></h2>
+        </div>
+        <div class="wrapper-div">
+          <h2 class="number-font-without-margin input-header float-left">Discount</h2>
+          <h2 class="gst-breakup-font money-green input-header" id="discount"></h2>
+        </div>
+        <div class="wrapper-div">
+          <h2 class="number-font-without-margin input-header float-left">Taxable Amount</h2>
+          <h2 class="gst-breakup-font money-green input-header" id="taxable-amount"></h2>
+        </div>
+        <div class="wrapper-div">
+          <h2 class="number-font-without-margin input-header float-left">GST Applied</h2>
+          <h2 class="gst-breakup-font money-green input-header" id="gst-applied"></h2>
+        <div class="wrapper-div">
+        </div>
+          <h2 class="number-font-without-margin input-header float-left">Total Bill</h2>
+          <h2 class="gst-breakup-font money-green input-header" id="total-amount"></h2>
+        </div>
+      </div>
+      <div class="gst-info-div display-none" id="second-section">
+        <h2 class="number-font-without-margin input-header">Invoice Number</h2>
+        <div class="wrapper-div">
+          <input class="gst-input-text" style="border-color: red;" id="invoice-no-input">
+        </div>
+        <h2 class="number-font-without-margin input-header">Name</h2>
+        <div class="wrapper-div">
+          <input class="gst-input-text" style="border-color: red;" id="name-input">
+        </div>
+        <h2 class="number-font-without-margin input-header">Address (in Jharkhand)</h2>
+        <div class="wrapper-div">
+          <input class="gst-input-text"  style="border-color: red;" id="address-input">
+        </div>
+        <h2 class="number-font-without-margin input-header">Phone Number</h2>
+        <div class="wrapper-div">
+          <input class="gst-input-text"  style="border-color: red;" id="phone-no-input">
+        </div>
+      </div>
+      <div class="gst-date-div display-none" id="last-section">
+        <h2 class="number-font-without-margin input-header">Invoice Date</h2>
+        <div class="wrapper-div">
+          <input type="date" class="gst-input-text" style="border-color: red;" id="date-input">
+        </div>
+      </div>
+    </div>
+    <div class="button-pair">
+      <button type="button" class="accept-button money-green">Next</button>
+      <button type="button" class="reject-button red-color">Cancel</button>
+    </div>
+  </body>
+  <script type="text/javascript">
+    require('./../renderers/gstInvoiceFormRenderer.js');
+  </script>
+</html>

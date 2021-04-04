@@ -1,6 +1,6 @@
 const {ipcRenderer, remote} = require("electron");
-const {createHtmlElement, addTableHeader, addTableData, getDesiNumber,
-  getFromDesiRupeeNumber, isMobileNumber} = require("./../utils.js");
+const {createHtmlElement, addTableHeader, addTableData, getDesiNumber, getRupeeDesiNumber,
+  getRupeeDesiDecimalNumber, getFromDesiRupeeNumber, isMobileNumber} = require("./../utils.js");
 const {calculateGSTAppliedTotals} = require("./../ShopCalculator.js");
 const Dao = remote.require("./Dao.js");
 
@@ -14,10 +14,16 @@ function createBillWindow() {
   let printButtonDiv = createHtmlElement("div", "no-print", "print-button-div", null, null);
   document.getElementById("bill-menu").appendChild(printButtonDiv);
 
-  let printButton = createHtmlElement("button", null, "print-button", null, "Print");
+  let printButton =
+    createHtmlElement("button", null, "print-button", null, configs.type === "GST" ? "Expand" : "Print");
   printButtonDiv.appendChild(printButton);
   printButton.addEventListener("click", () => {
-    window.print();
+    if (printButton.innerHTML === "Expand") {
+      expandPagesGST();
+      printButton.innerHTML = "Print";
+    } else if (printButton.innerHTML === "Print") {
+      window.print();
+    }
   });
 
   let gstButton = createHtmlElement("button", null, "gst-button", null, "EST");
@@ -41,15 +47,18 @@ function createBillWindow() {
     document.getElementById("billing-phone-no").textContent = configs.tabName;
   }
 
-  // sales table in bill
+  // sales table
   if (configs.sales.length > 0 || configs.additional > 0) {
     configs.sales = configs.sales.sort(compare);
 
-    let salesBillTable = createHtmlElement("table", "bill-table sales-table print-friendly", "sales-table-default", null, null);
+    let salesBillTable = createHtmlElement("table", "bill-table sales-table estimate-invoice print-friendly", "sales-table-default", null, null);
     document.getElementById("bill-sales").appendChild(salesBillTable);
     let salesBillTableLessGST =
-      createHtmlElement("table", "bill-table sales-table display-none print-friendly", "sales-table-less-gst", null, null);
+      createHtmlElement("table", "bill-table sales-table estimate-invoice display-none print-friendly", "sales-table-less-gst", null, null);
     document.getElementById("bill-sales").appendChild(salesBillTableLessGST);
+    let salesBillTableLessGSTWithHSN =
+      createHtmlElement("table", "bill-table sales-table gst-invoice display-none print-friendly", "sales-table-with-hsn", null, null);
+    document.getElementById("bill-sales").appendChild(salesBillTableLessGSTWithHSN);
 
     let thr = addTableHeader(
       salesBillTable, ["Item", "Qty", "Weight", "Breakup", "Price"]);
@@ -57,21 +66,12 @@ function createBillWindow() {
     let thrLessGST = addTableHeader(
       salesBillTableLessGST, ["Item", "Qty", "Weight", "Breakup", "Price"]);
     thrLessGST.className = "sales-header";
-    populateSalesBillTable(salesBillTable, false);
-    populateSalesBillTable(salesBillTableLessGST, true);
-
-    // additional charge for Munga/Moti/Mala/Others
-    if (configs.additional > 0) {
-      let tableRow = [
-        wrapTableData(document.createTextNode("Other Accessories"), "left"),
-        wrapTableData(document.createTextNode(""), "right"),
-        wrapTableData(document.createTextNode(""), "right"),
-        wrapTableData(document.createTextNode(""), "right"),
-        wrapTableData(document.createTextNode("₹ " + configs.additional), "right")];
-
-      let tr = addTableData(salesBillTable, tableRow);
-      tr.className  = "sales-row section-end";
-    }
+    let thrLessGSTWithHSN = addTableHeader(
+      salesBillTableLessGSTWithHSN, ["Item", "HSN/SAC", "Qty", "Weight", "Breakup", "Price"]);
+    thrLessGSTWithHSN.className = "sales-header-with-hsn";
+    populateSalesBillTable(salesBillTable, false, false);
+    populateSalesBillTable(salesBillTableLessGST, true, false);
+    populateSalesBillTable(salesBillTableLessGSTWithHSN, true, true);
 
     // sales total
     let salesTotal = createHtmlElement("div", "td-align-right section-close", "sales-table-total", null, configs.totals.sales);
@@ -112,7 +112,6 @@ function createBillWindow() {
     document.getElementById("bill-purchase").appendChild(purchaseTotal);
 
     // add purchase block at end in gst bills with page break
-    document.getElementById("bill-purchase-gst").classList.add("display-block");
     document.getElementById("bill-purchase-gst").appendChild(purchaseBillTable.cloneNode(true));
 
     let purchaseTotalClone = createHtmlElement("div", "td-align-right section-middle", null, null, configs.totals.purchase);
@@ -130,43 +129,24 @@ function createBillWindow() {
   document.getElementById("sub-total").innerHTML = configs.totals.sub_total;
   document.getElementById("discount").innerHTML = configs.totals.discount;
   document.getElementById("total-bill").innerHTML = configs.totals.total_bill;
-  if (configs.totals.pending_as === "Due"
-    && getFromDesiRupeeNumber(configs.totals.pending_amount) > 0) {
+  if (configs.totals.pending_amount != null && getFromDesiRupeeNumber(configs.totals.pending_amount) > 0) {
       document.getElementById("due-total").classList.add("display-block");
       document.getElementById("payment-due").innerHTML = configs.totals.pending_amount;
   }
 
-  // gst totals
-  let cgstPercentage = 1.5
-  let sgstPercentage = 1.5
-  let sellingPrice = getFromDesiRupeeNumber(configs.totals.sales);
-  let discount = getFromDesiRupeeNumber(configs.totals.discount);
-  let gstTotals = calculateGSTAppliedTotals(sellingPrice, discount, cgstPercentage, sgstPercentage);
-
-  document.getElementById("sub-total-gst").innerHTML = configs.totals.sales;
-  document.getElementById("discount-gst").innerHTML = "₹ " + getDesiNumber(gstTotals.adjustedDiscount);
-  document.getElementById("cgst-header").innerHTML = "CGST @ " + cgstPercentage + "%";
-  document.getElementById("cgst-applied").innerHTML = "₹ " + getDesiNumber(gstTotals.cgstApplied);
-  document.getElementById("sgst-header").innerHTML = "SGST @ " + sgstPercentage + "%";
-  document.getElementById("sgst-applied").innerHTML = "₹ " + getDesiNumber(gstTotals.sgstApplied);
-  document.getElementById("total-bill-gst").innerHTML = "₹ " + getDesiNumber(gstTotals.totalPrice);
-  document.getElementById("purchase-gst-total").innerHTML = "₹ " + getDesiNumber(gstTotals.totalPrice);
-  if (configs.purchase.length > 0) {
-    purchaseTotal = getFromDesiRupeeNumber(configs.totals.purchase.substring(2));
-    netTotal = gstTotals.totalPrice - purchaseTotal;
-    document.getElementById("purchase-gst-net-total").innerHTML =
-      (netTotal < 0 ? "- ₹ " : "₹ ") + getDesiNumber(Math.abs(netTotal));
+  // gst invoice generation
+  if (configs.type === "GST") {
+    applyGST(1.5, 1.5);
   }
 }
 
-function populateSalesBillTable(salesBillTable, lessGST) {
+function populateSalesBillTable(salesBillTable, lessGST, withHSN) {
   for (let i=0; i<configs.sales.length; i++) {
     let entry = configs.sales[i];
     entry.items = entry.items.sort(compare);
     for (let j=0; j<entry.items.length; j++) {
       let item = entry.items[j].Item;
       if (entry.items[j].Item.startsWith("Fancy") || entry.items[j].Item.startsWith("Dulhan")) {
-        console.log(["Silver", entry.items[j].Item].toString());
         item += " " + (Dao.getMappedItem(["Silver", entry.items[j].Item].toString()).APPLIED * 1000);
       }
 
@@ -195,27 +175,83 @@ function populateSalesBillTable(salesBillTable, lessGST) {
         wrapTableData(document.createTextNode(breakup), "right"),
         wrapTableData(document.createTextNode(price), "right")];
 
+      if (withHSN) {
+        tableRow.splice(1, 0, wrapTableData(document.createTextNode("7113"), "right"));
+        cl = cl.replace("sales-row", "sales-row-with-hsn");
+      }
+
       let tr = addTableData(salesBillTable, tableRow);
       tr.className  = cl;
     }
   }
+
+  // additional charge
+  if (configs.additional > 0) {
+    let tableRow = [
+      wrapTableData(document.createTextNode("Other Accessories"), "left"),
+      wrapTableData(document.createTextNode("1"), "right"),
+      wrapTableData(document.createTextNode(""), "right"),
+      wrapTableData(document.createTextNode(""), "right"),
+      wrapTableData(document.createTextNode("₹ " + configs.additional), "right")];
+
+    let clEnd = "sales-row section-end";
+    tableRow.splice(1, 0, wrapTableData(document.createTextNode("7113"), "right"));
+    if (withHSN) {
+      clEnd = "sales-row-with-hsn section-end";
+    }
+
+    let tr = addTableData(salesBillTable, tableRow);
+    tr.className  = clEnd;
+  }
 }
 
 // apply gst
-function applyGST() {
+function applyGST(cgstRate, sgstRate) {
+  document.getElementById("gst-rate-flag").classList.add("display-none");
   let gstEntries = document.getElementsByClassName("gst-invoice");
   for (let i=0; i<gstEntries.length; i++) {
-    gstEntries[i].classList.remove("display-none")
+    gstEntries[i].classList.remove("display-none");
   }
   let estimateEntries = document.getElementsByClassName("estimate-invoice");
   for (let i=0; i<estimateEntries.length; i++) {
-    estimateEntries[i].classList.add("display-none")
+    estimateEntries[i].classList.add("display-none");
   }
   document.getElementById("top-left-header").textContent = "GSTIN: 20AKXPD1609D1ZN";
   document.getElementById("top-center-header").textContent = "TAX INVOICE";
-  document.getElementById("gst-button").textContent = "EST";
+  document.getElementById("gst-button").classList.add("display-none");
   document.getElementById("bill-no-text").textContent = "INVOICE NO.";
-  document.getElementById("bill-no").textContent = "......................";
+  document.getElementById("bill-no").textContent = configs.gstInvoiceNumber;
+  document.getElementById("billing-date").textContent = configs.gstInvoiceDate;
+  document.getElementById("billing-name").textContent = configs.gstName;
+  document.getElementById("billing-address").textContent = configs.gstAddress;
+  document.getElementById("billing-phone-no").textContent = configs.gstPhoneNumber;
+
+  document.getElementById("sales-table-total").innerHTML = configs.totals.sales_less_gst;
+  document.getElementById("cgst-header").innerHTML = "CGST @ " + cgstRate + "%";
+  document.getElementById("sgst-header").innerHTML = "SGST @ " + sgstRate + "%";
+  document.getElementById("sub-total-gst").innerHTML = configs.totals.sales_less_gst + ".00";
+  document.getElementById("discount-gst").innerHTML = getRupeeDesiDecimalNumber(configs.gstTotals.adjustedDiscount);
+  document.getElementById("taxed-amount").innerHTML = getRupeeDesiDecimalNumber(configs.gstTotals.taxedAmount);
+  document.getElementById("cgst-applied").innerHTML = getRupeeDesiDecimalNumber(configs.gstTotals.cgstApplied);
+  document.getElementById("sgst-applied").innerHTML = getRupeeDesiDecimalNumber(configs.gstTotals.sgstApplied);
+  document.getElementById("round-off").innerHTML = getRupeeDesiDecimalNumber(configs.gstTotals.roundOff);
+  document.getElementById("total-bill-gst").innerHTML = getRupeeDesiDecimalNumber(configs.gstTotals.totalAmount);
+
+  // Create GST bill copy
+  document.getElementById("bill-copy-page-gst").appendChild(document.getElementById("bill-main-page").cloneNode(true));
+
+  // Create post GST exchange summary
+  if (configs.purchase.length > 0) {
+    purchaseTotal = Math.abs(getFromDesiRupeeNumber(configs.totals.purchase));
+    netTotal = configs.gstTotals.totalAmount - purchaseTotal;
+    document.getElementById("purchase-gst-total").innerHTML = getRupeeDesiNumber(configs.gstTotals.totalAmount);
+    document.getElementById("purchase-gst-net-total").innerHTML = getRupeeDesiNumber(netTotal);
+  }
+}
+
+function expandPagesGST() {
+  document.getElementById("bill-copy-page-gst").classList.add("display-block");
+  document.getElementById("bill-purchase-gst").classList.add("display-block");
 }
 
 function applyEstimateGST() {

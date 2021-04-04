@@ -4,7 +4,7 @@ const {app, BrowserWindow, Menu} = require('electron');
 
 let mainWindow, goldSellForm, goldExchangeForm, editTrayItemForm;
 let priceCardView, gradePickerWindow, billWindow, paymentAcceptWindow;
-let updateConfigsWindow, mobileNumberForm;
+let updateConfigsWindow, invoiceForm;
 
 function createMainWindow() {
   mainWindow = new BrowserWindow({
@@ -237,8 +237,8 @@ function getBillWindow() {
 
 function createPaymentAcceptForm(configs) {
   paymentAcceptWindow = new BrowserWindow({
-    width: 400,
-    height: 350,
+    width: 530,
+    height: 305,
     frame: false,
     backgroundColor:'#205081',
     parent: mainWindow, modal:true,
@@ -263,32 +263,32 @@ function getPaymentAcceptForm() {
   return paymentAcceptWindow;
 }
 
-function createMobileNumberForm(params) {
-  mobileNumberForm = new BrowserWindow({
-    width: 275,
-    height: 310,
+function createInvoiceForm(params) {
+  invoiceForm = new BrowserWindow({
+    width: 350,
+    height: 532,
     frame: false,
     backgroundColor:'#205081',
     parent: mainWindow, modal:true,
     show: false,
     webPreferences: {nodeIntegration: true}
   });
-  mobileNumberForm.params = params;
-  mobileNumberForm.loadURL(url.format({
-    pathname: path.join(__dirname, 'html', 'mobileNumberForm.html'),
+  invoiceForm.configs = params;
+  invoiceForm.loadURL(url.format({
+    pathname: path.join(__dirname, 'html', 'gstInvoiceForm.html'),
     protocol: 'file:',
     slashes: true
   }));
-  mobileNumberForm.once('ready-to-show', () => {
-    mobileNumberForm.show()
+  invoiceForm.once('ready-to-show', () => {
+    invoiceForm.show()
   });
-  mobileNumberForm.on('close', () => {
-    mobileNumberForm = null;
+  invoiceForm.on('close', () => {
+    invoiceForm = null;
   });
 }
 
-function getMobileNumberForm() {
-  return mobileNumberForm;
+function getInvoiceForm() {
+  return invoiceForm;
 }
 
 const mainMenuTemplate = [
@@ -370,5 +370,5 @@ module.exports = {
   createGradePickerWindow, getGradePickerWindow,
   createBillWindow, getBillWindow,
   createPaymentAcceptForm, getPaymentAcceptForm,
-  createMobileNumberForm, getMobileNumberForm
+  createInvoiceForm, getInvoiceForm
 };

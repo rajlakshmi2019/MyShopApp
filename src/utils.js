@@ -246,7 +246,7 @@ function getInputTextFloatValue(element) {
 }
 
 function getDesiNumber(number) {
-  number = Math.floor(number);
+  number = Math.round(number);
   let lastDigit = Math.abs(number%10);
   let numberWithoutLastDigit = Math.floor(number/10);
   if (numberWithoutLastDigit > 0) {
@@ -256,11 +256,27 @@ function getDesiNumber(number) {
   }
 }
 
+function getRupeeDesiNumber(number) {
+  return (number < 0 ? "- " : "") + "₹ " + getDesiNumber(Math.abs(number));
+}
+
+function getDesiDecimalNumber(number) {
+  decimalPart = Math.round((number - Math.floor(number)) * 100) / 100;
+  return getDesiNumber(Math.floor(number)) + decimalPart.toFixed(2).replace("0.", ".");
+}
+
+function getRupeeDesiDecimalNumber(number) {
+  return (number < 0 ? "- " : "") + "₹ " + getDesiDecimalNumber(Math.abs(number));
+}
+
 function getFromDesiNumber(desiNumber) {
   return Number(desiNumber.replace(/,/g,""));
 }
 
 function getFromDesiRupeeNumber(desiRupeeNumber) {
+  if(desiRupeeNumber.startsWith("- ₹")) {
+    return -1 * getFromDesiNumber(desiRupeeNumber.substring(4))
+  }
   return getFromDesiNumber(desiRupeeNumber.substring(2));
 }
 
@@ -272,9 +288,9 @@ function generateTransactionId(date) {
 }
 
 function formatDate(date) {
-  return getTwoDigitInteger(date.getDate()) + "-"
-    + getTwoDigitInteger(date.getMonth() + 1) + "-"
-    + date.getFullYear();
+  return "" + date.getFullYear() + "-" +
+    getTwoDigitInteger(date.getMonth() + 1) + "-" +
+    getTwoDigitInteger(date.getDate());
 }
 
 function formatDateSlash(date) {
@@ -287,6 +303,16 @@ function formatDateReverse(date) {
   return "" + date.getFullYear()
     + getTwoDigitInteger(date.getMonth() + 1)
     + getTwoDigitInteger(date.getDate());
+}
+
+function getFinancialYear(date) {
+  let prefixYear = date.getFullYear();
+  if (date.getMonth() < 3) {
+    prefixYear -= 1;
+  }
+
+  let suffixYear = prefixYear + 1 - 2000;
+  return prefixYear + "-" + suffixYear;
 }
 
 function getTwoDigitInteger(integer) {
@@ -305,8 +331,51 @@ function consolidateEntries(entriesList) {
   return consolidatedEntries;
 }
 
+function padStringWithZeros(numStr, size) {
+  while (numStr.length < size) numStr = "0" + numStr;
+  return numStr;
+}
+
+function toTitleCase(str) {
+  return str.replace(/\w\S*/g, function(txt) {
+    return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+  });
+}
+
 function isMobileNumber(text) {
   return text.match(/^[5-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]$/) != null;
+}
+
+function borderColorOnNumberCheck() {
+  if (isNaN(Number(this.value)) || this.value === "") {
+    this.style.borderColor = "red";
+  } else {
+    this.style.borderColor = "green";
+  }
+}
+
+function borderColorOnEmptyCheck() {
+  if (this.value === "") {
+    this.style.borderColor = "red";
+  } else {
+    this.style.borderColor = "green";
+  }
+}
+
+function borderColorOnMobileNumberCheck() {
+  if (isMobileNumber(this.value)) {
+    this.style.borderColor = "green";
+  } else {
+    this.style.borderColor = "red";
+  }
+}
+
+function borderColorOnAlphabetsOnlyCheck() {
+  if (this.value.match(/^[a-zA-Z\s,]+$/)) {
+    this.style.borderColor = "green";
+  } else {
+    this.style.borderColor = "red";
+  }
 }
 
 module.exports = {
@@ -324,12 +393,22 @@ module.exports = {
   parseSalesTable,
   getInputTextFloatValue,
   getDesiNumber,
+  getRupeeDesiNumber,
+  getDesiDecimalNumber,
+  getRupeeDesiDecimalNumber,
   getFromDesiNumber,
   getFromDesiRupeeNumber,
   generateTransactionId,
   formatDate,
   formatDateSlash,
   formatDateReverse,
+  getFinancialYear,
   consolidateEntries,
-  isMobileNumber
+  padStringWithZeros,
+  toTitleCase,
+  isMobileNumber,
+  borderColorOnNumberCheck,
+  borderColorOnEmptyCheck,
+  borderColorOnMobileNumberCheck,
+  borderColorOnAlphabetsOnlyCheck
 }

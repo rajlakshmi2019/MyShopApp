@@ -1,5 +1,5 @@
 function calculateMetalPrice(weight, metalRate, purity) {
-  return Math.floor(weight*metalRate*purity);
+  return Math.round(weight*metalRate*purity);
 }
 
 function calculateMakingRate(makingRate, appliedGradeMakingRateDiff, newGradeMakingRateDiff) {
@@ -8,7 +8,7 @@ function calculateMakingRate(makingRate, appliedGradeMakingRateDiff, newGradeMak
 
 function calculateMakingCharge(weight, makingRate, minimumMaking,
   appliedGradeMakingDiff, newGradeMakingDiff, diffUnit, mmDiffUnit) {
-  return Math.floor(Math.max(weight*calculateMakingRate(makingRate, appliedGradeMakingDiff["DIFF"] * diffUnit, newGradeMakingDiff["DIFF"] * diffUnit),
+  return Math.round(Math.max(weight*calculateMakingRate(makingRate, appliedGradeMakingDiff["DIFF"] * diffUnit, newGradeMakingDiff["DIFF"] * diffUnit),
     calculateMakingRate(minimumMaking, appliedGradeMakingDiff["MM_DIFF"] * mmDiffUnit, newGradeMakingDiff["MM_DIFF"] * mmDiffUnit)));
 }
 
@@ -53,46 +53,35 @@ function calculateGST(taxedAmount, cgstPercentage, sgstPercentage) {
 }
 
 function calculateGSTAppliedTotals(
-  sellingPrice, discount, cgstPercentage, sgstPercentage) {
-    let taxedAmount = sellingPrice - discount;
-    let cgstApplied = Math.floor(taxedAmount * 0.01 * cgstPercentage);
-    let sgstApplied = Math.floor(taxedAmount * 0.01 * sgstPercentage);
-    let totalPrice = taxedAmount + cgstApplied + sgstApplied;
-    let adjustedDiscount = discount;
-    return {
-      taxedAmount,
-      cgstApplied,
-      sgstApplied,
-      totalPrice,
-      adjustedDiscount
-    };
+  salesAmount, discount, cgstPercentage, sgstPercentage) {
+    let taxedAmount = salesAmount - discount;
+    return getGSTTotals(taxedAmount, discount, cgstPercentage, sgstPercentage);
   }
 
 function calculateGSTInplaceTotals(
-  sellingPrice, discount, cgstPercentage, sgstPercentage) {
-    let finalPrice = sellingPrice - discount;
-    let taxedAmount = Math.round(finalPrice / (1 + 0.01 * (cgstPercentage + sgstPercentage)));
-    let gstApplied = finalPrice - taxedAmount;
-    let cgstApplied = Math.floor(taxedAmount * 0.01 * cgstPercentage);
-    let sgstApplied = Math.floor(taxedAmount * 0.01 * sgstPercentage);
-    let gstDiff = gstApplied - cgstApplied - sgstApplied;
-    if (gstDiff == 1) {
-      cgstApplied += 0.5;
-      sgstApplied += 0.5;
-    } else if (gstDiff == 2) {
-      cgstApplied += 1;
-      sgstApplied += 1;
-    }
+  salesAmount, totalAmount, cgstPercentage, sgstPercentage) {
+    let taxedAmount = Math.round(totalAmount / (1 + 0.01 * (cgstPercentage + sgstPercentage)));
+    let adjustedDiscount = salesAmount - taxedAmount;
+    return getGSTTotals(taxedAmount, adjustedDiscount, cgstPercentage, sgstPercentage);
+}
 
-    let totalPrice = taxedAmount + cgstApplied + sgstApplied;
-    let adjustedDiscount = sellingPrice - taxedAmount;
-    return {
-      taxedAmount,
-      cgstApplied,
-      sgstApplied,
-      totalPrice,
-      adjustedDiscount
-    };
+function getGSTTotals(taxedAmount, adjustedDiscount, cgstPercentage, sgstPercentage) {
+  let cgstApplied = Math.round(taxedAmount * cgstPercentage) / 100;
+  let sgstApplied = Math.round(taxedAmount * sgstPercentage) / 100;
+  let gstApplied = cgstApplied + sgstApplied;
+  let totalAmountRaw = taxedAmount + gstApplied;
+  let totalAmount = Math.round(totalAmountRaw);
+  let roundOff = Math.round((totalAmount - totalAmountRaw) * 100) / 100;
+
+  return {
+    taxedAmount,
+    adjustedDiscount,
+    gstApplied,
+    cgstApplied,
+    sgstApplied,
+    totalAmount,
+    roundOff
+  };
 }
 
 module.exports = {

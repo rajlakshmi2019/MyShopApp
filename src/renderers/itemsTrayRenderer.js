@@ -56,17 +56,12 @@ ipcRenderer.on('grade:update', (event, grade) => {
   updateSellTrayGrade(grade.tabIndex, grade.newGrade);
 });
 
-ipcRenderer.on('mark:pending', (event, configs) => {
-  finishTransaction(configs.tabIndex, configs);
-});
-
 ipcRenderer.on('tab-name:update', (event, params) => {
-  console.log(getTabButton(params.tabId).querySelector(".tab-name").textContent);
-  if (isMobileNumber(params.tabName)) {
-    getTabButton(params.tabId).querySelector(".tab-name").textContent = params.tabName;
+  let tabNameDiv = getTabButton(params.tabId).querySelector(".tab-name");
+  if (isMobileNumber(params.tabName) && params.tabName !== tabNameDiv.textContent) {
+    tabNameDiv.textContent = params.tabName;
     Dao.saveMobileNo(params.tabName);
   }
-  ipcRenderer.send('bill:create', params);
 });
 
 /* Build tab button and content */
@@ -117,45 +112,28 @@ function addTab(tabType, set) {
       }
     });
 
-  netTotalContainer.querySelector(".finish-transaction-button")
+  netTotalContainer.querySelector(".gst-bill-button")
     .addEventListener("click", () => {
-      let netTotal = document.getElementById("net-total-display-" + tabIndex).innerHTML
-      if (netTotal.startsWith("- ₹")) {
-        remote.dialog.showMessageBox(
-          remote.getCurrentWindow(),
-          {
-            type: 'question',
-            buttons: ['Yes', 'No'],
-            defaultId: 1,
-            title: 'Remember to add the discount',
-            message: 'Mark this transaction completed?',
-            detail: 'Amount to be paid to the customer ' + netTotal.substring(2)
-          },
-          (response) => {
-            if (response == 0) {
-              finishTransaction(tabIndex, {});
-            }
-          });
+      billParams = getBillParams(tabIndex, false);
+      if (billParams.sales.length == 0) {
+        alert("No Sale!! Can't generate GST Invoice");
       } else {
-        ipcRenderer.send('payment:accept', {
-          tabIndex: tabIndex,
-          netTotal: netTotal
-        });
+        ipcRenderer.send('gst:form', billParams);
       }
     });
 
-    netTotalContainer.querySelector(".convert-to-a-button")
-      .addEventListener("click", function() {
-        if (this.textContent == "A") {
-          updateSellTrayGrade(tabIndex, "A");
-          updateNetTotalContainer(tabIndex);
-          this.textContent = "B";
-        } else if (this.textContent == "B") {
-          updateSellTrayGrade(tabIndex, "B");
-          updateNetTotalContainer(tabIndex);
-          this.textContent = "A";
-        }
-      });
+  netTotalContainer.querySelector(".convert-to-a-button")
+    .addEventListener("click", function() {
+      if (this.textContent == "A") {
+        updateSellTrayGrade(tabIndex, "A");
+        updateNetTotalContainer(tabIndex);
+        this.textContent = "B";
+      } else if (this.textContent == "B") {
+        updateSellTrayGrade(tabIndex, "B");
+        updateNetTotalContainer(tabIndex);
+        this.textContent = "A";
+      }
+    });
 
   /* Select tray and tab */
   if (tabType === "sell") {
@@ -738,18 +716,14 @@ function buildNetTotalContainer(tabContent, set) {
   trayControlsContainer.appendChild(backButton);
   let billButton = createHtmlElement("button", "tray-window-button controller-button bill-button float-left", "bill-button-" + tabIndex, null, null);
   billButton.addEventListener("click", () => {
-    generateBill(getTabButton(tabIndex).querySelector(".tab-name").textContent,
-      tabIndex, new Date(), "......................",
-      parseSalesTable(document.getElementById("sales-table-" + tabIndex), true),
-      parseTable(document.getElementById("purchase-table-" + tabIndex), true),
-      getAdditionalCharge(tabIndex), getTotals(tabIndex), false, false);
+    generateBill(tabIndex, false);
   });
   trayControlsContainer.appendChild(billButton);
   let netTotalDisplay = createHtmlElement(
     "div", "total-price-display number-font money-green float-right align-right", "net-total-display-" + tabIndex, null, decodeURI("&#8377;") + " 0");
   trayControlsContainer.appendChild(netTotalDisplay);
   let proceedButton =
-    createHtmlElement("button", "tray-window-button finish-transaction-button float-right", "finish-transaction-button-" + tabIndex, "Payment", null);
+    createHtmlElement("button", "tray-window-button gst-bill-button float-right", "gst-bill-button-" + tabIndex, "INVOICE", null);
   trayControlsContainer.appendChild(proceedButton);
   let convertToAButton =
     createHtmlElement("button", "tray-window-button convert-to-a-button float-right", "convert-to-a-button-" + tabIndex, "A", null);
@@ -1054,7 +1028,6 @@ function populateWeightTable(tabIndex, salesTable, purchaseTable) {
   for (let i=0; i<purchaseRows.length; i++) {
     let tableColumnDivs = purchaseRows[i].getElementsByClassName("table-data-div");
     let metal = tableColumnDivs[0].innerHTML;
-    console.log(tableColumnDivs[1].innerHTML.replace(" g", ""));
     let metalWeight = Number(tableColumnDivs[1].innerHTML.replace(" g", ""));
     let color = "accessories";
     if ( metal === "Gold") {
@@ -1375,29 +1348,6 @@ function aggregateItemNames(itemNames) {
   return itemNamesMap;
 }
 
-function generateBill(tabName, tabId, date, transId,
-  salesEntries, purchaseEntries, additionalCharge, totals, savable, force) {
-    let billParams = {
-      tabName: tabName,
-      tabId: tabId,
-      bill_date: formatDateSlash(date),
-      bill_date_reverse: formatDateReverse(date),
-      id: transId,
-      sales: aggregateSalesEntries(salesEntries),
-      purchase: purchaseEntries,
-      additional: additionalCharge,
-      totals: totals,
-      savable: savable
-    }
-    if (salesEntries.length == 0 && purchaseEntries.length == 0 && additionalCharge == 0) {
-      alert('No item selected. Please select items to complete this transaction.');
-    } else if (force || isMobileNumber(tabName)) {
-      ipcRenderer.send('bill:create', billParams);
-    } else {
-      ipcRenderer.send('mobile-no:create', billParams);
-    }
-}
-
 function finishTransaction(tabId, additionalConfigs) {
   let date = new Date();
   let tabButton = getTabButton(tabId);
@@ -1460,10 +1410,42 @@ function finishTransaction(tabId, additionalConfigs) {
           }
 
           // generate bills
-          generateBill(tabName, tabId, date, transId, salesEntries, purchaseEntries,
+          generateGSTBill(tabName, tabId, date, transId, salesEntries, purchaseEntries,
             getAdditionalCharge(tabId), billTotals, false, false);
         });
   }
+}
+
+function generateBill(tabId, force) {
+    let billParams = getBillParams(tabId, false);
+    if (billParams.sales.length == 0 && billParams.purchase.length == 0 && billParams.additional == 0) {
+      alert('No item selected. Please select items to complete this transaction.');
+    } else {
+      if (force) {
+        ipcRenderer.send('bill:create', billParams);
+      } else {
+        ipcRenderer.send('payment:form', billParams);
+      }
+    }
+}
+
+function getBillParams(tabId, savable) {
+  let date = new Date();
+  let salesEntries = parseSalesTable(document.getElementById("sales-table-" + tabId), true);
+  let purchaseEntries = parseTable(document.getElementById("purchase-table-" + tabId), true);
+  return {
+    tabName: getTabButton(tabId).querySelector(".tab-name").textContent,
+    tabId: tabId,
+    bill_date_raw: date,
+    bill_date: formatDateSlash(date),
+    bill_date_reverse: formatDateReverse(date),
+    id: ".....................",
+    sales: aggregateSalesEntries(salesEntries),
+    purchase: purchaseEntries,
+    additional: getAdditionalCharge(tabId),
+    totals: getTotals(tabId),
+    savable: savable
+  };
 }
 
 function getTotals(tabId) {
@@ -1476,7 +1458,7 @@ function getTotals(tabId) {
   let subTotal = getAdditionalCharge(tabId) + (subTotalVal.startsWith("- ₹") ?
     -1 * getFromDesiRupeeNumber(subTotalVal.substring(2)) : getFromDesiRupeeNumber(subTotalVal));
   let purchaseTotal = getFromDesiRupeeNumber(document.getElementById("purchase-total-" + tabId).innerHTML);
-  let subTotalLessGST = getAdditionalCharge(tabId) + salesTotalLessGST - purchaseTotal;
+  let subTotalLessGST = salesTotalLessGST - purchaseTotal;
   let discountLessGST = discount > (salesTotal - salesTotalLessGST) ? discount - salesTotal + salesTotalLessGST : 0;
   let totalLessGST = subTotalLessGST - discountLessGST;
 

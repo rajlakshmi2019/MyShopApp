@@ -40,19 +40,30 @@ tr.purchase-header th:nth-child(1) {
   width: 25%;
 }
 
+tr.sales-header-with-hsn th:nth-child(1) {
+  text-align: left;
+  padding-left: 10px;
+  width: 22%;
+}
+
 tr.sales-row td:nth-child(1),
+tr.sales-row-with-hsn td:nth-child(1),
 tr.purchase-row td:nth-child(1) {
   padding-left: 2px;
 }
 
 tr.sales-header th:nth-child(2),
-tr.sales-row td:nth-child(2) {
+tr.sales-row td:nth-child(2),
+tr.sales-header-with-hsn th:nth-child(3),
+tr.sales-row-with-hsn td:nth-child(3) {
   text-align: right;
   width: 10%;
 }
 
 tr.sales-header th:nth-child(3),
 tr.sales-row td:nth-child(3),
+tr.sales-header-with-hsn th:nth-child(4),
+tr.sales-row-with-hsn td:nth-child(4),
 tr.purchase-header th:nth-child(2),
 tr.purchase-row td:nth-child(2) {
   text-align: right;
@@ -60,20 +71,30 @@ tr.purchase-row td:nth-child(2) {
 }
 
 tr.sales-header th:nth-child(4),
-tr.sales-row td:nth-child(4) {
+tr.sales-row td:nth-child(4),
+tr.sales-header-with-hsn th:nth-child(5),
+tr.sales-row-with-hsn td:nth-child(5) {
   text-align: right;
 }
 
-tr.sales-row td:nth-child(5) {
+tr.sales-row td:nth-child(5),
+tr.sales-row-with-hsn td:nth-child(6) {
   padding-right: 2px;
   text-align: right;
   width: 22%;
 }
 
-tr.sales-header th:nth-child(5) {
+tr.sales-header th:nth-child(5),
+tr.sales-header-with-hsn th:nth-child(6) {
   padding-right: 10px;
   text-align: right;
   width: 22%;
+}
+
+tr.sales-header-with-hsn th:nth-child(2),
+tr.sales-row-with-hsn td:nth-child(2) {
+  text-align: right;
+  width: 8%;
 }
 
 tr.purchase-header th:nth-child(3),
@@ -228,12 +249,21 @@ table.print-friendly tr {
   page-break-before: always;
 }
 
+.full-width {
+  width: 70%;
+}
+
 .fixed-width {
-  width: 32%;
+  width: 24%;
 }
 
 .fixed-width-twenty {
   width: 24%;
+}
+
+.absolute-left-position {
+  position: absolute;
+  left: 20%;
 }
 
 .hindi-bold {

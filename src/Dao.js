@@ -61,6 +61,29 @@ let persistTransactionEntriesEnabled = async function(transactionDate, transacti
   appendToFileOverwritingLastBlock(process.env.BASE_DATA_DIR + 'running', iv, transactionEnc);
 }
 
+let persistGSTRecord = function(gstBillParams, filedir, filename) {
+  let filepath = process.env.BASE_DATA_DIR + filedir;
+
+  // check if file exists
+  if (!fs.existsSync(filepath)) {
+    fs.mkdirSync(filepath);
+  }
+
+  if (!fs.existsSync(filepath + filename)) {
+    let fileHeader = 'Invoice No,Name,Address,Phone No,Taxable Value,CGST,SGST,Total GST,Round Off,Total Bill';
+    fs.appendFileSync(filepath + filename, fileHeader);
+  }
+
+  // write to file
+  let gstRecord = '' + gstBillParams.gstInvoiceNumber + ',' + gstBillParams.gstName.replace(/,/g, ':') + ',' +
+    gstBillParams.gstAddress.replace(/,/g, ':') + ',' + gstBillParams.gstPhoneNumber + ',' +
+    gstBillParams.gstTotals.taxedAmount + ',' + gstBillParams.gstTotals.cgstApplied + ',' +
+    gstBillParams.gstTotals.sgstApplied + ',' + gstBillParams.gstTotals.gstApplied + ',' +
+    gstBillParams.gstTotals.roundOff + ',' + gstBillParams.gstTotals.totalAmount;
+
+  addGSTRecordToFile(filepath + filename, Number(gstBillParams.gstInvoiceNumber), gstRecord);
+}
+
 let savePDF = function(pdf, filedir, filename) {
   let filepath = process.env.BASE_DATA_DIR + filedir;
 
@@ -71,7 +94,7 @@ let savePDF = function(pdf, filedir, filename) {
 
   // write to file
   fs.writeFile(filepath + filename, pdf, (error) => {
-    if (error) return console.log(error.message);
+    if (error) console.log(error.message);
   });
 }
 
@@ -233,6 +256,30 @@ function tryWriteSync(fd, buffer, pos, len, start) {
   return bytesWrote;
 }
 
+// helper function to write entries to GST report
+function addGSTRecordToFile(gstFile, gstInvoiceNo, gstRecord) {
+  let gstFileText = ""
+  let gstRecordAdded = false;
+
+  // write to file
+  fs.readFileSync(gstFile).toString().split('\n').forEach(function (record) {
+    if (Number(record.split(',')[0]) == gstInvoiceNo) {
+      record = gstRecord;
+      gstRecordAdded = true;
+    }
+
+    if (record !== "") {
+      gstFileText += record + '\n';  
+    }
+  });
+
+  if (!gstRecordAdded) {
+    gstFileText += gstRecord;
+  }
+
+  fs.writeFileSync(gstFile, gstFileText);
+}
+
 // helper function to write transaction entries to file
 function writeTransactionToFile(filepath, filename, transaction, errorCallback) {
   // check if file exists
@@ -251,6 +298,7 @@ function writeTransactionToFile(filepath, filename, transaction, errorCallback) 
 module.exports = {
   loadAppConfigs,
   persistTransactionEntries,
+  persistGSTRecord,
   savePDF,
   getTodaysRate,
   getTodaysGoldRate,

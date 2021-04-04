@@ -10,124 +10,133 @@
   <body>
     <div id="bill-menu"></div>
     <div class="bill-container">
-      <div class="wrapper-div" id="bill-header">
-        <div id="bill-top-header">
-          <div class="float-left split-forty" id="top-left-header"></div>
-          <div class="float-left td-align-center" id="top-center-header"></div>
-          <div class="float-right td-align-right split-forty" id="top-right-header"></div>
+      <div class="overflow-hidden" id="bill-main-page">
+        <div class="wrapper-div" id="bill-header">
+          <div id="bill-top-header">
+            <div class="float-left split-forty" id="top-left-header"></div>
+            <div class="float-left td-align-center" id="top-center-header"></div>
+            <div class="float-right td-align-right split-forty" id="top-right-header"></div>
+          </div>
+          <div class="overflow-hidden">
+            <img class="float-left" id="rj-img" src="./../resource/rj_logo.png" alt="RJ">
+            <div class="wrapper-div float-left" id="name-header-div">
+              <div class="title-large font-bold">
+                Rajlaxmi Jewellers
+              </div>
+              <div class="sub-title font-bold">
+                The jewellery people
+              </div>
+              <div class="td-align-center">
+                Amar Chowk (Nawadih More), Rajdhanwar
+              </div>
+              <div class="td-align-center">
+                Giridih (Jharkhand) - 825412
+              </div>
+            </div>
+            <img class="float-right" id="hallmark-img" src="./../resource/hallmark_65.png" alt="hallmark">
+          </div>
+          <div class="overflow-hidden">
+            <div class="custom-box full-width float-left">
+              <label class="fixed-width float-left" id="bill-no-text">ESTIMATE</label>
+              <label class="td-align-left font-bold float-left" id="bill-no"></label>
+            </div>
+            <div class="custom-box fixed-width-twenty float-right td-align-right">
+              <div class="overflow-hidden float-left">
+                DATE
+              </div>
+              <div class="float-right font-bold" id="billing-date"></div>
+            </div>
+          </div>
+          <div class="overflow-hidden">
+            <div class="custom-box full-width float-left">
+              <label class="fixed-width float-left">NAME</label>
+              <label class="td-align-left font-bold float-left" id="billing-name">
+                .....................
+              </label>
+            </div>
+            <div class="custom-box fixed-width-twenty float-right td-align-right">
+              <div class="overflow-hidden float-left">
+                PLACE
+              </div>
+              <div class="float-right font-bold" id="billing-place">
+                Dhanwar
+              </div>
+            </div>
+          </div>
+          <div class="overflow-hidden">
+            <div class="custom-box full-width float-left">
+              <label class="fixed-width float-left">ADDR</label>
+              <label class="td-align-left font-bold float-left" id="billing-address">
+                .....................
+              </label>
+            </div>
+            <div class="custom-box fixed-width-twenty float-right td-align-right">
+              <div class="overflow-hidden float-left">
+                PHONE
+              </div>
+              <label class="float-right font-bold" id="billing-phone-no">
+                .....................
+              </label>
+            </div>
+          </div>
         </div>
-        <div class="overflow-hidden">
-          <img class="float-left" id="rj-img" src="./../resource/rj_logo.png" alt="RJ">
-          <div class="wrapper-div float-left" id="name-header-div">
-            <div class="title-large font-bold">
-              Rajlaxmi Jewellers
+        <br>
+        <div class="wrapper-div bill-contents">
+          <div class="wrapper-div" id="bill-sales"></div>
+          <div class="wrapper-div avoid-break-inside default-none estimate-invoice" id="bill-purchase"></div>
+          <div class="overflow-hidden total-box avoid-break-inside" id="bill-total">
+            <div class="custom-box" id="gst-rate-flag">GST @ 3%</div>
+            <div class="float-left custom-box">
+              Sub Total
             </div>
-            <div class="sub-title font-bold">
-              The jewellery people
+            <div class="td-align-right custom-box estimate-invoice" id="sub-total"></div>
+            <div class="td-align-right custom-box gst-invoice display-none" id="sub-total-gst"></div>
+
+            <div class="float-left custom-box">
+              Discount
             </div>
-            <div class="td-align-center">
-              Amar Chowk (Nawadih More), Rajdhanwar
+            <div class="td-align-right custom-box estimate-invoice" id="discount"></div>
+            <div class="td-align-right custom-box gst-invoice display-none" id="discount-gst"></div>
+
+            <br>
+            <div class="float-left custom-box gst-invoice display-none" id="taxed-amount-header">Taxable Value</div>
+            <div class="td-align-right custom-box gst-invoice display-none" id="taxed-amount"></div>
+            <div class="float-left custom-box gst-invoice display-none" id="cgst-header"></div>
+            <div class="td-align-right custom-box gst-invoice display-none" id="cgst-applied"></div>
+            <div class="float-left custom-box gst-invoice display-none" id="sgst-header"></div>
+            <div class="td-align-right custom-box gst-invoice display-none" id="sgst-applied"></div>
+            <div class="float-left custom-box gst-invoice display-none" id="round-off-header">Round Off</div>
+            <div class="td-align-right custom-box gst-invoice display-none" id="round-off"></div>
+            <div class="float-left custom-box">
+              Grand Total
             </div>
-            <div class="td-align-center">
-              Giridih (Jharkhand) - 825412
+            <div class="td-align-right custom-box estimate-invoice" id="total-bill"></div>
+            <div class="td-align-right custom-box gst-invoice display-none" id="total-bill-gst"></div>
+
+            <div class="overflow-hidden due-box default-none estimate-invoice" id="due-total">
+              <div class="float-left custom-box">
+                Due
+              </div>
+              <div class="td-align-right custom-box" id="payment-due"></div>
             </div>
-          </div>
-          <img class="float-right" id="hallmark-img" src="./../resource/hallmark_65.png" alt="hallmark">
-        </div>
-        <div class="overflow-hidden">
-          <div class="custom-box fixed-width float-left">
-            <label id="bill-no-text">ESTIMATE NO.</label>
-            <label class="td-align-left float-right" id="bill-no"></label>
-          </div>
-          <div class="custom-box fixed-width-twenty float-right td-align-right">
-            <div class="overflow-hidden float-left">
-              DATE
+
+            <div class="overflow-hidden td-align-center" id="bill-footer">
+              Purity is our Speciality
             </div>
-            <div class="float-right" id="billing-date"></div>
-          </div>
-        </div>
-        <div class="overflow-hidden">
-          <div class="custom-box fixed-width float-left">
-            NAME
-            <label class="td-align-left float-right" id="billing-name">
-              ...........................
-            </label>
-          </div>
-          <div class="custom-box fixed-width-twenty float-right td-align-right">
-            <div class="overflow-hidden float-left">
-              PLACE
+            <div class="overflow-hidden hindi-bold font-bold td-align-center" id="footer-message">
+              वापसी के समय रसीद लाना जरुरी है।
             </div>
-            <div class="float-right" id="billing-place">
-              Rajdhanwar
+            <div class="overflow-hidden font-bold td-align-center" id="footer-message">
+              90% Return by Weight of All Gold Items on Market Purchase Rate
             </div>
-          </div>
-        </div>
-        <div class="overflow-hidden">
-          <div class="custom-box fixed-width float-left">
-            ADDR
-            <label class="td-align-left float-right" id="billing-address">
-              ...........................
-            </label>
-          </div>
-          <div class="custom-box fixed-width-twenty float-right td-align-right">
-            <div class="overflow-hidden float-left">
-              PHONE
-            </div>
-            <label class="float-right" id="billing-phone-no">
-              .......................
-            </label>
           </div>
         </div>
       </div>
-      <br>
-      <div class="wrapper-div bill-contents">
-        <div class="wrapper-div" id="bill-sales"></div>
-        <div class="wrapper-div avoid-break-inside default-none estimate-invoice" id="bill-purchase"></div>
-        <div class="overflow-hidden total-box avoid-break-inside" id="bill-total">
-          <div class="custom-box" id="gst-rate-flag">GST @ 3%</div>
-          <div class="float-left custom-box">
-            Sub Total
-          </div>
-          <div class="td-align-right custom-box estimate-invoice" id="sub-total"></div>
-          <div class="td-align-right custom-box gst-invoice display-none" id="sub-total-gst">Rs 14565</div>
-
-          <div class="float-left custom-box">
-            Discount
-          </div>
-          <div class="td-align-right custom-box estimate-invoice" id="discount"></div>
-          <div class="td-align-right custom-box gst-invoice display-none" id="discount-gst">Rs 570</div>
-
-          <div class="float-left custom-box gst-invoice display-none" id="cgst-header"></div>
-          <div class="td-align-right custom-box gst-invoice display-none" id="cgst-applied">Rs 450</div>
-          <div class="float-left custom-box gst-invoice display-none" id="sgst-header"></div>
-          <div class="td-align-right custom-box gst-invoice display-none" id="sgst-applied">Rs 450</div>
-          <br>
-          <div class="float-left custom-box">
-            Grand Total
-          </div>
-          <div class="td-align-right custom-box estimate-invoice" id="total-bill"></div>
-          <div class="td-align-right custom-box gst-invoice display-none" id="total-bill-gst">Rs 15100</div>
-
-          <div class="overflow-hidden due-box default-none estimate-invoice" id="due-total">
-            <div class="float-left custom-box">
-              Due
-            </div>
-            <div class="td-align-right custom-box" id="payment-due"></div>
-          </div>
-
-          <div class="overflow-hidden td-align-center" id="bill-footer">
-            Purity is our Speciality
-          </div>
-          <div class="overflow-hidden hindi-bold font-bold td-align-center" id="footer-message">
-            वापसी के समय रसीद लाना जरुरी है।
-          </div>
-          <div class="overflow-hidden font-bold td-align-center" id="footer-message">
-            90% Return by Weight of All Gold Items on Market Purchase Rate
-          </div>
-        </div>
-        <div id="bill-purchase-gst"
-          class="wrapper-div upper-margin page-break-before default-none gst-invoice display-none">
-        </div>
+      <div id="bill-copy-page-gst"
+        class="wrapper-div upper-margin page-break-before default-none gst-invoice display-none">
+      </div>
+      <div id="bill-purchase-gst"
+        class="wrapper-div upper-margin page-break-before default-none gst-invoice display-none">
       </div>
     </div>
   </body>

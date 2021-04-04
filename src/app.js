@@ -101,45 +101,46 @@ ipcMain.on('update:selected:grade', (event, grade) => {
   windowFactory.getGradePickerWindow().close();
 });
 
-ipcMain.on('payment:accept', (event, configs) => {
+ipcMain.on('payment:form', (event, configs) => {
   if (windowFactory.getPaymentAcceptForm() == null) {
     windowFactory.createPaymentAcceptForm(configs);
   }
 });
 
-ipcMain.on('update:pending', (event, configs) => {
-  windowFactory.getMainWindow().webContents.send('mark:pending', configs);
-  windowFactory.getPaymentAcceptForm().close();
-});
-
 ipcMain.on('bill:create', (event, configs) => {
   windowFactory.createBillWindow(configs);
   windowFactory.getBillWindow().webContents.on('did-finish-load', () => {
+    // Add gst bill to monthly GST Report
+    if (configs.type === "GST") {
+      Dao.persistGSTRecord(configs, configs.gstFinancialYear + '/',
+        configs.gstFinancialYear + '_' + configs.gstInvoiceMonth + '_GST_Report.csv');
+    }
+
     windowFactory.getBillWindow().webContents.printToPDF({
       marginsType: 2,
       pageSize:"A5"
     }, (error, data) => {
-      if(error) return console.log(error.message);
+      if (error) console.log(error.message);
 
       // save to pdf file
       if (configs.savable) {
-        Dao.savePDF(data, configs.bill_date_reverse.slice(0, -2) + '/',
-          configs.bill_date_reverse + '_' + configs.id + ".pdf");
+        Dao.savePDF(data, configs.gstFinancialYear + '/',
+          configs.gstFinancialYear + '_' + configs.gstInvoiceMonth +
+          '_GST_INVOICE_' + configs.gstInvoiceNumber + '.pdf');
       }
     });
   });
 });
 
-ipcMain.on('mobile-no:create', (event, params) => {
-  if (windowFactory.getMobileNumberForm() == null) {
-    windowFactory.createMobileNumberForm(params);
-  }
-});
-
 ipcMain.on('mobile-no:update', (event, params) => {
   windowFactory.getMainWindow().webContents.send('tab-name:update', params);
-  windowFactory.getMobileNumberForm().close();
 });
+
+ipcMain.on('gst:form', (event, params) => {
+  if (windowFactory.getInvoiceForm() == null) {
+    windowFactory.createInvoiceForm(params);
+  }
+})
 
 /** Helper Methods **/
 function addFirstTrayTab() {

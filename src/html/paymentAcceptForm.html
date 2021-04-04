@@ -10,23 +10,27 @@
   </head>
   <body>
     <div id="accept-payment-div">
-      <h1 class="big-header-margin">Accept Payment</h1>
-      <div class="wrapper-div">
-        <h2 class="number-font-without-margin input-header float-left">Total Bill of </h2>
-        <h2 class="number-font money-green input-header" id="net-total">₹ 0</h2>
-        <div class="wrapper-div">
-          <input class="input-text rupee-background" id="payment-input">
-        </div>
+      <div class="contact-no-div float-right">
+        <input class="input-text phone-background" style="width: 100%" id="mobile-no-input">
       </div>
-      <div class="wrapper-div upper-margin">
-        <h2 class="number-font-without-margin input-header float-left">Total Pending </h2>
-        <h2 class="number-font red-color input-header" id="pending-total">₹ 0</h2>
-        <div id="pending-form">
-          <input type="radio" name="pending-opt" class="radio-btn" id="discount" value="Discount" checked> <b>Discount</b>
-          &nbsp;&nbsp;
-          <input type="radio" name="pending-opt" class="radio-btn" id="due" value="Due"> <b>Due</b>
-          &nbsp;&nbsp;
-          <input type="radio" name="pending-opt" class="radio-btn" id="return" value="Return"> <b>Return</b>
+      <h1 class="big-header-margin">Accept Payment</h1>
+      <div class="payment-info-div">
+        <div class="wrapper-div float-right due-amount-div">
+          <h2 class="number-font-without-margin input-header align-right">Due Amount</h2>
+          <div class="wrapper-div">
+            <input class="input-text rupee-background" id="due-input">
+          </div>
+        </div>
+        <div class="wrapper-div payment-amount-div">
+          <h2 class="number-font-without-margin input-header float-left">Total Bill of </h2>
+          <h2 class="number-font input-header" id="net-total">₹ 0</h2>
+          <div class="wrapper-div">
+            <input class="input-text rupee-background" id="payment-input">
+          </div>
+        </div>
+        <div class="wrapper-div upper-margin">
+          <h2 class="number-font-without-margin input-header float-left">Discount of </h2>
+          <h2 class="number-font red-color input-header" id="pending-total">₹ 0</h2>
         </div>
       </div>
     </div>
