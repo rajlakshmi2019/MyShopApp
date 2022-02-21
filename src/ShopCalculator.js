@@ -29,6 +29,16 @@ function calculatePrice(weight, metalRate, makingRate, minimumMaking, purity,
   };
 }
 
+function calculatePriceByPercentageMaking(weight, metalRate, percentageMakingRate, minimumMaking, purity,
+  appliedGradeMakingDiff, newGradeMakingDiff, percentageDiffUnit, mmDiffUnit,
+  cgstPercentage, sgstPercentage) {
+  let makingRate = metalRate * 0.01 * percentageMakingRate;
+  let diffUnit = metalRate * 0.01 * percentageDiffUnit;
+  return calculatePrice(weight, metalRate, makingRate, minimumMaking, purity,
+    appliedGradeMakingDiff, newGradeMakingDiff, diffUnit, mmDiffUnit,
+    cgstPercentage, sgstPercentage);
+}
+
 function calculateMetalPurchaseRate(metalRate, purchaseRateDiff) {
   return metalRate + purchaseRateDiff;
 }
@@ -89,6 +99,7 @@ module.exports = {
   calculateMakingRate,
   calculateMakingCharge,
   calculatePrice,
+  calculatePriceByPercentageMaking,
   calculateMetalPurchaseRate,
   calculateMetalPurchaseRateDiff,
   calculateCostPrice,

@@ -12,6 +12,15 @@ class AppConfigs {
       return accumulator;
     }, {});
 
+    this.percentageMaking = metalRateRecords.reduce((accumulator, record) => {
+      accumulator[record.METAL] = {
+        'RATE': Number(record.PERCENTAGE_MAKING),
+        'DIFF_UNIT': Number(record.PERCENTAGE_MAKING_DIFF),
+        'ENABLED': record.PERCENTAGE_MAKING_ENABLED === 'TRUE'
+      };
+      return accumulator;
+    }, {});
+
     this.grades = [...new Set(gradesMakingRateDiffRecords.map(record => record.GRADE))];
 
     this.gradeMakingRateDiff = gradesMakingRateDiffRecords.reduce((accumulator, record) => {

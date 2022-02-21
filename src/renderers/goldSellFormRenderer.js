@@ -184,6 +184,7 @@ submitButton.addEventListener("dblclick", (event) => {
 
 function submitFormData() {
   let purchaseRateDiff = Dao.getPurchaseRateDiff();
+  let percentageMaking = Dao.getPercentageMaking();
   let goldRateMain = Number(document.getElementById("gold-rate-main").value);
   let silverRateMain = Number(document.getElementById("silver-rate-main").value);
 
@@ -208,7 +209,11 @@ function submitFormData() {
       formDataObject.metal = metal;
       formDataObject.itemName = itemName;
       formDataObject.ratePerGram = (metal === 'Gold') ? goldRateMain : silverRateMain;
-      formDataObject.makingPerGram = Dao.getMappedItem([metal, itemName].toString()).MAKING_RATE;
+      if (metal !== 'Accessories' && percentageMaking[metal].ENABLED) {
+        formDataObject.percentageMaking = percentageMaking[metal].RATE;
+      } else {
+        formDataObject.makingPerGram = Dao.getMappedItem([metal, itemName].toString()).MAKING_RATE;
+      }
       formDataObject.minimumMakingCharge = Dao.getMappedItem([metal, itemName].toString()).MIN_MAKING;
       if (!(isNaN(formDataObject.ratePerGram) ||
         isNaN(formDataObject.ratePerGram) || isNaN(formDataObject.minimumMakingCharge))) {

@@ -332,16 +332,6 @@ function createPriceCards(weightList, item, priceCardContainer, autoSelectPriceC
       updateTotalSalesPrice(getTabIndexFromId(priceCardContainer.id));
       clearSelection();
     });
-    itemPriceCard.addEventListener("dblclick", (event) => {
-      event.preventDefault();
-      if (item.metal !== "Accessories") {
-        let itemInfoCard = priceCardContainer.querySelector(".item-info-card");
-        let currentItem = getCurentItem(item, itemInfoCard);
-        let priceCardDetails = {...currentItem, weight: weight};
-        ipcRenderer.send('view:price:card', priceCardDetails);
-      }
-      clearSelection();
-    });
     priceCardContainer.appendChild(itemPriceCard);
     let cardMainLabel = createHtmlElement("div", "item-label overflow-hiden", null, null, null);
     let cardWeightLabel = createHtmlElement("h3", "float-left", null, weight.toString() + " g", null);
@@ -377,6 +367,7 @@ function createPriceCardToolTip() {
 
 function addPriceLabels(item, priceCardContainer, appliedPricingGrade, newPricingGrade) {
   if (item.metal !== "Accessories") {
+    let percentageMaking = Dao.getPercentageMaking();
     let gradeMakingRateDiff = Dao.getGradeMakingRateDiff();
     let mappedItem = Dao.getMappedItem([item.metal, item.itemName].toString());
     let priceCards = priceCardContainer.getElementsByClassName("price-card");
@@ -388,17 +379,34 @@ function addPriceLabels(item, priceCardContainer, appliedPricingGrade, newPricin
           ShopCalculator.calculateMakingRate(item.minimumMakingCharge,
             (gradeMakingRateDiff[appliedPricingGrade][mappedItem.METAL].MM_DIFF * mappedItem.MM_DIFF_UNIT),
             (gradeMakingRateDiff[newPricingGrade][mappedItem.METAL].MM_DIFF * mappedItem.MM_DIFF_UNIT)));
-        priceCard.querySelector(".making-rate").innerHTML = "₹ " + getDesiNumber(
-          ShopCalculator.calculateMakingRate(item.makingPerGram,
-            (gradeMakingRateDiff[appliedPricingGrade][mappedItem.METAL].DIFF * mappedItem.DIFF_UNIT),
-            (gradeMakingRateDiff[newPricingGrade][mappedItem.METAL].DIFF  * mappedItem.DIFF_UNIT))) + " /g";
+        if (percentageMaking[mappedItem.METAL].ENABLED) {
+          priceCard.querySelector(".making-rate").innerHTML =
+            ShopCalculator.calculateMakingRate(item.percentageMaking,
+              (gradeMakingRateDiff[appliedPricingGrade][mappedItem.METAL].DIFF * percentageMaking[mappedItem.METAL].DIFF_UNIT),
+              (gradeMakingRateDiff[newPricingGrade][mappedItem.METAL].DIFF  * percentageMaking[mappedItem.METAL].DIFF_UNIT)) + "%";
+        } else {
+          priceCard.querySelector(".making-rate").innerHTML = "₹ " + getDesiNumber(
+            ShopCalculator.calculateMakingRate(item.makingPerGram,
+              (gradeMakingRateDiff[appliedPricingGrade][mappedItem.METAL].DIFF * mappedItem.DIFF_UNIT),
+              (gradeMakingRateDiff[newPricingGrade][mappedItem.METAL].DIFF  * mappedItem.DIFF_UNIT))) + " /g";
+        }
       } else {
+        let priceDetails = {};
         let weight = parseFloat(priceCard.querySelector(".item-label").textContent);
-        let priceDetails = ShopCalculator.calculatePrice(weight, item.ratePerGram,
-          item.makingPerGram, item.minimumMakingCharge, mappedItem.APPLIED,
-          gradeMakingRateDiff[appliedPricingGrade][mappedItem.METAL],
-          gradeMakingRateDiff[newPricingGrade][mappedItem.METAL],
-          mappedItem.DIFF_UNIT, mappedItem.MM_DIFF_UNIT, 1.5, 1.5);
+        if (percentageMaking[mappedItem.METAL].ENABLED) {
+          priceDetails = ShopCalculator.calculatePriceByPercentageMaking(
+            weight, item.ratePerGram, item.percentageMaking, item.minimumMakingCharge,
+            mappedItem.APPLIED, gradeMakingRateDiff[appliedPricingGrade][mappedItem.METAL],
+            gradeMakingRateDiff[newPricingGrade][mappedItem.METAL],
+            percentageMaking[mappedItem.METAL].DIFF_UNIT, mappedItem.MM_DIFF_UNIT, 1.5, 1.5);
+        } else {
+          priceDetails = ShopCalculator.calculatePrice(weight, item.ratePerGram,
+            item.makingPerGram, item.minimumMakingCharge, mappedItem.APPLIED,
+            gradeMakingRateDiff[appliedPricingGrade][mappedItem.METAL],
+            gradeMakingRateDiff[newPricingGrade][mappedItem.METAL],
+            mappedItem.DIFF_UNIT, mappedItem.MM_DIFF_UNIT, 1.5, 1.5);
+        }
+
         priceCard.querySelector(".gst-applied").innerHTML = "₹ " + getDesiNumber(priceDetails.gstApplied.total);
         priceCard.querySelector(".money-green").innerHTML = "₹ " + getDesiNumber(priceDetails.totalPrice);
         priceCard.querySelector(".metal-price").innerHTML = "₹ " + getDesiNumber(priceDetails.metalPrice);
@@ -834,7 +842,7 @@ function buildNetTotalContainer(tabContent, set) {
   purchaseWindowDiv.appendChild(purchaseTotal);
   let purchaseTable = createHtmlElement("table", "purchase-table", "purchase-table-" + tabIndex, null, null);
   purchaseWindowDiv.appendChild(purchaseTable);
-  addTableHeaderWithCheckbox(purchaseTable, ["Metal", "Weight", "Purchase Rate", "Percentage", "Price"]);
+  addTableHeaderWithCheckbox(purchaseTable, ["Metal", "Weight", "Purchase Rate", "Net Wt", "Price"]);
 
   let purchaseWeightTable = createHtmlElement("table", "weight-table", "purchase-weight-table-" + tabIndex, null, null);
   purchaseWindowDiv.appendChild(purchaseWeightTable);
@@ -845,6 +853,7 @@ function buildNetTotalContainer(tabContent, set) {
 function populateNetTotalContainer(tabIndex) {
   let salesItems = getSelectedSalesItems(tabIndex);
   let salesTable = document.getElementById("sales-table-" + tabIndex);
+  let percentageMaking = Dao.getPercentageMaking();
   emptyTable(salesTable);
   for (let i=0; i<salesItems.length; i++) {
     let salesItem = salesItems[i];
@@ -864,8 +873,9 @@ function populateNetTotalContainer(tabIndex) {
     tableDataElements.push(
       wrapTableData(color, document.createTextNode(salesItem.metal === "Accessories" ? "-" : "₹ " + getDesiNumber(salesItem.ratePerGram) + " /g")));
     tableDataElements.push(
-      wrapTableData(color, document.createTextNode(salesItem.metal === "Accessories" ? "-" : "₹ " + (salesItem.making == salesItem.minimumMakingCharge
-        ? getDesiNumber(salesItem.minimumMakingCharge) : getDesiNumber(salesItem.makingPerGram) + " /g"))));
+      wrapTableData(color, document.createTextNode(salesItem.metal === "Accessories" ? "-" : salesItem.making == salesItem.minimumMakingCharge
+        ? "₹ " + getDesiNumber(salesItem.minimumMakingCharge) : percentageMaking[salesItem.metal].ENABLED
+        ? salesItem.percentageMaking + "%" : "₹ " + getDesiNumber(salesItem.makingPerGram) + " /g")));
 
     // hidden taxed-amount and gst details with price display
     let priceTextDiv = createHtmlElement("div", "sales-table-price", null, "₹ " + getDesiNumber(salesItem.price), null);
@@ -899,7 +909,7 @@ function populateNetTotalContainer(tabIndex) {
     tableDataElements.push(
       wrapTableData(color, document.createTextNode("₹ " + getDesiNumber(purchaseItem.metalPurchaseRate) + " /g")));
     tableDataElements.push(
-      wrapTableData(color, document.createTextNode(purchaseItem.purchaseRatePurity + " %")));
+      wrapTableData(color, document.createTextNode((purchaseItem.weight * 0.01 * purchaseItem.purchaseRatePurity).toFixed(2))));
     tableDataElements.push(
       wrapTableData(color, document.createTextNode("₹ " + getDesiNumber(purchaseItem.price))));
     addTableDataWithCheckbox(purchaseTable, tableDataElements, () => {
@@ -916,6 +926,7 @@ function updateNetTotalContainer(tabIndex) {
   let salesItems = getSelectedSalesItems(tabIndex);
   let salesTable = document.getElementById("sales-table-" + tabIndex);
   let salesRows = salesTable.getElementsByClassName("data-row");
+  let percentageMaking = Dao.getPercentageMaking();
   for (let i=0; i<salesRows.length; i++) {
     let salesRow = salesRows[i];
     let salesItem = salesItems[i];
@@ -923,8 +934,9 @@ function updateNetTotalContainer(tabIndex) {
     if (salesItem.metal !== "Accessories") {
       salesDataColumns[2].textContent = salesItem.weight + " g";
       salesDataColumns[3].textContent = "₹ " + getDesiNumber(salesItem.ratePerGram) + " /g";
-      salesDataColumns[4].textContent = "₹ " + (salesItem.making == salesItem.minimumMakingCharge
-        ? getDesiNumber(salesItem.minimumMakingCharge) : getDesiNumber(salesItem.makingPerGram) + " /g");
+      salesDataColumns[4].textContent = salesItem.making == salesItem.minimumMakingCharge
+          ? "₹ " + getDesiNumber(salesItem.minimumMakingCharge) : percentageMaking[salesItem.metal].ENABLED
+          ? salesItem.percentageMaking + "%" : "₹ " + getDesiNumber(salesItem.makingPerGram) + " /g";
       salesDataColumns[5].querySelector(".sales-table-price").textContent = "₹ " + getDesiNumber(salesItem.price);
       salesDataColumns[5].querySelector(".sales-table-amount").textContent = salesItem.amount;
       salesDataColumns[5].querySelector(".sales-table-cgst").textContent = salesItem.cgst;
@@ -1182,7 +1194,12 @@ function getCurentItem(item, itemInfoCard) {
   }
   currentItem.itemName = itemInfoCard.querySelector(".item-label").textContent;
   currentItem.ratePerGram = getFromDesiRupeeNumber(itemInfoCard.querySelector(".metal-rate").textContent.replace(" /g", ""));
-  currentItem.makingPerGram = getFromDesiRupeeNumber(itemInfoCard.querySelector(".making-rate").textContent.replace(" /g", ""));
+  let makingRateText = itemInfoCard.querySelector(".making-rate").textContent;
+  if (makingRateText.endsWith("%")) {
+    currentItem.percentageMaking = makingRateText.replace("%", "");
+  } else {
+    currentItem.makingPerGram = getFromDesiRupeeNumber(makingRateText.replace(" /g", ""));
+  }
   currentItem.minimumMakingCharge = getFromDesiRupeeNumber(itemInfoCard.querySelector(".min-making-charge").textContent);
   currentItem.tabIndex = getTabIndexFromId(itemInfoCard.id);
   currentItem.appliedPriceGrade = getAppliedPriceGrade(currentItem.tabIndex);
@@ -1279,7 +1296,7 @@ function getOtherTransactionEntry(price) {
 }
 
 function getSalesRateKey(entry) {
-  let entryKey = [entry.Metal, entry.Rate_Per_Gram, entry.Making_Per_Gram, entry.Making];
+  let entryKey = [entry.Metal, entry.Rate_Per_Gram, entry.Making_Percentage, entry.Making_Per_Gram, entry.Making];
   if (entry.Item.startsWith("Fancy") || entry.Item.startsWith("Dulhan")) {
     entryKey.push(entry.Item);
   }
@@ -1299,6 +1316,7 @@ function groupBySalesRateKey(aggregatedSalesMap) {
     }
   }
 
+console.log(groupMap);
   return Array.from(groupMap.values());
 }
 

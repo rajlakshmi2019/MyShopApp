@@ -122,6 +122,10 @@ let getSilverPurchseRateDiff = function() {
   return appConfigs.purchaseRateDiff.Silver;
 }
 
+let getPercentageMaking = function() {
+  return appConfigs.percentageMaking;
+}
+
 let getGradesList = function() {
   return appConfigs.grades;
 }
@@ -147,9 +151,10 @@ let getMappedItem = function(itemKey) {
 }
 
 let updateMetalRate = async function(metalRate, purchaseRateDiff) {
-  let metalRateContent = "METAL,RATE,DIFF\n" +
-    "Gold," + metalRate.Gold + "," + purchaseRateDiff.Gold + "\n" +
-    "Silver," + metalRate.Silver + "," + purchaseRateDiff.Silver + "\n";
+  let making = appConfigs.percentageMaking;
+  let metalRateContent = "METAL,RATE,DIFF,PERCENTAGE_MAKING,PERCENTAGE_MAKING_DIFF,PERCENTAGE_MAKING_ENABLED\n" +
+    "Gold," + metalRate.Gold + "," + purchaseRateDiff.Gold + "," + making.Gold.RATE + "," + making.Gold.DIFF_UNIT + "," + (making.Gold.ENABLED ? "TRUE" : "FALSE") + "\n" +
+    "Silver," + metalRate.Silver + "," + purchaseRateDiff.Silver + "," + making.Silver.RATE + "," + making.Silver.DIFF_UNIT + "," + (making.Silver.ENABLED ? "TRUE" : "FALSE") + "\n";
     // write to file
     fs.writeFileSync(process.env.BASE_CONFIG_DIR + 'metal_rate.csv', metalRateContent);
     loadAppConfigs();
@@ -269,7 +274,7 @@ function addGSTRecordToFile(gstFile, gstInvoiceNo, gstRecord) {
     }
 
     if (record !== "") {
-      gstFileText += record + '\n';  
+      gstFileText += record + '\n';
     }
   });
 
@@ -306,6 +311,7 @@ module.exports = {
   getGoldPurchseRateDiff,
   getSilverPurchseRateDiff,
   getPurchaseRateDiff,
+  getPercentageMaking,
   getGradeMakingRateDiff,
   getGradesList,
   getGoldItemTypes,

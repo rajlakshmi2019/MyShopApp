@@ -90,12 +90,6 @@ ipcMain.on('set:item:update', (event, updateParams) => {
   windowFactory.getEditTrayItemForm().close();
 });
 
-ipcMain.on('view:price:card', (event, priceCardDetails) => {
-  if (windowFactory.getPriceCardView() == null) {
-    windowFactory.createPriceCardView(priceCardDetails);
-  }
-});
-
 ipcMain.on('update:selected:grade', (event, grade) => {
   windowFactory.getMainWindow().webContents.send('grade:update', grade);
   windowFactory.getGradePickerWindow().close();

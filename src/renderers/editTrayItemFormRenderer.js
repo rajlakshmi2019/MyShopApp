@@ -1,5 +1,6 @@
 const {ipcRenderer, remote} = require("electron");
 const {clearSelection, getInputTextFloatValue} = require("./../utils.js");
+const Dao = remote.require("./Dao.js");
 
 /* ESC key event handling */
 window.addEventListener('keydown', closeCurrentWindow, true);
@@ -27,10 +28,18 @@ if (item.metal === 'Gold') {
   document.getElementById("weight-input-header").textContent = "Price";
 }
 
+let percentageMaking = Dao.getPercentageMaking();
+if (item.metal !== 'Accessories' && percentageMaking[item.metal].ENABLED) {
+  document.querySelector(".making-per-gram").querySelector(".input-header").textContent = "Percentage Making Rate";
+  document.querySelector(".making-per-gram").querySelector(".input-text").classList.remove("rupee-background");
+  document.querySelector(".making-per-gram").querySelector(".input-text").classList.add("percentage-background");
+}
+
 document.querySelector(".form-edit-tray-div").classList.add(itemColor);
 document.querySelector(".item-header").textContent = item.itemName;
 document.querySelector(".rate-per-gram").querySelector(".input-text").value = item.ratePerGram;
-document.querySelector(".making-per-gram").querySelector(".input-text").value = item.makingPerGram;
+document.querySelector(".making-per-gram").querySelector(".input-text").value =
+  (item.metal !== 'Accessories' && percentageMaking[item.metal].ENABLED) ? item.percentageMaking : item.makingPerGram;
 document.querySelector(".minimum-making").querySelector(".input-text").value = item.minimumMakingCharge;
 
 /* Done Button Event Listener */
@@ -62,7 +71,11 @@ function submitFormData() {
     }
   }
 
-  formDataObject.makingPerGram = getInputTextFloatValue(document.querySelector(".making-per-gram"));
+  if (item.metal !== 'Accessories' && percentageMaking[item.metal].ENABLED) {
+    formDataObject.percentageMaking = getInputTextFloatValue(document.querySelector(".making-per-gram"));
+  } else {
+    formDataObject.makingPerGram = getInputTextFloatValue(document.querySelector(".making-per-gram"));
+  }
   formDataObject.ratePerGram = getInputTextFloatValue(document.querySelector(".rate-per-gram"));
   formDataObject.minimumMakingCharge = getInputTextFloatValue(document.querySelector(".minimum-making"));
   if (!(isNaN(formDataObject.ratePerGram) || isNaN(formDataObject.ratePerGram) || isNaN(formDataObject.minimumMakingCharge))) {

@@ -3,7 +3,7 @@ const path = require('path');
 const {app, BrowserWindow, Menu} = require('electron');
 
 let mainWindow, goldSellForm, goldExchangeForm, editTrayItemForm;
-let priceCardView, gradePickerWindow, billWindow, paymentAcceptWindow;
+let gradePickerWindow, billWindow, paymentAcceptWindow;
 let updateConfigsWindow, invoiceForm;
 
 function createMainWindow() {
@@ -124,34 +124,6 @@ function createEditTrayItemForm(item) {
 
 function getEditTrayItemForm() {
   return editTrayItemForm;
-}
-
-function createPriceCardView(priceCardDetails) {
-  priceCardView = new BrowserWindow({
-    width: 550,
-    height: 600,
-    frame: false,
-    backgroundColor:'#205081',
-    parent: mainWindow, modal:true,
-    show: false,
-    webPreferences: {nodeIntegration: true}
-  });
-  priceCardView.priceCardDetails = priceCardDetails;
-  priceCardView.loadURL(url.format({
-    pathname: path.join(__dirname, 'html', 'priceCardView.html'),
-    protocol: 'file:',
-    slashes: true
-  }));
-  priceCardView.once('ready-to-show', () => {
-    priceCardView.show()
-  });
-  priceCardView.on('close', () => {
-    priceCardView = null;
-  });
-}
-
-function getPriceCardView() {
-  return priceCardView;
 }
 
 function createGradePickerWindow() {
@@ -364,8 +336,6 @@ module.exports = {
   getGoldSellForm: getGoldSellForm,
   createEditTrayItemForm: createEditTrayItemForm,
   getEditTrayItemForm: getEditTrayItemForm,
-  createPriceCardView: createPriceCardView,
-  getPriceCardView: getPriceCardView,
   createUpdateConfigsWindow,getUpdateConfigsWindow,
   createGradePickerWindow, getGradePickerWindow,
   createBillWindow, getBillWindow,

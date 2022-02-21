@@ -191,6 +191,8 @@ function parseTable(table, checkedOnly) {
           } else {
             tableDataObject[getKeyFromHeader(headers[i], false)] = getFromDesiRupeeNumber(tableDataText);
           }
+        } else if(tableDataText.endsWith("%")) {
+          tableDataObject[getKeyFromHeader(headers[i], false) + "_Percentage"] = Number(tableDataText.replace("%", ""));
         } else {
           tableDataObject[getKeyFromHeader(headers[i], false)] = isNaN(Number(tableDataText)) ? tableDataText : Number(tableDataText);
         }
@@ -229,11 +231,14 @@ function parseSalesTable(table, checkedOnly) {
           } else {
             tableDataObject[getKeyFromHeader(headers[i], false)] = getFromDesiRupeeNumber(tableDataText);
           }
+        } else if(tableDataText.endsWith("%")) {
+          tableDataObject[getKeyFromHeader(headers[i], false) + "_Percentage"] = Number(tableDataText.replace("%", ""));
         } else {
           tableDataObject[getKeyFromHeader(headers[i], false)] = isNaN(Number(tableDataText)) ? tableDataText : Number(tableDataText);
         }
       }
 
+      console.log(tableDataObjects);
       tableDataObjects.push(tableDataObject);
     }
   }

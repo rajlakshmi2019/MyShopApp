@@ -162,8 +162,8 @@ function populateSalesBillTable(salesBillTable, lessGST, withHSN) {
           breakup = ""
         } else {
           var rate = entry.Metal.charAt(0) + " " + entry.Rate_Per_Gram + "/g";
-          var making = (entry.Making_Per_Gram == null ?
-            entry.Making + "/pc" : entry.Making_Per_Gram + "/g");
+          var making = entry.Making_Percentage == null ? (entry.Making_Per_Gram == null ?
+            entry.Making + "/pc" : entry.Making_Per_Gram + "/g") : entry.Making_Percentage + "%";
           breakup = rate + " + " + making;
         }
       }
@@ -195,9 +195,9 @@ function populateSalesBillTable(salesBillTable, lessGST, withHSN) {
       wrapTableData(document.createTextNode("₹ " + configs.additional), "right")];
 
     let clEnd = "sales-row section-end";
-    tableRow.splice(1, 0, wrapTableData(document.createTextNode("7113"), "right"));
     if (withHSN) {
       clEnd = "sales-row-with-hsn section-end";
+      tableRow.splice(1, 0, wrapTableData(document.createTextNode("7113"), "right"));
     }
 
     let tr = addTableData(salesBillTable, tableRow);
@@ -208,10 +208,15 @@ function populateSalesBillTable(salesBillTable, lessGST, withHSN) {
 // apply gst
 function applyGST(cgstRate, sgstRate) {
   document.getElementById("gst-rate-flag").classList.add("display-none");
+
   let gstEntries = document.getElementsByClassName("gst-invoice");
   for (let i=0; i<gstEntries.length; i++) {
     gstEntries[i].classList.remove("display-none");
   }
+  if (configs.purchase.length == 0) {
+    document.getElementById("bill-purchase-gst").classList.add("display-none");
+  }
+
   let estimateEntries = document.getElementsByClassName("estimate-invoice");
   for (let i=0; i<estimateEntries.length; i++) {
     estimateEntries[i].classList.add("display-none");
