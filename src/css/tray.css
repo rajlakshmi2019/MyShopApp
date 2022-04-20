@@ -25,6 +25,10 @@ th.silver-border, td.silver-border {
   border: 2px solid silver;
 }
 
+th.white-border, td.white-border {
+  border: 2px solid #FFFFFF;
+}
+
 tr.equi-column td {
   width: 50%;
 }

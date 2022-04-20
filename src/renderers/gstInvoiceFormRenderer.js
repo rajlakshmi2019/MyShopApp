@@ -4,10 +4,10 @@ const {isMobileNumber, getDesiNumber, getRupeeDesiNumber, getFromDesiRupeeNumber
   borderColorOnMobileNumberCheck, borderColorOnAlphabetsOnlyCheck,
   padStringWithZeros, toTitleCase, getFinancialYear} = require("./../utils.js");
 const {calculateGSTInplaceTotals, calculateGSTAppliedTotals} = require("./../ShopCalculator.js");
+const Dao = remote.require("./Dao.js");
 
 /* ESC key event handling */
 /* NumKey - key event handling */
-window.addEventListener('keydown', closeCurrentWindow, true);
 window.addEventListener('keydown', closeCurrentWindow, true);
 function closeCurrentWindow(e) {
   if (e.keyCode == 109 || e.keyCode == 27) {
@@ -73,7 +73,12 @@ if (isMobileNumber(billParams.tabName)) {
 }
 document.getElementById("date-input").value = formatDate(new Date(billParams.bill_date_raw));
 document.getElementById("date-input").style.borderColor = "green";
+
+billParams.gstSerialNumber = Dao.getGSTSerialNumber(getFinancialYear(new Date(billParams.bill_date_raw))  + '/');
+document.getElementById("invoice-no-input").value = billParams.gstSerialNumber;
+document.getElementById("invoice-no-input").style.borderColor = "green";
 document.getElementById("invoice-no-input").addEventListener('keyup', borderColorOnNumberCheck);
+
 document.getElementById("name-input").addEventListener('keyup', borderColorOnAlphabetsOnlyCheck);
 document.getElementById("address-input").addEventListener('keyup', borderColorOnAlphabetsOnlyCheck);
 document.getElementById("phone-no-input").addEventListener('keyup', borderColorOnMobileNumberCheck);

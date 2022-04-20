@@ -4,7 +4,7 @@ const {app, BrowserWindow, Menu} = require('electron');
 
 let mainWindow, goldSellForm, goldExchangeForm, editTrayItemForm;
 let gradePickerWindow, billWindow, paymentAcceptWindow;
-let updateConfigsWindow, invoiceForm;
+let updateConfigsWindow, invoiceForm, gstReportView;
 
 function createMainWindow() {
   mainWindow = new BrowserWindow({
@@ -263,6 +263,33 @@ function getInvoiceForm() {
   return invoiceForm;
 }
 
+function createGSTReportView() {
+  gstReportView = new BrowserWindow({
+    width: 900,
+    height: 430,
+    frame: false,
+    backgroundColor: "#363A42",
+    parent: mainWindow, modal:true,
+    show: false,
+    webPreferences: {nodeIntegration: true}
+  });
+  gstReportView.loadURL(url.format({
+    pathname: path.join(__dirname, 'html', 'gstReportView.html'),
+    protocol: 'file:',
+    slashes: true
+  }));
+  gstReportView.once('ready-to-show', () => {
+    gstReportView.show()
+  });
+  gstReportView.on('close', () => {
+    gstReportView = null;
+  });
+}
+
+function getGSTReportView() {
+  return gstReportView;
+}
+
 const mainMenuTemplate = [
   {
     label: 'Services',
@@ -304,6 +331,13 @@ const mainMenuTemplate = [
       {
         label: 'PnL',
         accelerator: 'ctrl+P'
+      },
+      {
+        label: 'GST Report',
+        accelerator: 'ctrl+G',
+        click() {
+          createGSTReportView();
+        }
       }
     ]
   },
@@ -340,5 +374,6 @@ module.exports = {
   createGradePickerWindow, getGradePickerWindow,
   createBillWindow, getBillWindow,
   createPaymentAcceptForm, getPaymentAcceptForm,
-  createInvoiceForm, getInvoiceForm
+  createInvoiceForm, getInvoiceForm,
+  createGSTReportView, getGSTReportView
 };

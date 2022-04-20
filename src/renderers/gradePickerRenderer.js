@@ -4,15 +4,7 @@ const {clearSelection} = require("./../utils.js");
 /* ESC key event handling */
 window.addEventListener('keydown', closeCurrentWindow, true);
 function closeCurrentWindow(e) {
-  if (e.keyCode == 27) {
-    window.close();
-  }
-}
-
-/* NumKey - key event handling */
-window.addEventListener('keydown', closeCurrentWindow, true);
-function closeCurrentWindow(e) {
-  if (e.keyCode == 109) {
+  if (e.keyCode == 109 || e.keyCode == 27) {
     window.close();
   }
 }

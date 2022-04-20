@@ -1316,7 +1316,6 @@ function groupBySalesRateKey(aggregatedSalesMap) {
     }
   }
 
-console.log(groupMap);
   return Array.from(groupMap.values());
 }
 
@@ -1462,7 +1461,8 @@ function getBillParams(tabId, savable) {
     purchase: purchaseEntries,
     additional: getAdditionalCharge(tabId),
     totals: getTotals(tabId),
-    savable: savable
+    savable: savable,
+    weight_totals: getWeightTotals(tabId)
   };
 }
 
@@ -1494,6 +1494,31 @@ function getTotals(tabId) {
     total_bill_less_gst: (totalLessGST < 0 ? "- ₹ " : "₹ ") + getDesiNumber(Math.abs(totalLessGST)),
     total_bill_less_gst_val: totalLessGST
   }
+}
+
+function getWeightTotals(tabId) {
+  weightTotals = {}
+  let salesWeightTableData = document.getElementById("sales-weight-table-" + tabId).getElementsByClassName("table-data-div");
+  for (let i = 0; i < salesWeightTableData.length; i++) {
+    let dataDiv = salesWeightTableData[i];
+    if (dataDiv.classList.contains("gold-color")) {
+      weightTotals["gold_sales_in_gram"] = parseFloat(dataDiv.innerHTML)
+    } else if (dataDiv.classList.contains("silver-color")) {
+      weightTotals["silver_sales_in_gram"] = parseFloat(dataDiv.innerHTML)
+    }
+  }
+
+  let purchaseWeightTableData = document.getElementById("purchase-weight-table-" + tabId).getElementsByClassName("table-data-div");
+  for (let i = 0; i < purchaseWeightTableData.length; i++) {
+    let dataDiv = purchaseWeightTableData[i];
+    if (dataDiv.classList.contains("gold-color")) {
+      weightTotals["gold_purchase_in_gram"] = parseFloat(dataDiv.innerHTML)
+    } else if (dataDiv.classList.contains("silver-color")) {
+      weightTotals["silver_purchase_in_gram"] = parseFloat(dataDiv.innerHTML)
+    }
+  }
+
+  return weightTotals;
 }
 
 function enrichTransactionEntries(

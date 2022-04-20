@@ -181,7 +181,20 @@
   box-sizing: border-box;
 }
 
-.input-text:focus, .input-inline-text:focus, .input-textarea:focus {
+.select-list {
+  width: 180px;
+  background-color: white;
+  font-weight: bold;
+  font-size: 14px;
+  padding: 8px 5px;
+  color: #363A42;
+  border: 1px solid #C0C0C0;
+  border-radius: 2px;
+  box-shadow: inset 0 0 4px #C0C0C0;
+  box-sizing: border-box;
+}
+
+.input-text:focus, .input-inline-text:focus, .input-textarea:focus, .select-list:focus {
   outline: 10px auto #70A5D3;
   box-shadow: inset 0 0 4px #70A5D3;
 }
@@ -367,6 +380,30 @@ div, span, a, h2, h3, p {
   -moz-user-select: none; /* mozilla browsers */
   -khtml-user-select: none; /* webkit (konqueror) browsers */
   -ms-user-select: none; /* IE10+ */
+}
+
+#generate-report-btn {
+  background-color: inherit;
+  border-radius: 8px;
+  border: 2px solid white;
+  padding: 10px 20px;
+  cursor: pointer;
+  float: right;
+  margin: 20px 0px;
+  font-weight: bold;
+  width: 100px;
+}
+
+#generate-report-btn:hover {
+  border-color: #48DB48;
+}
+
+#generate-report-btn:focus {
+  outline: 0;
+}
+
+#gst-report-table {
+  color: #FFDF00;
 }
 
 #gold-btn {

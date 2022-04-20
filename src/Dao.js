@@ -61,6 +61,15 @@ let persistTransactionEntriesEnabled = async function(transactionDate, transacti
   appendToFileOverwritingLastBlock(process.env.BASE_DATA_DIR + 'running', iv, transactionEnc);
 }
 
+let getGSTSerialNumber = function(filedir) {
+  try {
+    return parseInt(fs.readFileSync(process.env.BASE_DATA_DIR + filedir + 'gst_serial_number.csv')) + 1;
+  } catch(e) {
+    console.log(e);
+    return 1;
+  }
+}
+
 let persistGSTRecord = function(gstBillParams, filedir, filename) {
   let filepath = process.env.BASE_DATA_DIR + filedir;
 
@@ -70,18 +79,25 @@ let persistGSTRecord = function(gstBillParams, filedir, filename) {
   }
 
   if (!fs.existsSync(filepath + filename)) {
-    let fileHeader = 'Invoice No,Name,Address,Phone No,Taxable Value,CGST,SGST,Total GST,Round Off,Total Bill';
+    let fileHeader = 'Invoice No,Date,Name,Address,Phone No,Taxable Value,CGST,SGST,Total GST,Round Off,Total Bill,Gold Wt,Silver Wt';
     fs.appendFileSync(filepath + filename, fileHeader);
   }
 
   // write to file
-  let gstRecord = '' + gstBillParams.gstInvoiceNumber + ',' + gstBillParams.gstName.replace(/,/g, ':') + ',' +
+  let gstRecord = '' + gstBillParams.gstInvoiceNumber + ',' +
+    gstBillParams.gstInvoiceDate + ',' + gstBillParams.gstName.replace(/,/g, ':') + ',' +
     gstBillParams.gstAddress.replace(/,/g, ':') + ',' + gstBillParams.gstPhoneNumber + ',' +
     gstBillParams.gstTotals.taxedAmount + ',' + gstBillParams.gstTotals.cgstApplied + ',' +
     gstBillParams.gstTotals.sgstApplied + ',' + gstBillParams.gstTotals.gstApplied + ',' +
-    gstBillParams.gstTotals.roundOff + ',' + gstBillParams.gstTotals.totalAmount;
+    gstBillParams.gstTotals.roundOff + ',' + gstBillParams.gstTotals.totalAmount + ',' +
+    gstBillParams.weight_totals.gold_sales_in_gram + ',' + gstBillParams.weight_totals.silver_sales_in_gram;
 
   addGSTRecordToFile(filepath + filename, Number(gstBillParams.gstInvoiceNumber), gstRecord);
+
+  // Update gst serial number
+  if (Number(gstBillParams.gstInvoiceNumber) >= gstBillParams.gstSerialNumber) {
+    fs.writeFileSync(filepath + 'gst_serial_number.csv', gstBillParams.gstInvoiceNumber);
+  }
 }
 
 let savePDF = function(pdf, filedir, filename) {
@@ -161,7 +177,15 @@ let updateMetalRate = async function(metalRate, purchaseRateDiff) {
 }
 
 let saveMobileNo = async function(mobileNo) {
-  fs.appendFileSync(process.env.BASE_DATA_DIR + 'wa.csv', mobileNo + "\n")
+  fs.appendFileSync(process.env.BASE_DATA_DIR + 'wa.csv', mobileNo + "\n");
+}
+
+let getDirectoryContents = function(dirname) {
+  return fs.readdirSync(process.env.BASE_DATA_DIR + dirname);
+}
+
+let getGSTReportRecords = async function(gstReportFile) {
+  return await csv().fromFile(process.env.BASE_DATA_DIR + gstReportFile);
 }
 
 // encryption/decryption utils
@@ -303,6 +327,7 @@ function writeTransactionToFile(filepath, filename, transaction, errorCallback) 
 module.exports = {
   loadAppConfigs,
   persistTransactionEntries,
+  getGSTSerialNumber,
   persistGSTRecord,
   savePDF,
   getTodaysRate,
@@ -319,5 +344,7 @@ module.exports = {
   getAccessoriesItemTypes,
   getMappedItem,
   updateMetalRate,
-  saveMobileNo
+  saveMobileNo,
+  getDirectoryContents,
+  getGSTReportRecords
 }

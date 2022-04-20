@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>GST Monthly Report</title>
+    <link rel="stylesheet" href="../css/app.css">
+    <link rel="stylesheet" href="../css/body.css">
+    <link rel="stylesheet" href="../css/tray.css">
+    <link rel="stylesheet" href="../css/done.css">
+  </head>
+  <body>
+    <div class="form-container">
+      <h1 class="form-title gold-color">GST Monthly Report</h1>
+      <br>
+      <div class="form-content">
+        <div class="wrapper-div lower-margin" id="gst-report-month-selector">
+          <div calss="wrapper-div">
+            <div class="wrapper-div half-width float-left">
+              <div class="input-header gold-color">
+                Finacial Year
+              </div>
+              <select class="select-list" id="financial-year-select">
+              </select>
+            </div>
+            <div class="wrapper-div half-width float-right">
+              <div class="input-header gold-color align-right">
+                Month
+              </div>
+              <select class="select-list float-right" id="month-select">
+              </select>
+            </div>
+          </div>
+          <button type="button" class="money-green float-right" id="generate-report-btn">Generate</button>
+        </div>
+        <div id="gst-report-table">
+          <table>
+            <tr id="gst-report-header">
+              <th class="white-border align-center">Taxable</th>
+              <th class="white-border align-center">CGST</th>
+              <th class="white-border align-center">SGST</th>
+              <th class="white-border align-center">GST</th>
+              <th class="white-border align-center">R/Off</th>
+              <th class="white-border align-center">Total</th>
+              <th class="white-border align-center">Gold (g)</th>
+              <th class="white-border align-center">Silver (g)</th>
+            </tr>
+            <tr id="gst-report-data">
+              <td class="white-border align-center" id="taxable-value-td"></th>
+              <td class="white-border align-center" id="cgst-td"></th>
+              <td class="white-border align-center" id="sgst-td"></th>
+              <td class="white-border align-center" id="total-gst-td"></th>
+              <td class="white-border align-center" id="round-off-td"></th>
+              <td class="white-border align-center" id="total-bill-td"></th>
+              <td class="white-border align-center" id="gold-wt-td"></th>
+              <td class="white-border align-center" id="silver-wt-td"></th>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-submit-div">
+      <a class="form-submit">
+        <div class="done-button">
+          <div class="done-check-left"></div>
+          <div class="done-check-right"></div>
+        </div>
+        <div class='done-button-text'>
+          <span>Done</span>
+        </div>
+      </a>
+    </div>
+  </body>
+  <script type="text/javascript">
+    require('./../renderers/gstReportViewRenderer.js');
+  </script>
+</html>

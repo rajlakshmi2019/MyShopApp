@@ -2,8 +2,6 @@ const {ipcRenderer, remote} = require("electron");
 const {clearSelection, isMobileNumber, getDesiNumber, getRupeeDesiNumber, getFromDesiRupeeNumber} = require("./../utils.js");
 
 /* ESC key event handling */
-/* NumKey - key event handling */
-window.addEventListener('keydown', closeCurrentWindow, true);
 window.addEventListener('keydown', closeCurrentWindow, true);
 function closeCurrentWindow(e) {
   if (e.keyCode == 109 || e.keyCode == 27) {

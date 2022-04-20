@@ -238,7 +238,6 @@ function parseSalesTable(table, checkedOnly) {
         }
       }
 
-      console.log(tableDataObjects);
       tableDataObjects.push(tableDataObject);
     }
   }
@@ -320,6 +319,11 @@ function getFinancialYear(date) {
   return prefixYear + "-" + suffixYear;
 }
 
+function isValidFinancialYear(fyString) {
+  let years = fyString.split("-");
+  return years.length == 2 && parseInt(years[0].substring(2)) == parseInt(years[1]) - 1;
+}
+
 function getTwoDigitInteger(integer) {
   return ("0" + integer).slice(-2);
 }
@@ -383,6 +387,23 @@ function borderColorOnAlphabetsOnlyCheck() {
   }
 }
 
+function getMonths() {
+  return [
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+    'January',
+    'February',
+    'March'
+  ];
+}
+
 module.exports = {
   clearSelection,
   createHtmlElement,
@@ -408,6 +429,7 @@ module.exports = {
   formatDateSlash,
   formatDateReverse,
   getFinancialYear,
+  isValidFinancialYear,
   consolidateEntries,
   padStringWithZeros,
   toTitleCase,
@@ -415,5 +437,6 @@ module.exports = {
   borderColorOnNumberCheck,
   borderColorOnEmptyCheck,
   borderColorOnMobileNumberCheck,
-  borderColorOnAlphabetsOnlyCheck
+  borderColorOnAlphabetsOnlyCheck,
+  getMonths
 }
