@@ -511,7 +511,7 @@ function addExchangeCard(exchangeWindow, metal) {
   } else if (metal === "Silver") {
     color = "silver";
     checkedPurchaseRatePurity = 45;
-    uncheckedPurchaseRatePurity = 85;
+    uncheckedPurchaseRatePurity = 80;
   }
 
   let exchangeCard = createHtmlElement("div", "exchange-price-card exchange-card " + color + "-outer-shadow " + color + "-color", null, null, null);
