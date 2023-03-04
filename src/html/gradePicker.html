@@ -11,11 +11,25 @@
   <body>
     <div id="grade-picker-div">
       <h1 class="big-header-margin">Select a pricing grade</h1>
+      <div class="wrapper-div lower-margin">
+        <div class="wrapper-div half-width float-left">
+          <div class="input-header gold-color">
+            Gold per gram
+          </div>
+          <input type="text" size="8" class="input-text rupee-background" id="gold-rate-main">
+        </div>
+        <div class="wrapper-div half-width float-right">
+          <div class="input-header silver-color align-right">
+            Silver per gram
+          </div>
+          <input type="text" size="8" class="input-text rupee-background float-right" id="silver-rate-main">
+        </div>
+      </div>
       <div id="grades-form">
         <input type="radio" name="grades" class="radio-btn" id="grade-a" value="A"> Grade A&nbsp;&nbsp;&nbsp;&nbsp;
-        <input type="radio" name="grades" class="radio-btn" id="grade-b" value="B"> Grade B <br><br>
-        <input type="radio" name="grades" class="radio-btn" id="grade-c" value="C"> Grade C&nbsp;&nbsp;&nbsp;&nbsp;
-        <input type="radio" name="grades" class="radio-btn" id="grade-d" value="D"> Grade D
+        <div class="wrapper-div float-right">
+          <input type="radio" name="grades" class="radio-btn" id="grade-b" value="B"> Grade B
+        </div>
       </div>
     </div>
     <div class="form-submit-div">

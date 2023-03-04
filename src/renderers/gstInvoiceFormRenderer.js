@@ -87,10 +87,11 @@ updateBreakupDetails(0);
 
 function updateBreakupDetails(paidAmountDiff) {
   let salesTotal = getFromDesiRupeeNumber(billParams.totals.sales);
+  let preAppliedDiscount = getFromDesiRupeeNumber(billParams.totals.discount);
   let salesTotalLessGST = getFromDesiRupeeNumber(billParams.totals.sales_less_gst);
   document.getElementById("sales-amount").innerHTML = billParams.totals.sales_less_gst;
 
-  billParams.gstTotals = calculateGSTInplaceTotals(salesTotalLessGST, salesTotal - paidAmountDiff, getCGSTRate(), getSGSTRate());
+  billParams.gstTotals = calculateGSTInplaceTotals(salesTotalLessGST, salesTotal - preAppliedDiscount - paidAmountDiff, getCGSTRate(), getSGSTRate());
   if (billParams.gstTotals.adjustedDiscount < 0) {
     billParams.gstTotals = calculateGSTAppliedTotals(salesTotalLessGST, 0, getCGSTRate(), getSGSTRate());
   }

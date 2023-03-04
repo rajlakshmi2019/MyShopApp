@@ -1,6 +1,6 @@
 {
-  "name": "shop-app",
-  "version": "1.0.0",
+  "name": "munshi",
+  "version": "1.2.0",
   "description": "utility app for shop",
   "main": "src/app.js",
   "scripts": {

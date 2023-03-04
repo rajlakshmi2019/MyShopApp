@@ -455,7 +455,7 @@ div, span, a, h2, h3, p {
 
 #grade-picker-div {
   color: #FFDF00;
-  padding: 20px;
+  padding: 20px 20px 0;
 }
 
 #grades-form {

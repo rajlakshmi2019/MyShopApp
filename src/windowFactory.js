@@ -128,8 +128,8 @@ function getEditTrayItemForm() {
 
 function createGradePickerWindow() {
   gradePickerWindow = new BrowserWindow({
-    width: 350,
-    height: 270,
+    width: 340,
+    height: 280,
     frame: false,
     backgroundColor:'#205081',
     parent: mainWindow, modal:true,

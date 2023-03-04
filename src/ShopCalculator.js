@@ -8,35 +8,55 @@ function calculateMakingRate(makingRate, appliedGradeMakingRateDiff, newGradeMak
 
 function calculateMakingCharge(weight, makingRate, minimumMaking,
   appliedGradeMakingDiff, newGradeMakingDiff, diffUnit, mmDiffUnit) {
-  return Math.round(Math.max(weight*calculateMakingRate(makingRate, appliedGradeMakingDiff["DIFF"] * diffUnit, newGradeMakingDiff["DIFF"] * diffUnit),
-    calculateMakingRate(minimumMaking, appliedGradeMakingDiff["MM_DIFF"] * mmDiffUnit, newGradeMakingDiff["MM_DIFF"] * mmDiffUnit)));
+  return Math.round(Math.max(weight*calculateMakingRate(makingRate,
+    appliedGradeMakingDiff["DIFF"] * diffUnit, newGradeMakingDiff["DIFF"] * diffUnit),
+    calculateMakingRate(minimumMaking, appliedGradeMakingDiff["MM_DIFF"] * mmDiffUnit,
+    newGradeMakingDiff["MM_DIFF"] * mmDiffUnit)));
+}
+
+function calculateOfferPrice(price, discountOffer) {
+  if (discountOffer != null) {
+    return Math.round(discountOffer.isFlatDiscount ? price - discountOffer.value
+      : price * (1 - 0.01 * discountOffer.value));
+  }
+
+  return price;
 }
 
 function calculatePrice(weight, metalRate, makingRate, minimumMaking, purity,
   appliedGradeMakingDiff, newGradeMakingDiff, diffUnit, mmDiffUnit,
-  cgstPercentage, sgstPercentage) {
+  cgstPercentage, sgstPercentage, discountOffer) {
   let metalPrice = calculateMetalPrice(weight, metalRate, purity);
+  let offerMetalPrice = calculateOfferPrice(metalPrice, discountOffer != null ? discountOffer.metalPrice : null);
   let makingCharge = calculateMakingCharge(weight, makingRate, minimumMaking,
-    appliedGradeMakingDiff, newGradeMakingDiff, diffUnit, mmDiffUnit);
+    appliedGradeMakingDiff, newGradeMakingDiff, diffUnit, mmDiffUnit,
+    discountOffer != null ? discountOffer.makingCharge : null);
+  let offerMakingCharge = calculateOfferPrice(makingCharge, discountOffer != null ? discountOffer.makingCharge : null);
   let gstApplied = calculateGST(metalPrice + makingCharge, cgstPercentage, sgstPercentage);
+  let offerGstApplied = calculateGST(offerMetalPrice + offerMakingCharge, cgstPercentage, sgstPercentage);
   let totalPrice = metalPrice + makingCharge + gstApplied.total;
+  let offerTotalPrice = offerMetalPrice + offerMakingCharge + offerGstApplied.total;
 
   return {
     totalPrice,
+    offerTotalPrice,
     metalPrice,
+    offerMetalPrice,
     makingCharge,
-    gstApplied
+    offerMakingCharge,
+    gstApplied,
+    offerGstApplied
   };
 }
 
 function calculatePriceByPercentageMaking(weight, metalRate, percentageMakingRate, minimumMaking, purity,
   appliedGradeMakingDiff, newGradeMakingDiff, percentageDiffUnit, mmDiffUnit,
-  cgstPercentage, sgstPercentage) {
+  cgstPercentage, sgstPercentage, offerDiscount) {
   let makingRate = metalRate * 0.01 * percentageMakingRate;
   let diffUnit = metalRate * 0.01 * percentageDiffUnit;
   return calculatePrice(weight, metalRate, makingRate, minimumMaking, purity,
     appliedGradeMakingDiff, newGradeMakingDiff, diffUnit, mmDiffUnit,
-    cgstPercentage, sgstPercentage);
+    cgstPercentage, sgstPercentage, offerDiscount);
 }
 
 function calculateMetalPurchaseRate(metalRate, purchaseRateDiff) {

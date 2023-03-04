@@ -262,9 +262,18 @@ input[type="radio"]
   vertical-align: baseline;
 }
 
-.total-price-display {
+.price-display {
   width: 45%;
+}
+
+.total-price-display {
   font-size: 40px;
+  vertical-align: baseline;
+}
+
+.total-striked-price-display {
+  font-size: 30px;
+  padding-top: 14px;
   vertical-align: baseline;
 }
 
@@ -312,7 +321,7 @@ input[type="radio"]
   margin: 0 20px;
   visibility: hidden;
   width: 150px;
-  height: 40px;
+  height: 15px;
   color: white;
   background-color: black;
   text-align: center;
@@ -325,6 +334,12 @@ input[type="radio"]
 }
 
 .sales-table-hidden {
+  height: 0px;
+  width: 0px;
+  visibility: hidden;
+}
+
+.visiblity-hidden {
   height: 0px;
   width: 0px;
   visibility: hidden;
@@ -350,6 +365,12 @@ input[type="radio"]
 
 .number-font-without-margin {
   padding: 5px 10px 5px 0;
+  font-weight: bold;
+  font-family: Old Standard TT;
+}
+
+.striked-off-number-font {
+  text-decoration: line-through;
   font-weight: bold;
   font-family: Old Standard TT;
 }
@@ -421,6 +442,10 @@ input[type="radio"]
 
 .padding-top-fifteen {
   padding-top: 20px;
+}
+
+.padding-top-thirty {
+  padding-top: 30px;
 }
 
 .money-green {
