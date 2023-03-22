@@ -111,6 +111,7 @@ function updateBillParams() {
   billParams.gstInvoiceDate = formatDateSlash(invoiceDate);
   billParams.gstInvoiceMonth = invoiceDate.toLocaleString('default', {month: 'short'});
   billParams.gstFinancialYear = getFinancialYear(invoiceDate);
+  billParams.gstin = document.getElementById("gstin-input").value;
 }
 
 function isFirstSectionInputValid() {

@@ -74,6 +74,7 @@ ipcMain.on('edit:tray:set', (event, tab) => {
     windowFactory.getGoldSellForm().tabName = tab.tabName;
     if (tab.metaData != null) {
       windowFactory.getGoldSellForm().sellingMetalRate = tab.metaData.sellingRate;
+      windowFactory.getGoldSellForm().percentageMaking = tab.metaData.percentageMaking;
     }
   }
 });

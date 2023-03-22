@@ -31,8 +31,8 @@ ipcRenderer.on('item:update', (event, updateParams) => {
   createPriceCards(updateParams.weightList, updateParams, priceCardContainer);
 
   let currnetPriceGrade = getAppliedPriceGrade(getTabIndexFromId(priceCardContainer.id));
-  addPriceLabels(updateParams, priceCardContainer, currnetPriceGrade, currnetPriceGrade,
-    getAppliedDiscountOffer(updateParams.tabIndex));
+  addPriceLabels(updateParams, priceCardContainer, getPercentageMaking(updateParams.tabIndex),
+    currnetPriceGrade, currnetPriceGrade, getSpecialDiscountOffer(updateParams.tabIndex));
 });
 
 ipcRenderer.on('add:set', (event, set) => {
@@ -54,7 +54,27 @@ ipcRenderer.on('add:set', (event, set) => {
 });
 
 ipcRenderer.on('grade:update', (event, gradeDetails) => {
-  updateSellTrayGradeAndRate(gradeDetails.tabIndex, gradeDetails.newGrade, gradeDetails.metalSellingRate);
+  let specialDiscountOffer = getSpecialDiscountOffer(gradeDetails.tabIndex);
+  if (gradeDetails.metalSellingRateDiscount["Gold"] !== null) {
+    specialDiscountOffer["Gold"].metalRate = {"isFlatDiscount": true, "value": gradeDetails.metalSellingRateDiscount["Gold"]};
+  }
+
+  if (gradeDetails.metalSellingRateDiscount["Silver"] !== null) {
+    specialDiscountOffer["Silver"].metalRate = {"isFlatDiscount": true, "value": gradeDetails.metalSellingRateDiscount["Silver"]};
+  }
+
+  let percentageMakingRateDiscount = gradeDetails.percentageMakingRateDiscount;
+  if (gradeDetails.percentageMakingRateDiscount["Gold"] !== null) {
+    specialDiscountOffer["Gold"].makingCharge = {"isFlatDiscount": true, "value": gradeDetails.percentageMakingRateDiscount["Gold"]};
+  }
+
+  if (gradeDetails.percentageMakingRateDiscount["Silver"] !== null) {
+    specialDiscountOffer["Silver"].makingCharge = {"isFlatDiscount": true, "value": gradeDetails.percentageMakingRateDiscount["Silver"]};
+  }
+
+  document.getElementById("data-special-discount-offer-" + gradeDetails.tabIndex).innerHTML = JSON.stringify(specialDiscountOffer);
+  updateSellTrayGradeAndRate(gradeDetails.tabIndex, getAppliedPriceGrade(gradeDetails.tabIndex), gradeDetails.metalSellingRate,
+  gradeDetails.percentageMakingRate);
 });
 
 ipcRenderer.on('tab-name:update', (event, params) => {
@@ -194,7 +214,9 @@ function buildSellTrayContainer(tabContent, set) {
   let changePriceGrade =
     createHtmlElement("button", "tray-window-button controller-button change-price-grade-button float-left", "price-grade-" + tabIndex, null, null);
   changePriceGrade.addEventListener("click", () => {
-    ipcRenderer.send('change:tray:grade', {tabIndex: tabIndex, appliedPriceGrade: getAppliedPriceGrade(tabIndex), metalSellingRate: getMetaData(tabIndex).sellingRate});
+    let metaData = getMetaData(tabIndex);
+    ipcRenderer.send('change:tray:grade', {tabIndex: tabIndex, metalSellingRate: getAppliedMetalSellingRate(tabIndex),
+      percentageMaking: getAppliedPercentageMaking(tabIndex)});
   });
   trayControlsContainer.appendChild(changePriceGrade);
   let proceedButton =
@@ -273,12 +295,20 @@ function setUpSellTrayDisplay(sellTrayContainer, itemsList) {
       priceCardContainer.appendChild(itemInfoCard);
       let itemLabel = createHtmlElement("h3", "item-label", null, item.itemName, null);
       itemInfoCard.appendChild(itemLabel);
-      let itemRateLabel = createHtmlElement("h2", "number-font metal-rate align-right padding-top-fifteen", null, null, null);
-      itemInfoCard.appendChild(itemRateLabel);
+      let itemRateLabelDiv = createHtmlElement("div", "wrapper-div price-label-banner offer-banner", null, null, null);
+      itemInfoCard.appendChild(itemRateLabelDiv);
+      let itemRateLabel = createHtmlElement("h2", "number-font metal-rate float-right padding-top-fifteen", null, null, null);
+      itemRateLabelDiv.appendChild(itemRateLabel);
+      let itemStrikedRateLabel = createHtmlElement("h4", "striked-off-number-font striked-off-metal-rate align-right padding-top-thirty", null, null, null);
+      itemRateLabelDiv.appendChild(itemStrikedRateLabel);
       let itemMinMakingLabel = createHtmlElement("div", "number-font min-making-charge float-left", null, null, null);
       itemInfoCard.appendChild(itemMinMakingLabel);
-      let itemMakingRateLabel = createHtmlElement("div", "number-font making-rate align-right", null, null, null);
-      itemInfoCard.appendChild(itemMakingRateLabel);
+      let itemMakingRateLabelDiv = createHtmlElement("div", "wrapper-div making-label-banner offer-banner", null, null, null);
+      itemInfoCard.appendChild(itemMakingRateLabelDiv);
+      let itemMakingRateLabel = createHtmlElement("div", "number-font making-rate padding-left-five float-right", null, null, null);
+      itemMakingRateLabelDiv.appendChild(itemMakingRateLabel);
+      let itemStrikedMakingRateLabel = createHtmlElement("div", "striked-off-number-font striked-off-making-rate padding-top-ten float-right", null, null, null);
+      itemMakingRateLabelDiv.appendChild(itemStrikedMakingRateLabel);
       autoSelectPriceCard = true;
     }
 
@@ -287,7 +317,7 @@ function setUpSellTrayDisplay(sellTrayContainer, itemsList) {
 
     // The default item rates are A grade rates
     let currnetPriceGrade = getAppliedPriceGrade(tabIndex);
-    addPriceLabels(item, priceCardContainer, "A", currnetPriceGrade, getAppliedDiscountOffer(tabIndex));
+    addPriceLabels(item, priceCardContainer, getPercentageMaking(tabIndex), "A", currnetPriceGrade, getSpecialDiscountOffer(tabIndex));
 
     let priceCardBoxButtons = priceCardBox.querySelector(".price-card-box-buttons-container");
     if (priceCardBoxButtons == null) {
@@ -375,31 +405,61 @@ function createPriceCardToolTip() {
   return priceCardToolTip;
 }
 
-function addPriceLabels(item, priceCardContainer, appliedPricingGrade, newPricingGrade, discountOffer) {
+function addPriceLabels(item, priceCardContainer, percentageMaking, appliedPricingGrade, newPricingGrade, discountOffer) {
   if (item.metal !== "Accessories") {
-    let percentageMaking = Dao.getPercentageMaking();
     let gradeMakingRateDiff = Dao.getGradeMakingRateDiff();
     let mappedItem = Dao.getMappedItem([item.metal, item.itemName].toString());
     let priceCards = priceCardContainer.getElementsByClassName("price-card");
     for(let i=0; i<priceCards.length; i++) {
       let priceCard = priceCards[i];
       if (i == 0) {
-        priceCard.querySelector(".metal-rate").innerHTML = "₹ " + getDesiNumber(item.ratePerGram) +" /g";
+        let metalDiscountOffer = discountOffer[mappedItem.METAL];
+        let offerMetalRate = ShopCalculator.calculateOfferPrice(
+          item.ratePerGram, metalDiscountOffer != null ? metalDiscountOffer.metalRate : null);
+        priceCard.querySelector(".metal-rate").innerHTML = "₹ " + getDesiNumber(offerMetalRate) +" /g";
+        if (item.ratePerGram != offerMetalRate) {
+          priceCard.querySelector(".striked-off-metal-rate").innerHTML = "₹ " + getDesiNumber(item.ratePerGram) +" /g";
+          if (item.metal === "Gold") {
+            priceCard.querySelector(".metal-rate").classList.add("padding-left-five");
+          }
+        } else {
+          priceCard.querySelector(".striked-off-metal-rate").innerHTML = "";
+        }
         priceCard.querySelector(".min-making-charge").innerHTML = "₹ " + getDesiNumber(
           ShopCalculator.calculateMakingRate(item.minimumMakingCharge,
             (gradeMakingRateDiff[appliedPricingGrade][mappedItem.METAL].MM_DIFF * mappedItem.MM_DIFF_UNIT),
             (gradeMakingRateDiff[newPricingGrade][mappedItem.METAL].MM_DIFF * mappedItem.MM_DIFF_UNIT)));
+
+        let makingRateLabelValue = "";
+        let strikedMakingRateLabelValue = "";
         if (percentageMaking[mappedItem.METAL].ENABLED) {
-          priceCard.querySelector(".making-rate").innerHTML =
-            ShopCalculator.calculateMakingRate(item.percentageMaking,
-              (gradeMakingRateDiff[appliedPricingGrade][mappedItem.METAL].DIFF * percentageMaking[mappedItem.METAL].DIFF_UNIT),
-              (gradeMakingRateDiff[newPricingGrade][mappedItem.METAL].DIFF  * percentageMaking[mappedItem.METAL].DIFF_UNIT)) + "%";
+          let makingRateValue = ShopCalculator.calculateMakingRate(item.percentageMaking,
+            (gradeMakingRateDiff[appliedPricingGrade][mappedItem.METAL].DIFF * percentageMaking[mappedItem.METAL].DIFF_UNIT),
+            (gradeMakingRateDiff[newPricingGrade][mappedItem.METAL].DIFF  * percentageMaking[mappedItem.METAL].DIFF_UNIT)).toFixed(2);
+          let offerMakingRateValue = ShopCalculator.calculateOfferPrice(makingRateValue,
+            metalDiscountOffer != null ? metalDiscountOffer.makingCharge : null).toFixed(2);
+          priceCard.querySelector(".making-rate").innerHTML = parseFloat(offerMakingRateValue) + "%";
+          if (offerMakingRateValue != makingRateValue) {
+            priceCard.querySelector(".striked-off-making-rate").innerHTML = parseFloat(makingRateValue) + "%";
+          } else {
+            priceCard.querySelector(".striked-off-making-rate").innerHTML = "";
+          }
         } else {
-          priceCard.querySelector(".making-rate").innerHTML = "₹ " + getDesiNumber(
-            ShopCalculator.calculateMakingRate(item.makingPerGram,
-              (gradeMakingRateDiff[appliedPricingGrade][mappedItem.METAL].DIFF * mappedItem.DIFF_UNIT),
-              (gradeMakingRateDiff[newPricingGrade][mappedItem.METAL].DIFF  * mappedItem.DIFF_UNIT))) + " /g";
+          let makingRateValue = ShopCalculator.calculateMakingRate(item.makingPerGram,
+            (gradeMakingRateDiff[appliedPricingGrade][mappedItem.METAL].DIFF * mappedItem.DIFF_UNIT),
+            (gradeMakingRateDiff[newPricingGrade][mappedItem.METAL].DIFF  * mappedItem.DIFF_UNIT));
+          let offerMakingRateValue = ShopCalculator.calculateOfferPrice(makingRateValue,
+            metalDiscountOffer != null ? metalDiscountOffer.makingCharge : null);
+          priceCard.querySelector(".making-rate").innerHTML = "₹ " + getDesiNumber(offerMakingRateValue) + " /g";
+          if (offerMakingRateValue != makingRateValue) {
+            priceCard.querySelector(".striked-off-making-rate").innerHTML = "₹ " + getDesiNumber(makingRateValue) + " /g";
+          } else {
+            priceCard.querySelector(".striked-off-making-rate").innerHTML = "";
+          }
         }
+
+        let offerMakingRate = ShopCalculator.calculateOfferPrice(
+          percentageMaking[mappedItem.METAL].RATE, metalDiscountOffer != null ? metalDiscountOffer.makingCharge : null);
       } else {
         let priceDetails = {};
         let weight = parseFloat(priceCard.querySelector(".item-label").textContent);
@@ -419,16 +479,19 @@ function addPriceLabels(item, priceCardContainer, appliedPricingGrade, newPricin
             discountOffer[mappedItem.METAL]);
         }
 
-        priceCard.querySelector(".gst-applied").innerHTML = "₹ " + getDesiNumber(priceDetails.gstApplied.total);
-        priceCard.querySelector(".metal-price").innerHTML = "₹ " + getDesiNumber(priceDetails.metalPrice);
-        priceCard.querySelector(".making-charge").innerHTML = "₹ " + getDesiNumber(priceDetails.makingCharge);
-        priceCard.querySelector(".tooltip-display-amount").innerHTML = "Amount: " + getDesiNumber(priceDetails.metalPrice + priceDetails.makingCharge);
+        priceCard.querySelector(".gst-applied").innerHTML = "₹ " + getDesiNumber(priceDetails.offerGstApplied.total);
+        priceCard.querySelector(".metal-price").innerHTML = "₹ " + getDesiNumber(priceDetails.offerMetalPrice);
+        priceCard.querySelector(".making-charge").innerHTML = "₹ " + getDesiNumber(priceDetails.offerMakingCharge);
+        priceCard.querySelector(".tooltip-display-amount").innerHTML = "Amount: " + getDesiNumber(priceDetails.offerMetalPrice + priceDetails.offerMakingCharge);
         priceCard.querySelector(".tooltip-amount").innerHTML = priceDetails.metalPrice + priceDetails.makingCharge;
         priceCard.querySelector(".tooltip-cgst").innerHTML = priceDetails.gstApplied.cgst;
         priceCard.querySelector(".tooltip-sgst").innerHTML = priceDetails.gstApplied.sgst;
-        if (priceDetails.totalPrice > priceDetails.offerTotalPrice) {
+        if (priceDetails.totalPrice != priceDetails.offerTotalPrice) {
           priceCard.querySelector(".striked-off-price").innerHTML = "₹ " + getDesiNumber(priceDetails.totalPrice);
           priceCard.querySelector(".money-green").innerHTML = "₹ " + getDesiNumber(priceDetails.offerTotalPrice);
+          if (priceDetails.offerTotalPrice > 99999) {
+            priceCard.querySelector(".money-green").classList.add("padding-left-two");
+          }
         } else {
           priceCard.querySelector(".striked-off-price").innerHTML = "";
           priceCard.querySelector(".money-green").innerHTML = "₹ " + getDesiNumber(priceDetails.totalPrice);
@@ -441,20 +504,24 @@ function addPriceLabels(item, priceCardContainer, appliedPricingGrade, newPricin
 }
 
 function updateSellTrayGrade(tabIndex, newGrade) {
-  updateSellTrayGradeAndRate(tabIndex, newGrade, null)
+  updateSellTrayGradeAndRate(tabIndex, newGrade, null, null)
 }
 
-function updateSellTrayGradeAndRate(tabIndex, newGrade, metalSellingRate) {
+function updateSellTrayGradeAndRate(tabIndex, newGrade, metalSellingRate, percentageMakingRate) {
   let tabContent = document.getElementById("tab-content-" + tabIndex);
   let priceCardContainers = tabContent.getElementsByClassName("price-card-container");
   if (metalSellingRate !== null) {
-    if (!isNaN(Number(metalSellingRate["Gold"]))) {
-      document.getElementById("data-gold-rate-" + tabIndex).innerHTML = Number(metalSellingRate["Gold"]);
-    }
+    document.getElementById("data-gold-rate-" + tabIndex).innerHTML = metalSellingRate["Gold"];
+    document.getElementById("data-silver-rate-" + tabIndex).innerHTML = metalSellingRate["Silver"];
+  }
 
-    if (!isNaN(Number(metalSellingRate["Silver"]))) {
-      document.getElementById("data-silver-rate-" + tabIndex).innerHTML = Number(metalSellingRate["Silver"]);
-    }
+  let setPercentageMaking = getPercentageMaking(tabIndex);
+  if (percentageMakingRate !== null) {
+    setPercentageMaking["Gold"].RATE = percentageMakingRate["Gold"] !== null
+      ? getNewPercentageMaking(tabIndex, "Gold", newGrade, "A", percentageMakingRate["Gold"]) : setPercentageMaking["Gold"].RATE;
+    setPercentageMaking["Silver"].RATE = percentageMakingRate["Silver"] !== null
+      ? getNewPercentageMaking(tabIndex, "Silver", newGrade, "A", percentageMakingRate["Silver"]) : setPercentageMaking["Silver"].RATE;
+    document.getElementById("data-percentage-making-" + tabIndex).innerHTML = JSON.stringify(setPercentageMaking);
   }
 
   for(let i=0; i<priceCardContainers.length; i++) {
@@ -464,11 +531,15 @@ function updateSellTrayGradeAndRate(tabIndex, newGrade, metalSellingRate) {
       itemName: itemInfoCard.querySelector(".item-label").textContent,
       metal: getItemType(itemInfoCard.classList)
     }, itemInfoCard);
-    if (metalSellingRate !== null && !isNaN(Number(metalSellingRate[currentItem.metal]))) {
-      currentItem.ratePerGram = Number(metalSellingRate[currentItem.metal]);
+    if (metalSellingRate !== null) {
+      currentItem.ratePerGram = metalSellingRate[currentItem.metal];
     }
 
-    addPriceLabels(currentItem, priceCardContainer, getAppliedPriceGrade(tabIndex), newGrade, getAppliedDiscountOffer(tabIndex));
+    if (percentageMakingRate !== null && percentageMakingRate[currentItem.metal] !== null && setPercentageMaking[currentItem.metal].ENABLED) {
+      currentItem.percentageMaking = percentageMakingRate[currentItem.metal];
+    }
+
+    addPriceLabels(currentItem, priceCardContainer, getPercentageMaking(tabIndex), getAppliedPriceGrade(tabIndex), newGrade, getSpecialDiscountOffer(tabIndex));
   }
 
   document.getElementById("applied-price-grade-" + tabIndex).textContent = newGrade;
@@ -889,7 +960,7 @@ function buildNetTotalContainer(tabContent, set) {
 function populateNetTotalContainer(tabIndex) {
   let salesItems = getSelectedSalesItems(tabIndex);
   let salesTable = document.getElementById("sales-table-" + tabIndex);
-  let percentageMaking = Dao.getPercentageMaking();
+  let percentageMaking = getPercentageMaking(tabIndex);
   emptyTable(salesTable);
   for (let i=0; i<salesItems.length; i++) {
     let salesItem = salesItems[i];
@@ -963,7 +1034,7 @@ function updateNetTotalContainer(tabIndex) {
   let salesItems = getSelectedSalesItems(tabIndex);
   let salesTable = document.getElementById("sales-table-" + tabIndex);
   let salesRows = salesTable.getElementsByClassName("data-row");
-  let percentageMaking = Dao.getPercentageMaking();
+  let percentageMaking = getPercentageMaking(tabIndex);
   for (let i=0; i<salesRows.length; i++) {
     let salesRow = salesRows[i];
     let salesItem = salesItems[i];
@@ -1107,6 +1178,8 @@ function buildMetaDataContainer(tabContent, set) {
   let metaDataContainer = createHtmlElement("div", "full-tray-container", "meta-data-container-" + tabIndex, null, null);
   tabContent.appendChild(metaDataContainer);
   populateMetaData(metaDataContainer, set);
+  createMetaDataDiv2(metaDataContainer, "data-percentage-making", Dao.getPercentageMaking());
+  createMetaDataDiv2(metaDataContainer, "data-special-discount-offer", Dao.getSpecialDiscountOffer());
 }
 
 function populateMetaData(metaDataContainer, set) {
@@ -1117,17 +1190,18 @@ function populateMetaData(metaDataContainer, set) {
 }
 
 function createMetaDataDiv(metaDataContainer, dataName, className, set) {
+  createMetaDataDiv2(metaDataContainer, className, set[dataName]);
+}
+
+function createMetaDataDiv2(metaDataContainer, className, data) {
   let tabIndex = getTabIndexFromId(metaDataContainer.id);
-
-  if (set[dataName] != null) {
-    let dataDiv = document.getElementById(className + "-" + tabIndex);
-    if (dataDiv != null) {
-      dataDiv.remove();
-    }
-
-    dataDiv = createHtmlElement("div", "data-div", className + "-" + tabIndex, null, "" + set[dataName]);
-    metaDataContainer.appendChild(dataDiv);
+  let dataDiv = document.getElementById(className + "-" + tabIndex);
+  if (dataDiv != null) {
+    dataDiv.remove();
   }
+
+  dataDiv = createHtmlElement("div", "data-div", className + "-" + tabIndex, null, JSON.stringify(data));
+  metaDataContainer.appendChild(dataDiv);
 }
 
 function getMetaData(tabIndex) {
@@ -1150,6 +1224,14 @@ function getMetaData(tabIndex) {
 
   if (document.getElementById("data-silver-purchase-rate-" + tabIndex) != null) {
     metaData.purchaseRate["Silver"] = document.getElementById("data-silver-purchase-rate-" + tabIndex).innerHTML;
+  }
+
+  if (document.getElementById("data-percentage-making-" + tabIndex) != null) {
+    metaData.percentageMaking = JSON.parse(document.getElementById("data-percentage-making-" + tabIndex).innerHTML);
+  }
+
+  if (document.getElementById("data-special-discount-offer-" + tabIndex) != null) {
+    metaData.specialDiscountOffer = JSON.parse(document.getElementById("data-special-discount-offer-" + tabIndex).innerHTML);
   }
 
   return metaData;
@@ -1240,7 +1322,16 @@ function getCurentItem(item, itemInfoCard) {
   }
   currentItem.itemName = itemInfoCard.querySelector(".item-label").textContent;
   currentItem.ratePerGram = getFromDesiRupeeNumber(itemInfoCard.querySelector(".metal-rate").textContent.replace(" /g", ""));
+  if (itemInfoCard.querySelector(".striked-off-metal-rate").textContent.startsWith("₹ ")) {
+    currentItem.ratePerGram = getFromDesiRupeeNumber(
+      itemInfoCard.querySelector(".striked-off-metal-rate").textContent.replace(" /g", ""));
+  }
+
   let makingRateText = itemInfoCard.querySelector(".making-rate").textContent;
+  if (itemInfoCard.querySelector(".striked-off-making-rate").textContent !== "") {
+    makingRateText = itemInfoCard.querySelector(".striked-off-making-rate").textContent;
+  }
+
   if (makingRateText.endsWith("%")) {
     currentItem.percentageMaking = makingRateText.replace("%", "");
   } else {
@@ -1599,12 +1690,67 @@ function enrichTransactionEntries(
     }
 }
 
-function getAppliedDiscountOffer(tabIndex) {
-  return {"Gold": {"metalPrice": {"isFlatDiscount": true, "value": 100}}, "Silver": {"metalPrice": {"isFlatDiscount": true, "value": 2}}}
+function getSpecialDiscountOffer(tabIndex) {
+  if (document.getElementById("data-special-discount-offer-" + tabIndex) != null) {
+    return JSON.parse(document.getElementById("data-special-discount-offer-" + tabIndex).innerHTML);
+  }
+
+  return null;
+}
+
+function getPercentageMaking(tabIndex) {
+  if (document.getElementById("data-percentage-making-" + tabIndex) != null) {
+    return JSON.parse(document.getElementById("data-percentage-making-" + tabIndex).innerHTML);
+  }
+
+  return null;
 }
 
 function getAppliedPriceGrade(tabIndex) {
   return document.getElementById("applied-price-grade-" + tabIndex).textContent;
+}
+
+function getAppliedMetalSellingRate(tabIndex) {
+  let metalSellingRate = getMetaData(tabIndex).sellingRate;
+  let discountOffer = getSpecialDiscountOffer(tabIndex);
+  return {
+    "Gold": {
+      "original": metalSellingRate["Gold"],
+      "discounted": parseFloat(ShopCalculator.calculateOfferPrice(
+        metalSellingRate["Gold"], discountOffer["Gold"] != null ? discountOffer["Gold"].metalRate : null).toFixed(2))
+    },
+    "Silver": {
+      "original": metalSellingRate["Silver"],
+      "discounted": parseFloat(ShopCalculator.calculateOfferPrice(
+        metalSellingRate["Silver"], discountOffer["Silver"] != null ? discountOffer["Silver"].metalRate : null).toFixed(2))
+    }
+  };
+}
+
+function getAppliedPercentageMaking(tabIndex) {
+  let currentGrade = getAppliedPriceGrade(tabIndex);
+  let percentageMaking = getPercentageMaking(tabIndex);
+  let discountOffer = getSpecialDiscountOffer(tabIndex);
+  let goldPercentageMaking = getNewPercentageMaking(tabIndex, "Gold", "A", currentGrade, percentageMaking["Gold"].RATE);
+  let silverPercentageMaking = getNewPercentageMaking(tabIndex, "Silver", "A", currentGrade, percentageMaking["Silver"].RATE);
+  return {
+    "Gold": {
+      "original": goldPercentageMaking,
+      "discounted": parseFloat(ShopCalculator.calculateOfferPrice(goldPercentageMaking, discountOffer["Gold"] != null ? discountOffer["Gold"].makingCharge : null).toFixed(2))
+    },
+    "Silver": {
+      "original": silverPercentageMaking,
+      "discounted": parseFloat(ShopCalculator.calculateOfferPrice(silverPercentageMaking, discountOffer["Silver"] != null ? discountOffer["Silver"].makingCharge : null).toFixed(2))
+    }
+  };
+}
+
+function getNewPercentageMaking(tabIndex, metal, currentGrade, newGrade, makingRate) {
+  let percentageMaking = getPercentageMaking(tabIndex);
+  let gradeMakingRateDiff = Dao.getGradeMakingRateDiff();
+  return parseFloat(ShopCalculator.calculateMakingRate(makingRate,
+    (gradeMakingRateDiff[currentGrade][metal].DIFF * percentageMaking[metal].DIFF_UNIT),
+    (gradeMakingRateDiff[newGrade][metal].DIFF  * percentageMaking[metal].DIFF_UNIT)).toFixed(2));
 }
 
 function wrapTableData(color, element) {

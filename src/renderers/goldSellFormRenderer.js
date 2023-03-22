@@ -17,6 +17,11 @@ if (metalRate == null) {
   metalRate = Dao.getTodaysRate(Dao);
 }
 
+let percentageMaking = remote.getCurrentWindow().percentageMaking;
+if (percentageMaking == null) {
+  percentageMaking = Dao.getPercentageMaking();
+}
+
 /* Form Populator */
 let tabName = remote.getCurrentWindow().tabName;
 if (tabName != null) {
@@ -176,7 +181,6 @@ submitButton.addEventListener("dblclick", (event) => {
 
 function submitFormData() {
   let purchaseRateDiff = Dao.getPurchaseRateDiff();
-  let percentageMaking = Dao.getPercentageMaking();
   let goldRateMain = Number(document.getElementById("gold-rate-main").value);
   let silverRateMain = Number(document.getElementById("silver-rate-main").value);
 
@@ -228,9 +232,11 @@ function submitFormData() {
     goldRate: goldRateMain,
     goldPurchaseRate:
       ShopCalculator.calculateMetalPurchaseRate(goldRateMain, purchaseRateDiff.Gold),
+    goldPercentageMaking: percentageMaking["Gold"].RATE,
     silverRate: silverRateMain,
     silverPurchaseRate:
       ShopCalculator.calculateMetalPurchaseRate(silverRateMain, purchaseRateDiff.Silver),
+    silverPercentageMaking: percentageMaking["Silver"].RATE,
     tabIndex: remote.getCurrentWindow().tabIndex
   };
 

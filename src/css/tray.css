@@ -375,6 +375,10 @@ input[type="radio"]
   font-family: Old Standard TT;
 }
 
+.striked-off-making-rate {
+  font-size: 14px;
+}
+
 .gst-breakup-font {
   padding: 5px 10px;
   font-weight: bold;
@@ -438,6 +442,22 @@ input[type="radio"]
 
 .align-bottom {
   vertical-align: bottom;
+}
+
+.padding-left-two {
+  padding-left: 2px;
+}
+
+.padding-left-five {
+  padding-left: 4px;
+}
+
+.padding-top-five {
+  padding-top: 5px;
+}
+
+.padding-top-ten {
+  padding-top: 8px;
 }
 
 .padding-top-fifteen {

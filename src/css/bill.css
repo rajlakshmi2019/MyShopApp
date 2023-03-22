@@ -1,6 +1,6 @@
 /* Bill window styles */
 body {
-  margin: 3px 2px 5px 5px;
+  margin: 3px;
 }
 
 @media print {
@@ -148,10 +148,24 @@ tr.purchase-row td:nth-child(4) {
   border-bottom: 1px solid black;
 }
 
-.title-large {
+@font-face {
+  font-family: 'philosopher-bold';
+  src: url('../resource/Philosopher-Bold.ttf');
+}
+
+.main-title {
   margin-bottom: 0;
   text-align: center;
-  font-size: 35px;
+  font-family: philosopher-bold;
+  color: #5a0000;
+}
+
+.title-large {
+  font-size: 58px;
+}
+
+.title-midium {
+  font-size: 32px;
 }
 
 @font-face {
@@ -162,8 +176,18 @@ tr.purchase-row td:nth-child(4) {
 .sub-title {
   margin-bottom: 0;
   text-align: center;
-  font-size: 22px;
+  font-size: 20px;
   font-family: gabriele;
+  color: #2957a3;
+}
+
+.sub-title-2 {
+  font-size: 14px;
+  color: green;
+}
+
+.bill-detail-field {
+  color: #5a0000;
 }
 
 .bill-contents {
@@ -190,7 +214,7 @@ tr.purchase-row td:nth-child(4) {
 }
 
 .upper-margin {
-  margin-top: 25px;
+  margin-top: 5px;
 }
 
 .td-align-left {
@@ -254,10 +278,6 @@ table.print-friendly tr {
 }
 
 .fixed-width {
-  width: 24%;
-}
-
-.fixed-width-twenty {
   width: 24%;
 }
 
@@ -327,12 +347,14 @@ table.print-friendly tr {
   font-size: 12px;
   padding-top: 2px;
   padding-left: 2px;
+  color: green;
 }
 
 #top-right-header {
   font-size: 12px;
   padding-top: 2px;
   padding-right: 2px;
+  color: green;
 }
 
 #top-center-header {
@@ -346,7 +368,7 @@ table.print-friendly tr {
 }
 
 #name-header-div {
-  width: 70%;
+  width: 58%;
 }
 
 #bill-footer {
@@ -359,9 +381,11 @@ table.print-friendly tr {
 }
 
 #rj-img {
-  width: 80px;
+  width: 90px;
+  margin: 10px 0px 0px 15px;
 }
 
 #hallmark-img {
-  width: 77px;
+  margin-top: 12px;
+  width: 115px;
 }

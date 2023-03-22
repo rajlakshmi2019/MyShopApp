@@ -5,7 +5,7 @@
     <link rel="stylesheet" href="../css/bill.css">
     <title>Generated Bill</title>
     <!-- Set page size here: A5, A4 or A3 -->
-    <style>@page { size: A5; margin: 0 0 30px; }</style>
+    <style>@page { size: A5; margin: 10px 10px 30px; }</style>
   </head>
   <body>
     <div id="bill-menu"></div>
@@ -18,30 +18,33 @@
             <div class="float-right td-align-right split-forty" id="top-right-header"></div>
           </div>
           <div class="overflow-hidden">
-            <img class="float-left" id="rj-img" src="./../resource/rj_logo.png" alt="RJ">
-            <div class="wrapper-div float-left" id="name-header-div">
-              <div class="title-large font-bold">
-                Rajlaxmi Jewellers
+            <img class="float-left" id="rj-img" src="./../resource/rj_new_colored_logo.png" alt="RJ">
+            <img class="float-right" id="hallmark-img" src="./../resource/hallmark_colored_logo.png" alt="hallmark">
+            <div class="overflow-hidden float-right" id="name-header-div">
+              <div class="main-title title-large font-bold">
+                RAJLAXMI
+              </div>
+              <div class="main-title title-midium font-bold">
+                JEWELLERS
               </div>
               <div class="sub-title font-bold">
-                The jewellery people
+                Your Jewellery of Dreams
               </div>
-              <div class="td-align-center">
+              <div class="sub-title-2 td-align-center">
                 Amar Chowk (Nawadih More), Rajdhanwar
               </div>
-              <div class="td-align-center">
+              <div class="sub-title-2 td-align-center">
                 Giridih (Jharkhand) - 825412
               </div>
             </div>
-            <img class="float-right" id="hallmark-img" src="./../resource/hallmark_65.png" alt="hallmark">
           </div>
           <div class="overflow-hidden">
             <div class="custom-box full-width float-left">
-              <label class="fixed-width float-left" id="bill-no-text">ESTIMATE</label>
+              <label class="bill-detail-field fixed-width float-left" id="bill-no-text">ESTIMATE</label>
               <label class="td-align-left font-bold float-left" id="bill-no"></label>
             </div>
-            <div class="custom-box fixed-width-twenty float-right td-align-right">
-              <div class="overflow-hidden float-left">
+            <div class="custom-box fixed-width float-right td-align-right">
+              <div class="bill-detail-field overflow-hidden float-left">
                 DATE
               </div>
               <div class="float-right font-bold" id="billing-date"></div>
@@ -49,13 +52,13 @@
           </div>
           <div class="overflow-hidden">
             <div class="custom-box full-width float-left">
-              <label class="fixed-width float-left">NAME</label>
+              <label class="bill-detail-field fixed-width float-left">NAME</label>
               <label class="td-align-left font-bold float-left" id="billing-name">
                 .....................
               </label>
             </div>
-            <div class="custom-box fixed-width-twenty float-right td-align-right">
-              <div class="overflow-hidden float-left">
+            <div class="custom-box fixed-width float-right td-align-right">
+              <div class="bill-detail-field overflow-hidden float-left">
                 PLACE
               </div>
               <div class="float-right font-bold" id="billing-place">
@@ -65,17 +68,25 @@
           </div>
           <div class="overflow-hidden">
             <div class="custom-box full-width float-left">
-              <label class="fixed-width float-left">ADDR</label>
+              <label class="bill-detail-field fixed-width float-left">ADDR</label>
               <label class="td-align-left font-bold float-left" id="billing-address">
                 .....................
               </label>
             </div>
-            <div class="custom-box fixed-width-twenty float-right td-align-right">
-              <div class="overflow-hidden float-left">
+            <div class="custom-box fixed-width float-right td-align-right">
+              <div class="bill-detail-field overflow-hidden float-left">
                 PHONE
               </div>
               <label class="float-right font-bold" id="billing-phone-no">
-                .....................
+                ..................
+              </label>
+            </div>
+          </div>
+
+          <div class="overflow-hidden display-none" id="billing-gstin-div">
+            <div class="custom-box full-width float-left">
+              <label class="bill-detail-field fixed-width float-left">GSTIN</label>
+              <label class="td-align-left font-bold float-left" id="billing-gstin">
               </label>
             </div>
           </div>

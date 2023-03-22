@@ -17,11 +17,11 @@ let loadAppConfigs = async function() {
     metalRateRecords, gradesMakingRateDiffRecords, itemsConfigRecords);
 }
 
-let persistTransactionEntries = async function(transactionDate, transactionEntries) {
-  // Empty place holder to temprorily disable persistance of transaction entries
-}
+// let persistTransactionEntries = async function(transactionDate, transactionEntries) {
+//   // Empty place holder to temprorily disable persistance of transaction entries
+// }
 
-let persistTransactionEntriesEnabled = async function(transactionDate, transactionEntries) {
+let persistTransactionEntries = async function(transactionDate, transactionEntries) {
 
   // build transaction string
   let transaction = "";
@@ -164,6 +164,11 @@ let getAccessoriesItemTypes = function() {
 
 let getMappedItem = function(itemKey) {
   return appConfigs.itemConfigs.get(itemKey);
+}
+
+let getSpecialDiscountOffer = function() {
+  return {"Gold": {"metalRate": {"isFlatDiscount": true, "value": 0}, "makingCharge": {"isFlatDiscount": true, "value": 0}},
+    "Silver": {"metalRate": {"isFlatDiscount": true, "value": 0}, "makingCharge": {"isFlatDiscount": true, "value": 0}}};
 }
 
 let updateMetalRate = async function(metalRate, purchaseRateDiff) {
@@ -343,6 +348,7 @@ module.exports = {
   getSilverItemTypes,
   getAccessoriesItemTypes,
   getMappedItem,
+  getSpecialDiscountOffer,
   updateMetalRate,
   saveMobileNo,
   getDirectoryContents,

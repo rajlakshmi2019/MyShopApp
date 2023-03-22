@@ -230,6 +230,10 @@ function applyGST(cgstRate, sgstRate) {
   document.getElementById("billing-name").textContent = configs.gstName;
   document.getElementById("billing-address").textContent = configs.gstAddress;
   document.getElementById("billing-phone-no").textContent = configs.gstPhoneNumber;
+  if (configs.gstin !== "") {
+    document.getElementById("billing-gstin").textContent = configs.gstin;
+    document.getElementById("billing-gstin-div").classList.remove("display-none");
+  }
 
   document.getElementById("sales-table-total").innerHTML = configs.totals.sales_less_gst;
   document.getElementById("cgst-header").innerHTML = "CGST @ " + cgstRate + "%";
