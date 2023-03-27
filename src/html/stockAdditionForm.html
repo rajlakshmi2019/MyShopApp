@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Pick a grade</title>
+    <link rel="stylesheet" href="../css/app.css">
+    <link rel="stylesheet" href="../css/body.css">
+    <link rel="stylesheet" href="../css/tray.css">
+    <link rel="stylesheet" href="../css/done.css">
+  </head>
+  <body>
+    <div id="grade-picker-div">
+      <h1 class="big-header-margin">Stock Addition</h1>
+      <div class="wrapper-div lower-margin">
+        <div class="wrapper-div lower-margin">
+          <div class="input-header gold-color">
+            Addition Date
+          </div>
+          <input type="date" class="input-text input-std-width" id="addition-date" readonly>
+        </div>
+        <div class="wrapper-div half-width float-left">
+          <div class="input-header gold-color">
+            Gold Weight
+          </div>
+          <input type="text" class="input-text input-std-width gram-background" id="gold-weight">
+        </div>
+        <div class="wrapper-div half-width float-right">
+          <div class="input-header silver-color align-right">
+            Silver Weight
+          </div>
+          <input type="text" class="input-text input-std-width gram-background float-right" id="silver-weight">
+        </div>
+      </div>
+      <div class="wrapper-div half-width">
+        <div class="input-header gold-color">
+          Cash
+        </div>
+        <input type="text" class="input-text input-std-width rupee-background" id="cash">
+      </div>
+    </div>
+    <div class="button-pair">
+      <button type="button" class="accept-button money-green" id="submit-button">Submit</button>
+      <button type="button" class="reject-button red-color" id="cancel-button">Cancel</button>
+    </div>
+  </body>
+  <script type="text/javascript">
+    require('./../renderers/stockAdditionRenderer.js');
+  </script>
+</html>

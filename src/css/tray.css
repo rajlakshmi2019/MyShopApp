@@ -25,6 +25,18 @@ th.silver-border, td.silver-border {
   border: 2px solid silver;
 }
 
+th.transactions-cell, td.transactions-cell {
+  padding: 0px;
+}
+
+th.summary-cell, td.summary-cell {
+  padding: 2px 0px 0px;
+}
+
+tr.summary-row {
+  border: none;
+}
+
 th.white-border, td.white-border {
   border: 2px solid #FFFFFF;
 }

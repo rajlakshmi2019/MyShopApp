@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Pick a grade</title>
+    <link rel="stylesheet" href="../css/app.css">
+    <link rel="stylesheet" href="../css/body.css">
+    <link rel="stylesheet" href="../css/tray.css">
+    <link rel="stylesheet" href="../css/done.css">
+  </head>
+  <body>
+    <div id="grade-picker-div">
+      <h1 class="big-header-margin">Stock Carryover</h1>
+      <div class="wrapper-div lower-margin">
+        <div class="wrapper-div half-width float-left">
+          <div class="input-header gold-color">
+            Carryover From
+          </div>
+          <input type="date" size="8" class="input-text" id="from-date">
+        </div>
+        <div class="wrapper-div half-width float-right">
+          <div class="input-header gold-color align-right">
+            Carryover To
+          </div>
+          <input type="date" size="8" class="input-text float-right" id="to-date" readonly>
+        </div>
+      </div>
+    </div>
+    <div class="button-pair">
+      <button type="button" class="accept-button money-green" id="submit-button">Submit</button>
+      <button type="button" class="reject-button red-color" id="cancel-button">Cancel</button>
+    </div>
+  </body>
+  <script type="text/javascript">
+    require('./../renderers/stockCarryoverRenderer.js');
+  </script>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Daily Transactions Report</title>
+    <link rel="stylesheet" href="../css/app.css">
+    <link rel="stylesheet" href="../css/body.css">
+    <link rel="stylesheet" href="../css/tray.css">
+    <link rel="stylesheet" href="../css/done.css">
+  </head>
+  <body>
+    <div class="form-container">
+      <h1 class="form-title gold-color">Daily Transactions Report</h1>
+      <div class="form-content">
+        <div class="wrapper-div lower-margin" id="date-selector">
+          <div calss="wrapper-div">
+            <div class="wrapper-div half-width float-left">
+              <div class="input-header gold-color">
+                Select Date
+              </div>
+              <input type="date" class="gst-input-text" style="width: 180px;" id="date-input">
+            </div>
+          </div>
+          <button type="button" class="gold-color transactions-menu-btn float-right" id="transaction-reversal-btn">Reversal</button>
+          <button type="button" class="gold-color transactions-menu-btn float-right" id="manual-reversal-btn">Manual Reversal</button>
+          <button type="button" class="gold-color transactions-menu-btn float-right" id="carry-over-btn">Carry Over</button>
+          <button type="button" class="gold-color transactions-menu-btn float-right" id="add-stock-btn">Add Stock</button>
+        </div>
+        <div id="transactions-report-table-div">
+          <table id="transactions-report-table">
+            <tr id="transactions-report-header">
+              <th class="align-center transactions-cell">
+                <div class="checkbox-div"><input class="checkbox-header" type="checkbox" onclick="return false;"></div>
+              </th>
+              <th class="align-center transactions-cell">ID</th>
+              <th class="align-center transactions-cell">Transaction ID</th>
+              <th class="align-center transactions-cell">Date</th>
+              <th class="align-center transactions-cell">Type</th>
+              <th class="align-center transactions-cell">Metal</th>
+              <th class="align-center transactions-cell">Weight</th>
+              <th class="align-center transactions-cell">Rate</th>
+              <th class="align-center transactions-cell">Making</th>
+              <th class="align-center transactions-cell">Price</th>
+              <th class="align-center transactions-cell">Referance</th>
+              <th class="align-center transactions-cell">Status</th>
+              <th class="align-center transactions-cell">Reversed On</th>
+            </tr>
+          </table>
+        </div>
+        <div id="transactions-summary-table-div">
+          <table id="transactions-summary-table">
+            <tr class="summary-row" id="transactions-summary-header">
+              <th class="align-center summary-cell">Gold Stock</th>
+              <th class="align-center summary-cell">Gold Sold</th>
+              <th class="align-center summary-cell">Old Gold Purchased</th>
+              <th class="align-center summary-cell">Silver Stock</th>
+              <th class="align-center summary-cell">Silver Sold</th>
+              <th class="align-center summary-cell">Old Silver Purchased</th>
+              <th class="align-center summary-cell">Cash Stock</th>
+              <th class="align-center summary-cell">Sold Amount</th>
+              <th class="align-center summary-cell">Purchased Amount</th>
+              <th class="align-center summary-cell">Additional</th>
+              <th class="align-center summary-cell">Discount</th>
+              <th class="align-center summary-cell">Due</th>
+            </tr>
+            <tr class="summary-row" id="transactions-summary-data">
+              <th class="align-center summary-cell" id="gold-stock"></th>
+              <th class="align-center summary-cell" id="gold-sold"></th>
+              <th class="align-center summary-cell" id="old-gold-purchased"></th>
+              <th class="align-center summary-cell" id="silver-stock"></th>
+              <th class="align-center summary-cell" id="silver-sold"></th>
+              <th class="align-center summary-cell" id="old-silver-purchased"></th>
+              <th class="align-center summary-cell" id="cash-stock"></th>
+              <th class="align-center summary-cell" id="cash-sold"></th>
+              <th class="align-center summary-cell" id="cash-purchased"></th>
+              <th class="align-center summary-cell" id="cash-additional"></th>
+              <th class="align-center summary-cell" id="cash-discount"></th>
+              <th class="align-center summary-cell" id="cash-due"></th>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </body>
+  <script type="text/javascript">
+    require('./../renderers/transactionsReportViewRenderer.js');
+  </script>
+</html>

@@ -3,14 +3,15 @@ const path = require('path');
 const {app, BrowserWindow, Menu} = require('electron');
 
 let mainWindow, goldSellForm, goldExchangeForm, editTrayItemForm;
-let gradePickerWindow, billWindow, paymentAcceptWindow;
-let updateConfigsWindow, invoiceForm, gstReportView;
+let gradePickerWindow, billWindow, transTokenWindow, paymentAcceptWindow;
+let updateConfigsWindow, invoiceForm, gstReportView, transactionsReportView;
+let stockCarryoverForm, stockAdditionForm, manualReversalForm;
 
 function createMainWindow() {
   mainWindow = new BrowserWindow({
     backgroundColor:'#363A42',
     show: false,
-    webPreferences: {nodeIntegration: true}
+    webPreferences: {nodeIntegration: true, devTools: !app.isPackaged}
   });
   mainWindow.setMenu(mainMenu);
   mainWindow.maximize();
@@ -52,7 +53,7 @@ function createGoldSellForm(backgroundColor) {
     backgroundColor: backgroundColor,
     parent: mainWindow, modal:true,
     show: false,
-    webPreferences: {nodeIntegration: true}
+    webPreferences: {nodeIntegration: true, devTools: !app.isPackaged}
   });
   goldSellForm.loadURL(url.format({
     pathname: path.join(__dirname, 'html', 'goldSellForm.html'),
@@ -79,7 +80,7 @@ function createGoldExchangeForm() {
     backgroundColor: "#363A42",
     parent: mainWindow, modal:true,
     show: false,
-    webPreferences: {nodeIntegration: true}
+    webPreferences: {nodeIntegration: true, devTools: !app.isPackaged}
   });
   goldExchangeForm.loadURL(url.format({
     pathname: path.join(__dirname, 'html', 'goldExchangeForm.html'),
@@ -106,7 +107,7 @@ function createEditTrayItemForm(item) {
     backgroundColor:'#205081',
     parent: mainWindow, modal:true,
     show: false,
-    webPreferences: {nodeIntegration: true}
+    webPreferences: {nodeIntegration: true, devTools: !app.isPackaged}
   });
   editTrayItemForm.windowItem = item;
   editTrayItemForm.loadURL(url.format({
@@ -134,7 +135,7 @@ function createGradePickerWindow() {
     backgroundColor:'#205081',
     parent: mainWindow, modal:true,
     show: false,
-    webPreferences: {nodeIntegration: true}
+    webPreferences: {nodeIntegration: true, devTools: !app.isPackaged}
   });
   gradePickerWindow.loadURL(url.format({
     pathname: path.join(__dirname, 'html', 'gradePicker.html'),
@@ -161,7 +162,7 @@ function createUpdateConfigsWindow() {
     backgroundColor:'#363A42',
     parent: mainWindow, modal:true,
     show: false,
-    webPreferences: {nodeIntegration: true}
+    webPreferences: {nodeIntegration: true, devTools: !app.isPackaged}
   });
   updateConfigsWindow.loadURL(url.format({
     pathname: path.join(__dirname, 'html', 'updateConfigsWindow.html'),
@@ -187,7 +188,7 @@ function createBillWindow(configs) {
     backgroundColor:'white',
     parent: mainWindow, modal:true,
     show: false,
-    webPreferences: {nodeIntegration: true}
+    webPreferences: {nodeIntegration: true, devTools: !app.isPackaged}
   });
   billWindow.configs = configs;
   billWindow.loadURL(url.format({
@@ -215,7 +216,7 @@ function createPaymentAcceptForm(configs) {
     backgroundColor:'#205081',
     parent: mainWindow, modal:true,
     show: false,
-    webPreferences: {nodeIntegration: true}
+    webPreferences: {nodeIntegration: true, devTools: !app.isPackaged}
   });
   paymentAcceptWindow.configs = configs;
   paymentAcceptWindow.loadURL(url.format({
@@ -243,7 +244,7 @@ function createInvoiceForm(params) {
     backgroundColor:'#205081',
     parent: mainWindow, modal:true,
     show: false,
-    webPreferences: {nodeIntegration: true}
+    webPreferences: {nodeIntegration: true, devTools: !app.isPackaged}
   });
   invoiceForm.configs = params;
   invoiceForm.loadURL(url.format({
@@ -263,6 +264,78 @@ function getInvoiceForm() {
   return invoiceForm;
 }
 
+function createStockCarryoverForm(fromDate) {
+  stockCarryoverForm = new BrowserWindow({
+    width: 475,
+    height: 265,
+    frame: false,
+    backgroundColor:'#205081',
+    parent: transactionsReportView, modal:true,
+    show: false,
+    webPreferences: {nodeIntegration: true, devTools: !app.isPackaged}
+  });
+  stockCarryoverForm.fromDate = fromDate;
+  stockCarryoverForm.loadURL(url.format({
+    pathname: path.join(__dirname, 'html', 'stockCarryoverForm.html'),
+    protocol: 'file:',
+    slashes: true
+  }));
+  stockCarryoverForm.once('ready-to-show', () => {
+    stockCarryoverForm.show()
+  });
+  stockCarryoverForm.on('close', () => {
+    stockCarryoverForm = null;
+  });
+}
+
+function createStockAdditionForm(additionDate) {
+  stockAdditionForm = new BrowserWindow({
+    width: 475,
+    height: 400,
+    frame: false,
+    backgroundColor:'#205081',
+    parent: transactionsReportView, modal:true,
+    show: false,
+    webPreferences: {nodeIntegration: true, devTools: !app.isPackaged}
+  });
+  stockAdditionForm.additionDate = additionDate;
+  stockAdditionForm.loadURL(url.format({
+    pathname: path.join(__dirname, 'html', 'stockAdditionForm.html'),
+    protocol: 'file:',
+    slashes: true
+  }));
+  stockAdditionForm.once('ready-to-show', () => {
+    stockAdditionForm.show()
+  });
+  stockAdditionForm.on('close', () => {
+    stockAdditionForm = null;
+  });
+}
+
+function createManualReversalForm(reversalDate) {
+  manualReversalForm = new BrowserWindow({
+    width: 475,
+    height: 420,
+    frame: false,
+    backgroundColor:'#205081',
+    parent: transactionsReportView, modal:true,
+    show: false,
+    webPreferences: {nodeIntegration: true, devTools: !app.isPackaged}
+  });
+  manualReversalForm.reversalDate = reversalDate;
+  manualReversalForm.loadURL(url.format({
+    pathname: path.join(__dirname, 'html', 'manualReversalForm.html'),
+    protocol: 'file:',
+    slashes: true
+  }));
+  manualReversalForm.once('ready-to-show', () => {
+    manualReversalForm.show()
+  });
+  manualReversalForm.on('close', () => {
+    manualReversalForm = null;
+  });
+}
+
 function createGSTReportView() {
   gstReportView = new BrowserWindow({
     width: 900,
@@ -271,7 +344,7 @@ function createGSTReportView() {
     backgroundColor: "#363A42",
     parent: mainWindow, modal:true,
     show: false,
-    webPreferences: {nodeIntegration: true}
+    webPreferences: {nodeIntegration: true, devTools: !app.isPackaged}
   });
   gstReportView.loadURL(url.format({
     pathname: path.join(__dirname, 'html', 'gstReportView.html'),
@@ -288,6 +361,33 @@ function createGSTReportView() {
 
 function getGSTReportView() {
   return gstReportView;
+}
+
+function createTransactionsReportView() {
+  transactionsReportView = new BrowserWindow({
+    width: 1300,
+    height: 900,
+    frame: false,
+    backgroundColor: "#363A42",
+    parent: mainWindow, modal:true,
+    show: false,
+    webPreferences: {nodeIntegration: true, devTools: !app.isPackaged}
+  });
+  transactionsReportView.loadURL(url.format({
+    pathname: path.join(__dirname, 'html', 'transactionsReportView.html'),
+    protocol: 'file:',
+    slashes: true
+  }));
+  transactionsReportView.once('ready-to-show', () => {
+    transactionsReportView.show()
+  });
+  transactionsReportView.on('close', () => {
+    transactionsReportView = null;
+  });
+}
+
+function getTransactionsReportView() {
+  return transactionsReportView;
 }
 
 const mainMenuTemplate = [
@@ -321,22 +421,17 @@ const mainMenuTemplate = [
     label: 'View',
     submenu: [
       {
-        label: 'Items',
-        accelerator: 'ctrl+A'
-      },
-      {
-        label: 'Rate',
-        accelerator: 'ctrl+T'
-      },
-      {
-        label: 'PnL',
-        accelerator: 'ctrl+P'
-      },
-      {
         label: 'GST Report',
         accelerator: 'ctrl+G',
         click() {
           createGSTReportView();
+        }
+      },
+      {
+        label: 'Transactions Report',
+        accelerator: 'ctrl+T',
+        click() {
+          createTransactionsReportView();
         }
       }
     ]
@@ -346,7 +441,7 @@ const mainMenuTemplate = [
     submenu: [
       {
         label: 'Toggle Devtools',
-        accelerator: 'ctrl+I',
+        accelerator: 'ctrl+shift+I',
         click(item, focusedWindow) {
           focusedWindow.toggleDevTools();
         }
@@ -375,5 +470,7 @@ module.exports = {
   createBillWindow, getBillWindow,
   createPaymentAcceptForm, getPaymentAcceptForm,
   createInvoiceForm, getInvoiceForm,
-  createGSTReportView, getGSTReportView
+  createGSTReportView, getGSTReportView,
+  createTransactionsReportView, getTransactionsReportView,
+  createStockCarryoverForm, createStockAdditionForm, createManualReversalForm
 };

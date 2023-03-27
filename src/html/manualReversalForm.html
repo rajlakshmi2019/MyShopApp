@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Pick a grade</title>
+    <link rel="stylesheet" href="../css/app.css">
+    <link rel="stylesheet" href="../css/body.css">
+    <link rel="stylesheet" href="../css/tray.css">
+    <link rel="stylesheet" href="../css/done.css">
+  </head>
+  <body>
+    <div id="grade-picker-div">
+      <h1 class="big-header-margin">Manual Reversal</h1>
+      <div class="wrapper-div lower-margin">
+        <div class="wrapper-div lower-margin">
+          <div class="input-header gold-color">
+            Reversal Date
+          </div>
+          <input type="date" class="input-text input-std-width" id="reversal-date" readonly>
+        </div>
+        <div class="wrapper-div half-width float-left">
+          <div class="input-header gold-color">
+            Gold Reversal Weight
+          </div>
+          <input type="text" class="input-text input-std-width gram-background" id="gold-weight">
+        </div>
+        <div class="wrapper-div half-width float-right">
+          <div class="input-header gold-color align-right">
+            Gold Reversal Amount
+          </div>
+          <input type="text" class="input-text input-std-width rupee-background float-right" id="gold-amount">
+        </div>
+      </div>
+      <div class="wrapper-div lower-margin">
+        <div class="wrapper-div half-width float-left">
+        <div class="input-header silver-color">
+          Silver Reversal Weight
+        </div>
+        <input type="text" class="input-text input-std-width gram-background" id="silver-weight">
+      </div>
+      <div class="wrapper-div half-width float-right">
+        <div class="input-header silver-color align-right">
+          Silver Reversal Amount
+        </div>
+        <input type="text" class="input-text input-std-width rupee-background float-right" id="silver-amount">
+      </div>
+      </div>
+    </div>
+    <div class="button-pair">
+      <button type="button" class="accept-button money-green" id="submit-button">Submit</button>
+      <button type="button" class="reject-button red-color" id="cancel-button">Cancel</button>
+    </div>
+  </body>
+  <script type="text/javascript">
+    require('./../renderers/manualReversalRenderer.js');
+  </script>
+</html>

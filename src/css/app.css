@@ -138,6 +138,10 @@
   box-sizing: border-box;
 }
 
+.input-std-width {
+  width: 180px;
+}
+
 .gst-input-text {
   width: 310px;
   background-color: white;
@@ -394,16 +398,65 @@ div, span, a, h2, h3, p {
   width: 100px;
 }
 
+.transactions-menu-btn {
+  background-color: #0d6901;
+  border-radius: 4px;
+  border: 2px solid #48DB48;
+  padding: 10px 10px;
+  cursor: pointer;
+  float: right;
+  margin: 20px 3px 0px;
+  font-weight: bold;
+  width: 140px;
+}
+
 #generate-report-btn:hover {
   border-color: #48DB48;
 }
 
-#generate-report-btn:focus {
+.transactions-menu-btn:hover {
+  border-color: #FFDF00;
+}
+
+#generate-report-btn:focus, .transactions-menu-btn:focus {
   outline: 0;
 }
 
-#gst-report-table {
+#gst-report-table, #transactions-report-table, #transactions-summary-table {
   color: #FFDF00;
+}
+
+#transactions-report-table, #transactions-report-header {
+  border: 0px !important;
+}
+
+#transactions-report-table-div {
+  overflow-y: auto;
+  max-height: 660px;
+  display: block;
+  border-top: 2px solid #1EB4FF;
+  border-bottom: 2px solid #1EB4FF;
+  border-collapse: collapse;
+}
+
+#transactions-summary-table-div {
+  margin: 20px 0px;
+}
+
+.transactions-color-reversed {
+  background: #7A040A;
+}
+
+.transactions-color-reversal {
+  background: #8b4401;
+}
+
+.transactions-color-stock, .transactions-color-cash {
+  background: #0d6901;
+}
+
+.transactions-color-checked {
+  background: #0040b6;
 }
 
 #gold-btn {

@@ -4,6 +4,7 @@ const {clearSelection, createHtmlElement, addTableHeader, addTableData, addEquiC
   parseSalesTable, getDesiNumber, consolidateEntries, getFromDesiRupeeNumber, generateTransactionId,
   formatDate, formatDateSlash, formatDateReverse, isMobileNumber, getRupeeDesiNumber} = require("./../utils.js");
 const ShopCalculator = require("./../ShopCalculator.js");
+const { readTransactionEntries } = require("../Dao.js");
 const Dao = remote.require("./Dao.js");
 
 /* add tab button listeners */
@@ -83,6 +84,10 @@ ipcRenderer.on('tab-name:update', (event, params) => {
     tabNameDiv.textContent = params.tabName;
     Dao.saveMobileNo(params.tabName);
   }
+});
+
+ipcRenderer.on('record:transactions', (event, configs) => {
+  finishTransaction(configs.tabId, configs);
 });
 
 /* Build tab button and content */
@@ -831,7 +836,7 @@ function buildNetTotalContainer(tabContent, set) {
   trayControlsContainer.appendChild(backButton);
   let billButton = createHtmlElement("button", "tray-window-button controller-button bill-button float-left", "bill-button-" + tabIndex, null, null);
   billButton.addEventListener("click", () => {
-    generateBill(tabIndex, false);
+    generateBill(tabIndex, false, true);
   });
   trayControlsContainer.appendChild(billButton);
   let netTotalDisplay = createHtmlElement(
@@ -1527,10 +1532,10 @@ function finishTransaction(tabId, additionalConfigs) {
   let date = new Date();
   let tabButton = getTabButton(tabId);
   let tabName = tabButton.textContent.slice(0, -1);
-  let transId = generateTransactionId(date);
+  let transId = additionalConfigs.transId;
   let totalDiscount = getTotalDiscount(tabId);
-  if (additionalConfigs.markAs === "Discount") {
-    totalDiscount += additionalConfigs.pending;
+  if (additionalConfigs.additionalDiscount > 0) {
+    totalDiscount += additionalConfigs.additionalDiscount;
   }
 
   // sales and purchase tables
@@ -1542,56 +1547,25 @@ function finishTransaction(tabId, additionalConfigs) {
   let purchaseEntries = parseTable(purchaseTable, true);
   let additionalChargeEntry = getOtherTransactionEntry(getAdditionalCharge(tabId));
   let discountEntry = getOtherTransactionEntry(totalDiscount);
+  let dueAmountEntry = getOtherTransactionEntry(additionalConfigs.dueAmount);
 
   // enrich transaction entries
   enrichTransactionEntries(salesEntries, transId, date, tabName, "Sales");
   enrichTransactionEntries(purchaseEntries, transId, date, tabName, "Purchase");
-  enrichTransactionEntries(additionalChargeEntry, transId, date, tabName, "Sales Extra");
+  enrichTransactionEntries(additionalChargeEntry, transId, date, tabName, "Additional Charges");
   enrichTransactionEntries(discountEntry, transId, date, tabName, "Discount");
+  enrichTransactionEntries(dueAmountEntry, transId, date, tabName, "Due Amount");
 
   // other transaction entries e.g. due, return
-  let allTransactionEntries = [salesEntries, purchaseEntries, additionalChargeEntry, discountEntry];
-  if (additionalConfigs.markAs != null) {
-    if (additionalConfigs.markAs !== "Discount") {
-      let otherEntry = getOtherTransactionEntry(additionalConfigs.pending);
-      enrichTransactionEntries(otherEntry, transId, date, tabName, additionalConfigs.markAs);
-      allTransactionEntries.push(otherEntry);
-    }
-  }
+  let allTransactionEntries = consolidateEntries([salesEntries, purchaseEntries, additionalChargeEntry, discountEntry, dueAmountEntry]);
 
   // persist transaction entries
-  if (salesEntries.length == 0 && purchaseEntries.length == 0
-    && additionalChargeEntry.length == 0) {
-      alert('No item selected. Please select items to complete this transaction.');
-  } else {
-    Dao
-      .persistTransactionEntries(date, consolidateEntries(allTransactionEntries))
-      .then(() => {
-          // bill totals
-          let billTotals = getTotals(tabId);
-          billTotals.pending_as = additionalConfigs.markAs;
-          billTotals.paid_amount = "₹ " + getDesiNumber(additionalConfigs.paid);
-          billTotals.pending_amount = "₹ " + getDesiNumber(additionalConfigs.pending);
-          billTotals.discount = "₹ " + getDesiNumber(totalDiscount);
-          if (billTotals.pending_as === "Discount") {
-            // update total bill when discount is updated
-            billTotals.total_bill = billTotals.paid_amount;
-
-            // Adjust for non-gst bill
-            if (additionalConfigs.paid < billTotals.total_bill_less_gst_val) {
-              billTotals.total_bill_less_gst = billTotals.paid_amount;
-              billTotals.discount_less_gst = "₹ " + getDesiNumber(billTotals.sub_total_less_gst_val - additionalConfigs.paid);
-            }
-          }
-
-          // generate bills
-          generateGSTBill(tabName, tabId, date, transId, salesEntries, purchaseEntries,
-            getAdditionalCharge(tabId), billTotals, false, false);
-        });
+  if (allTransactionEntries.length > 0) {
+    Dao.persistTransactionEntries(formatDate(date), allTransactionEntries);
   }
 }
 
-function generateBill(tabId, force) {
+function generateBill(tabId, force, recordTransactions) {
     let billParams = getBillParams(tabId, false);
     if (billParams.sales.length == 0 && billParams.purchase.length == 0 && billParams.additional == 0) {
       alert('No item selected. Please select items to complete this transaction.');
@@ -1684,6 +1658,7 @@ function enrichTransactionEntries(
     let transDateText = formatDate(transDate);
     for (let i=0; i<transEntries.length; i++) {
       transEntries[i]["Transaction_Id"] = transId;
+      transEntries[i]["Ref"] = "";
       transEntries[i]["Name"] = transName;
       transEntries[i]["Date"] = transDateText;
       transEntries[i]["Type"] = transType;

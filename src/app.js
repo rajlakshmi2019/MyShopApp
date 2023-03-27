@@ -3,6 +3,7 @@ const path = require('path');
 const {app, ipcMain} = require('electron');
 const windowFactory = require('./windowFactory.js');
 const Dao = require('./Dao.js');
+const { getMainWindow } = require('./windowFactory.js');
 
 /** Main process event handlers **/
 app.on('ready', () => {
@@ -13,6 +14,7 @@ app.on('ready', () => {
     windowFactory.loadMainWindowHomePage();
     windowFactory.getMainWindow().webContents.on('did-finish-load', addFirstTrayTab);
   });
+  Dao.setMainWindow(windowFactory.getMainWindow());
 });
 
 ipcMain.on('open:sell', () => {
@@ -100,6 +102,10 @@ ipcMain.on('payment:form', (event, configs) => {
   if (windowFactory.getPaymentAcceptForm() == null) {
     windowFactory.createPaymentAcceptForm(configs);
   }
+});
+
+ipcMain.on('record:transactions', (event, configs) => {
+  windowFactory.getMainWindow().webContents.send('record:transactions', configs);
 });
 
 ipcMain.on('bill:create', (event, configs) => {

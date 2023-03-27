@@ -128,11 +128,11 @@ function addColumnData(trElement, tableDataElements) {
 }
 
 function addCheckboxColumn(trElement, checkboxClassName, callbackIfChecked,
-  callbackIfUnchecked) {
+  callbackIfUnchecked, checked=true) {
     checkbox = document.createElement("input");
     checkbox.className = checkboxClassName;
     checkbox.type = "checkbox";
-    checkbox.checked = true;
+    checkbox.checked = checked;
     checkbox.addEventListener("change", function() {
       if (this.checked) {
         callbackIfChecked();
@@ -250,6 +250,10 @@ function getInputTextFloatValue(element) {
 }
 
 function getDesiNumber(number) {
+  if (number < 0) {
+    return "- " + getDesiNumber(-1 * number);
+  }
+  
   number = Math.round(number);
   let lastDigit = Math.abs(number%10);
   let numberWithoutLastDigit = Math.floor(number/10);
@@ -265,6 +269,10 @@ function getRupeeDesiNumber(number) {
 }
 
 function getDesiDecimalNumber(number) {
+  if (number < 0) {
+    return "- " + getDesiDecimalNumber(-1.0 * number);
+  }
+
   decimalPart = Math.round((number - Math.floor(number)) * 100) / 100;
   return getDesiNumber(Math.floor(number)) + decimalPart.toFixed(2).replace("0.", ".");
 }
@@ -413,6 +421,7 @@ module.exports = {
   addTableData,
   addEquiColumnTableData,
   addTableDataWithCheckbox,
+  addCheckboxColumn,
   emptyTable,
   emptyTableWithHeader,
   parseTable,

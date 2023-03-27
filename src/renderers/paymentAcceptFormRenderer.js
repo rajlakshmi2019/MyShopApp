@@ -1,5 +1,5 @@
 const {ipcRenderer, remote} = require("electron");
-const {clearSelection, isMobileNumber, getDesiNumber, getRupeeDesiNumber, getFromDesiRupeeNumber} = require("./../utils.js");
+const {clearSelection, isMobileNumber, getDesiNumber, getRupeeDesiNumber, getFromDesiRupeeNumber, generateTransactionId} = require("./../utils.js");
 
 /* ESC key event handling */
 window.addEventListener('keydown', closeCurrentWindow, true);
@@ -78,6 +78,16 @@ submitButton.addEventListener('click', (event) => {
       }
 
       billParams.type = "EST";
+      if (document.getElementById("record-transaction-checkbox").checked) {
+        billParams.id = generateTransactionId(new Date(billParams.bill_date_raw));
+        additionalConfigs = {
+          "tabId": billParams.tabId,
+          "transId": billParams.id,
+          "additionalDiscount": getFromDesiRupeeNumber(document.getElementById("pending-total").innerHTML),
+          "dueAmount": Number(dueInputVal)
+        };
+        ipcRenderer.send('record:transactions', additionalConfigs);
+      }
       ipcRenderer.send('bill:create', billParams);
       clearSelection();
       window.close();
