@@ -40,7 +40,7 @@
           </div>
           <div class="overflow-hidden">
             <div class="custom-box full-width float-left">
-              <label class="bill-detail-field fixed-width float-left" id="bill-no-text">ESTIMATE</label>
+              <label class="bill-detail-field fixed-width float-left" id="bill-no-text">TOKEN NO.</label>
               <label class="td-align-left font-bold float-left" id="bill-no"></label>
             </div>
             <div class="custom-box fixed-width float-right td-align-right">
@@ -52,8 +52,20 @@
           </div>
         </div>
         <br>
-        <div class="wrapper-div bill-contents">
+        <div class="wrapper-div bill-contents display-none" id="trans-details-wrapper">
           <div class="wrapper-div" id="trans-details"></div>
+        </div>
+        <div class="wrapper-div bill-contents display-none" id="trans-summary-wrapper">
+          <div class="wrapper-div" id="trans-summary">
+            <div class="float-left">
+              <h4 class="float-left" style="margin-top: 25px;">Opening Token No:&ensp;</h4>
+              <h2 class="float-right" id="opening-token-div"></h2>
+            </div>
+            <div class="float-right">
+              <h4 class="float-left" style="margin-top: 25px;">Closing Token No:&ensp;</h4>
+              <h2 class="float-right" id="closing-token-div"></h2>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -366,7 +366,7 @@ function getGSTReportView() {
 function createTransactionsReportView() {
   transactionsReportView = new BrowserWindow({
     width: 1300,
-    height: 900,
+    height: 700,
     frame: false,
     backgroundColor: "#363A42",
     parent: mainWindow, modal:true,

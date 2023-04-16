@@ -1,3 +1,5 @@
+const fs = require('fs');
+
 function clearSelection() {
   if(document.selection && document.selection.empty) {
       document.selection.empty();
@@ -292,11 +294,28 @@ function getFromDesiRupeeNumber(desiRupeeNumber) {
   return getFromDesiNumber(desiRupeeNumber.substring(2));
 }
 
+let getTokenNumber = function(year) {
+  try {
+    return parseInt(fs.readFileSync(process.env.BASE_DATA_DIR + year + '_token_number.csv')) + 1;
+  } catch(e) {
+    console.log(e);
+    return 1;
+  }
+}
+
+function padInt(n, len) {
+  n = '' + n;
+  if (n.length > len) {
+    return n;
+  }
+
+  return new Array(len - n.length + 1).join(0) + n;
+}
+
 function generateTransactionId(date) {
-  return "S" + process.env.MUNSHI_SYSTEM_NUMBER + "T"
-    + getTwoDigitInteger(date.getHours())
-    + getTwoDigitInteger(date.getMinutes())
-    + getTwoDigitInteger(date.getSeconds());
+  let tokenNumber = getTokenNumber(date.getFullYear());
+  fs.writeFileSync(process.env.BASE_DATA_DIR + date.getFullYear() + '_token_number.csv', tokenNumber);
+  return "S" + process.env.MUNSHI_SYSTEM_NUMBER + padInt(tokenNumber, 4);
 }
 
 function formatDate(date) {

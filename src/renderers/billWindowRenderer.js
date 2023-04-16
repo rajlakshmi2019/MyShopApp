@@ -159,7 +159,9 @@ function populateSalesBillTable(salesBillTable, lessGST, withHSN) {
       if (j == entry.items.length - 1) {
         cl += " section-end";
         if (entry.items[j].Metal === "Accessories") {
-          breakup = ""
+          breakup = "";
+        } else if (entry.items[j].Metal === "Silver" && !hasMaking(entry.items[j])) {
+          breakup = "";
         } else {
           var rate = entry.Metal.charAt(0) + " " + entry.Rate_Per_Gram + "/g";
           var making = entry.Making_Percentage == null ? (entry.Making_Per_Gram == null ?
@@ -327,6 +329,14 @@ function compare(a, b) {
     return 1;
   }
 
+  if (hasMaking(a) && !hasMaking(b)) {
+    return -1
+  }
+
+  if (!hasMaking(a) && hasMaking(b)) {
+    return 1
+  }
+
   if (a.Weight_In_Gram < b.Weight_In_Gram) {
     return -1;
   }
@@ -336,4 +346,8 @@ function compare(a, b) {
   }
 
   return 0;
+}
+
+function hasMaking(item) {
+  return (item.Making || item.Making_Per_Gram || item.Making_Percentage)
 }

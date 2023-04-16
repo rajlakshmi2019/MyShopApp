@@ -13,8 +13,8 @@ app.on('ready', () => {
     windowFactory.createMainWindow();
     windowFactory.loadMainWindowHomePage();
     windowFactory.getMainWindow().webContents.on('did-finish-load', addFirstTrayTab);
+    Dao.setMainWindow(windowFactory.getMainWindow());
   });
-  Dao.setMainWindow(windowFactory.getMainWindow());
 });
 
 ipcMain.on('open:sell', () => {

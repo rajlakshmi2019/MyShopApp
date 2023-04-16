@@ -18,6 +18,23 @@ ipcRenderer.on("update:date", (event, param) => {
   populateTransactionsTables();
 });
 
+let delButton = document.getElementById("delete-transactions-btn");
+delButton.addEventListener('click', (event) => {
+  event.preventDefault();
+  clearSelection();
+  let transDate = document.getElementById("date-input").value;
+  if (document.getElementsByClassName("transactions-color-checked").length > 0) {
+    alert("This option deletes all transactions, please use `Reversal` for selected transactions!");
+  } else if (confirm("Delete all transactions on " + transDate + "?")) {
+    Dao.deleteTransactionsFile(transDate);
+    populateTransactionsTables();
+  }
+});
+delButton.addEventListener("dblclick", (event) => {
+  event.preventDefault();
+  clearSelection();
+});
+
 let reversalButton = document.getElementById("transaction-reversal-btn");
 reversalButton.addEventListener('click', (event) => {
   event.preventDefault();
@@ -30,9 +47,11 @@ reversalButton.addEventListener('click', (event) => {
     }
   }
 
-  let currentDate = new Date();
-  Dao.addTransctionReversals(formatDate(currentDate), generateTransactionId(currentDate), transactionsToReverse);
-  populateTransactionsTables();
+  if (confirm("Reverse selected transactions?")) {
+    let currentDate = new Date();
+    Dao.addTransctionReversals(formatDate(currentDate), generateTransactionId(currentDate), transactionsToReverse);
+    populateTransactionsTables();
+  }
 });
 reversalButton.addEventListener("dblclick", (event) => {
   event.preventDefault();
@@ -68,6 +87,18 @@ addStockButton.addEventListener('click', (event) => {
   windowFactory.createStockAdditionForm(document.getElementById("date-input").value);
 });
 addStockButton.addEventListener("dblclick", (event) => {
+  event.preventDefault();
+  clearSelection();
+});
+
+
+let summaryButton = document.getElementById("summary-btn");
+summaryButton.addEventListener('click', (event) => {
+  event.preventDefault();
+  clearSelection();
+  Dao.createTransactionSummaryWindow(document.getElementById("date-input").value);
+});
+summaryButton.addEventListener("dblclick", (event) => {
   event.preventDefault();
   clearSelection();
 });

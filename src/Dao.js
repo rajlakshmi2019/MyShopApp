@@ -190,6 +190,9 @@ let getTransactions = function(transactionDate) {
 
 let getTransactionSummary = function(transactionDate) {
   let summary = {
+    "Opening_Token_No": null,
+    "Closing_Token_No": null,
+
     "Gold_Stock": 0,
     "Gold_Sales": 0,
     "Gold_Old_Purchase": 0,
@@ -208,6 +211,11 @@ let getTransactionSummary = function(transactionDate) {
 
   let transactions = getTransactions(transactionDate);
   for (let transaction of transactions) {
+    if (!summary['Opening_Token_No']) {
+      summary['Opening_Token_No'] = transaction['Transaction_Id'];
+    }
+    summary['Closing_Token_No'] = transaction['Transaction_Id'];
+
     let sign = transaction['Type'].endsWith("Reversal") ? -1 : 1;
     switch(transaction['Type']) {
       case "Sales":
@@ -285,7 +293,7 @@ let readTransactionEntries = function(transactionDate) {
 
 let carryOverStock = function(fromTransactionDate, toTransactionDate, transId) {
   let prevDaySummary = getTransactionSummary(fromTransactionDate);
-  addStockEntries(toTransactionDate, transId, prevDaySummary["Gold_Stock_Net"], prevDaySummary["Silver_Stock_Net"], prevDaySummary["Cash_Stock_Net"],
+  addStockEntries(toTransactionDate, transId, prevDaySummary["Gold_Stock_Net"], prevDaySummary["Silver_Stock_Net"], false ? prevDaySummary["Cash_Stock_Net"] : 0,
     true, fromTransactionDate);
 }
 
@@ -430,6 +438,13 @@ let persistTransactionEntries = function(transactionDate, transactionEntries) {
   appendToFileOverwritingLastBlock(transactionsFileName, iv, transactionEnc);
 }
 
+let deleteTransactionsFile = function(transactionDate) {
+  let file = process.env.BASE_DATA_DIR + transactionDate;
+  if (fs.existsSync(file)) {
+    fs.unlinkSync(file);
+  }
+}
+
 let createTransactionToken = function(transDate, transId, transactions) {
   if (transactions.length > 0) {
     createTransTokenWindow({
@@ -438,6 +453,14 @@ let createTransactionToken = function(transDate, transId, transactions) {
       transactions: transactions
     });
   }
+}
+
+let createTransactionSummaryWindow = function(transDate) {
+  createTransTokenWindow({
+    id: "DAILY SUMMARY",
+    bill_date: transDate,
+    summary: getTransactionSummary(transDate)
+  });
 }
 
 function createTransTokenWindow(configs) {
@@ -626,12 +649,14 @@ module.exports = {
   setMainWindow,
   getTransactions,
   getTransactionSummary,
+  createTransactionSummaryWindow,
   readTransactionEntries,
   carryOverStock,
   addStockEntries,
   addTransctionReversals,
   addManualTransctionReversals,
   persistTransactionEntries,
+  deleteTransactionsFile,
   getGSTSerialNumber,
   persistGSTRecord,
   savePDF,

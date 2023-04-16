@@ -28,14 +28,27 @@ function createTokenWindow() {
   document.getElementById("billing-date").textContent = configs.bill_date;
 
   // sales table
-  if (configs.transactions.length > 0) {
+  if (configs.transactions && configs.transactions.length > 0) {
+    document.getElementById("trans-details-wrapper").classList.remove("display-none");
     configs.transactions = configs.transactions.sort(compare);
 
     let transactionsTable = createHtmlElement("table", "bill-table sales-table estimate-invoice print-friendly", "trans-table-default", null, null);
     document.getElementById("trans-details").appendChild(transactionsTable);
 
-    addTableHeader(transactionsTable, ["Type", "Metal", "Weight", "Price"]);
+    addTableHeader(transactionsTable, ["Type", "Metal", "Weight", "Amount", "Ref"]);
     populateTransactionsTable(transactionsTable);
+  }
+
+  if (configs.summary) {
+    document.getElementById("trans-summary-wrapper").classList.remove("display-none");
+    document.getElementById("opening-token-div").textContent = configs.summary.Opening_Token_No;
+    document.getElementById("closing-token-div").textContent = configs.summary.Closing_Token_No;
+
+    let summaryTable = createHtmlElement("table", "bill-table sales-table estimate-invoice print-friendly", "summary-table-default", null, null);
+    document.getElementById("trans-summary").appendChild(summaryTable);
+
+    addTableHeader(summaryTable, ["Type", "Closing Stock", "Sales", "Purchase (Old)"]);
+    populateSummaryTable(configs.summary, summaryTable);
   }
 }
 
@@ -46,8 +59,70 @@ function populateTransactionsTable(salesBillTable) {
       wrapTableData(document.createTextNode(entry.Type)),
       wrapTableData(document.createTextNode(entry.Metal ? entry.Metal : "-")),
       wrapTableData(document.createTextNode(entry.Weight_In_Gram ? getDesiDecimalNumber(entry.Weight_In_Gram) + " g" : "-")),
-      wrapTableData(document.createTextNode(entry.Price ? getRupeeDesiNumber(entry.Price) : "-"))];
+      wrapTableData(document.createTextNode(entry.Price ? getRupeeDesiNumber(entry.Price) : "-")),
+      wrapTableData(document.createTextNode(entry.Ref ? entry.Ref : "-"))];
     let tr = addTableData(salesBillTable, tableRow);
+    tr.className  = "section-end";
+  }
+}
+
+function populateSummaryTable(summary, summaryTable) {
+  let tableRows = [
+    [
+      wrapTableData(document.createTextNode("Gold")),
+      wrapTableData(document.createTextNode(summary.Gold_Stock_Net ? getDesiDecimalNumber(summary.Gold_Stock_Net) + " g" : "-")),
+      wrapTableData(document.createTextNode(summary.Gold_Sales ? getDesiDecimalNumber(summary.Gold_Sales) + " g" : "-")),
+      wrapTableData(document.createTextNode(summary.Gold_Old_Purchase ? getDesiDecimalNumber(summary.Gold_Old_Purchase) + " g" : "-"))
+    ],
+    [
+      wrapTableData(document.createTextNode("Silver")),
+      wrapTableData(document.createTextNode(summary.Silver_Stock_Net ? getDesiDecimalNumber(summary.Silver_Stock_Net) + " g" : "-")),
+      wrapTableData(document.createTextNode(summary.Silver_Sales ? getDesiDecimalNumber(summary.Silver_Sales) + " g" : "-")),
+      wrapTableData(document.createTextNode(summary.Silver_Old_Purchase ? getDesiDecimalNumber(summary.Silver_Old_Purchase) + " g" : "-"))
+    ],
+    [
+      wrapTableData(document.createTextNode("Cash")),
+      wrapTableData(document.createTextNode(summary.Cash_Stock_Net ? getRupeeDesiNumber(summary.Cash_Stock_Net) + " g" : "-")),
+      wrapTableData(document.createTextNode(summary.Cash_Sales ? getRupeeDesiNumber(summary.Cash_Sales) + " g" : "-")),
+      wrapTableData(document.createTextNode(summary.Cash_Purchase ? getRupeeDesiNumber(summary.Cash_Purchase) + " g" : "-"))
+    ]
+  ];
+
+  if (summary.Cash_Additional_Charges && summary.Cash_Additional_Charges > 0) {
+    tableRows.push(
+      [
+        wrapTableData(document.createTextNode("Cash Additional Charges")),
+        wrapTableData(document.createTextNode(getRupeeDesiNumber(summary.Cash_Additional_Charges))),
+        wrapTableData(document.createTextNode("-")),
+        wrapTableData(document.createTextNode("-"))
+      ]
+    );
+  }
+
+  if (summary.Cash_Discount && summary.Cash_Discount > 0) {
+    tableRows.push(
+      [
+        wrapTableData(document.createTextNode("Cash Discount")),
+        wrapTableData(document.createTextNode(getRupeeDesiNumber(summary.Cash_Discount))),
+        wrapTableData(document.createTextNode("-")),
+        wrapTableData(document.createTextNode("-"))
+      ]
+    );
+  }
+
+  if (summary.Cash_Due && summary.Cash_Due > 0) {
+    tableRows.push(
+      [
+        wrapTableData(document.createTextNode("Cash Due")),
+        wrapTableData(document.createTextNode(getRupeeDesiNumber(summary.Cash_Due))),
+        wrapTableData(document.createTextNode("-")),
+        wrapTableData(document.createTextNode("-"))
+      ]
+    );
+  }
+
+  for (let tableRow of tableRows) {
+    let tr = addTableData(summaryTable, tableRow);
     tr.className  = "section-end";
   }
 }

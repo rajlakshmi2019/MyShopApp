@@ -407,7 +407,7 @@ div, span, a, h2, h3, p {
   float: right;
   margin: 20px 3px 0px;
   font-weight: bold;
-  width: 140px;
+  width: 130px;
 }
 
 #generate-report-btn:hover {
@@ -432,7 +432,7 @@ div, span, a, h2, h3, p {
 
 #transactions-report-table-div {
   overflow-y: auto;
-  max-height: 660px;
+  max-height: 460px;
   display: block;
   border-top: 2px solid #1EB4FF;
   border-bottom: 2px solid #1EB4FF;

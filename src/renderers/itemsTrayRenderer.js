@@ -7,6 +7,8 @@ const ShopCalculator = require("./../ShopCalculator.js");
 const { readTransactionEntries } = require("../Dao.js");
 const Dao = remote.require("./Dao.js");
 
+const noBreakupSet = new Set(["Silver Ring S", "Silver Ring M", "Silver Ring L", "Sil Locket", "Bhelwa", "Maduli", "Tabeej", "Maduli/Tabeej", "Chandrama", "Tangi/Chandrama"]);
+
 /* add tab button listeners */
 document.getElementById("tab-add-sell").addEventListener("click", () => {
   ipcRenderer.send('open:sell', null);
@@ -1491,6 +1493,10 @@ function getSalesEntryKey(entry) {
 function aggregateSalesEntries(salesEntries) {
   let aggregatedSalesMap = new Map();
   for (let entry of salesEntries) {
+    if (entry.Metal == "Silver" && noBreakupSet.has(entry.Item)) {
+      entry.Making = entry.Making_Per_Gram = entry.Making_Percentage = null;
+    }
+
     let salesEntryKey = getSalesEntryKey(entry).toString();
     if (aggregatedSalesMap.has(salesEntryKey)) {
       let aggregateEntry = aggregatedSalesMap.get(salesEntryKey);
