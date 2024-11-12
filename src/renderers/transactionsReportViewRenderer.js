@@ -47,10 +47,14 @@ reversalButton.addEventListener('click', (event) => {
     }
   }
 
-  if (confirm("Reverse selected transactions?")) {
-    let currentDate = new Date();
-    Dao.addTransctionReversals(formatDate(currentDate), generateTransactionId(currentDate), transactionsToReverse);
-    populateTransactionsTables();
+  if (transactionsToReverse.length === 0) {
+    alert("No transactions selected or Selection can't be reversed!!");
+  } else {
+    if (confirm("Reverse selected transactions?")) {
+      let currentDate = new Date();
+      Dao.addTransctionReversals(formatDate(currentDate), generateTransactionId(currentDate), transactionsToReverse);
+      populateTransactionsTables();
+    }
   }
 });
 reversalButton.addEventListener("dblclick", (event) => {
