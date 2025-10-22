@@ -134,8 +134,25 @@ let getSpecialDiscountOffer = function() {
     "Silver": {"metalRate": {"isFlatDiscount": true, "value": 0}, "makingCharge": {"isFlatDiscount": true, "value": 0}}};
 }
 
-let updateMetalRate = async function(metalRate, purchaseRateDiff) {
+let updateMetalRate = async function(metalRate, purchaseRateDiff,makingPercent1,makingPercent2) {
   let making = appConfigs.percentageMaking;
+
+  if (makingPercent1 && makingPercent2) {
+    making = {
+      Gold: {
+        RATE: Number(makingPercent2.Gold),
+        DIFF_UNIT: Number(makingPercent1.Gold) - Number(makingPercent2.Gold),
+        ENABLED: true
+      },
+      Silver: {
+        RATE: Number(makingPercent2.Silver),
+        DIFF_UNIT: Number(makingPercent1.Silver) - Number(makingPercent2.Silver),
+        ENABLED: true
+      }
+    };
+  }
+
+
   let metalRateContent = "METAL,RATE,DIFF,PERCENTAGE_MAKING,PERCENTAGE_MAKING_DIFF,PERCENTAGE_MAKING_ENABLED\n" +
     "Gold," + metalRate.Gold + "," + purchaseRateDiff.Gold + "," + making.Gold.RATE + "," + making.Gold.DIFF_UNIT + "," + (making.Gold.ENABLED ? "TRUE" : "FALSE") + "\n" +
     "Silver," + metalRate.Silver + "," + purchaseRateDiff.Silver + "," + making.Silver.RATE + "," + making.Silver.DIFF_UNIT + "," + (making.Silver.ENABLED ? "TRUE" : "FALSE") + "\n";

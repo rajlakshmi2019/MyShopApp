@@ -9,6 +9,15 @@ let configs = remote.getCurrentWindow().configs;
 
 createBillWindow();
 
+ // Set shop name dynamically from environment variables
+if (process.env.SHOP_NAME_1) {
+  document.getElementById("shop-name-1").textContent = process.env.SHOP_NAME_1;
+}
+ 
+if (process.env.SHOP_NAME_2) {
+  document.getElementById("shop-name-2").textContent = process.env.SHOP_NAME_2;
+}
+
 function createBillWindow() {
   // add print button
   let printButtonDiv = createHtmlElement("div", "no-print", "print-button-div", null, null);

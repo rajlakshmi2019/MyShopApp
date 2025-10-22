@@ -14,14 +14,21 @@ function closeCurrentWindow(e) {
 // Populate rates
 let metalRate = Dao.getTodaysRate();
 let purchaseRateDiff = Dao.getPurchaseRateDiff();
+let percentageMaking = Dao.getPercentageMaking();
 let purchaseRate = {
   "Gold": ShopCalculator.calculateMetalPurchaseRate(Number(metalRate.Gold), purchaseRateDiff.Gold),
   "Silver": ShopCalculator.calculateMetalPurchaseRate(Number(metalRate.Silver), purchaseRateDiff.Silver)
 };
 document.getElementById("gold-rate-sell").value = metalRate.Gold;
 document.getElementById("gold-rate-purchase").value = purchaseRate.Gold;
+document.getElementById("gold-making-percent-1").value = percentageMaking.Gold.RATE + percentageMaking.Gold.DIFF_UNIT;
+document.getElementById("gold-making-percent-2").value = percentageMaking.Gold.RATE;
+
 document.getElementById("silver-rate-sell").value = metalRate.Silver;
 document.getElementById("silver-rate-purchase").value = purchaseRate.Silver;
+document.getElementById("silver-making-percent-1").value = percentageMaking.Silver.RATE + percentageMaking.Silver.DIFF_UNIT;
+document.getElementById("silver-making-percent-2").value = percentageMaking.Silver.RATE;
+
 
 /* Done Button Event Listener */
 let submitButton = document.querySelector(".form-submit");
@@ -31,6 +38,11 @@ submitButton.addEventListener('click', (event) => {
   let goldRatePurchase = document.getElementById("gold-rate-purchase");
   let silverRateSell = document.getElementById("silver-rate-sell");
   let silverRatePurchase = document.getElementById("silver-rate-purchase");
+  let goldMaking1   = document.getElementById("gold-making-percent-1");
+  let goldMaking2   = document.getElementById("gold-making-percent-2");
+  let silverMaking1 = document.getElementById("silver-making-percent-1");
+  let silverMaking2 = document.getElementById("silver-making-percent-2");
+
   if (isNaN(Number(goldRateSell.value))) {
     goldRateSell.style.borderColor = "red";
     return;
@@ -43,23 +55,50 @@ submitButton.addEventListener('click', (event) => {
   } else if (isNaN(Number(silverRatePurchase.value))) {
     silverRatePurchase.style.borderColor = "red";
     return;
+  } else if (isNaN(Number(goldMaking1.value))) {
+    goldMaking1.style.borderColor = "red";
+  return;
+  } else if (isNaN(Number(goldMaking2.value))) {
+    goldMaking2.style.borderColor = "red";
+  return;
+  } else if (isNaN(Number(silverMaking1.value))) {
+    silverMaking1.style.borderColor = "red";
+  return;
+  } else if (isNaN(Number(silverMaking2.value))) {
+    silverMaking2.style.borderColor = "red";
+  return;
   } else if (
     Number(goldRateSell.value) != metalRate.Gold ||
     Number(silverRateSell.value) != metalRate.Silver ||
     Number(goldRatePurchase.value) != purchaseRate.Gold ||
-    Number(silverRatePurchase.value) != purchaseRate.Silver) {
+    Number(silverRatePurchase.value) != purchaseRate.Silver ||
+    Number(goldMaking1.value) != (percentageMaking.Gold.RATE + percentageMaking.Gold.DIFF_UNIT) ||
+    Number(goldMaking2.value) != percentageMaking.Gold.RATE ||
+    Number(silverMaking1.value) != (percentageMaking.Silver.RATE + percentageMaking.Silver.DIFF_UNIT) ||
+    Number(silverMaking2.value) != percentageMaking.Silver.RATE
+  ) {
       let updatedMetalRate = {
         Gold: Number(goldRateSell.value),
         Silver: Number(silverRateSell.value)
       };
-      let updatedPurchaseRate = {
+      let updatedPurchaseRate = {   
         Gold: ShopCalculator.calculateMetalPurchaseRateDiff(
           Number(goldRateSell.value), Number(goldRatePurchase.value)),
         Silver: ShopCalculator.calculateMetalPurchaseRateDiff(
           Number(silverRateSell.value), Number(silverRatePurchase.value))
       };
 
-      Dao.updateMetalRate(updatedMetalRate, updatedPurchaseRate);
+      // making-percent-1 & making-percent-2 dictionaries (both metals)
+      const updatedMakingPercentage1 = { // making 1
+        Gold:   Number(goldMaking1.value),
+        Silver: Number(silverMaking1.value)
+      };
+      const updatedMakingPercentage2 = { // making 2 (base)
+        Gold:   Number(goldMaking2.value),
+        Silver: Number(silverMaking2.value)
+      };
+
+      Dao.updateMetalRate(updatedMetalRate, updatedPurchaseRate, updatedMakingPercentage1, updatedMakingPercentage2);
     }
   window.close();
   clearSelection();

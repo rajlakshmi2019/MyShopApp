@@ -65,8 +65,8 @@ function calculatePrice(weight, metalRate, makingRate, minimumMaking, purity,
 function calculatePriceByPercentageMaking(weight, metalRate, percentageMakingRate, minimumMaking, purity,
   appliedGradeMakingDiff, newGradeMakingDiff, percentageDiffUnit, mmDiffUnit,
   cgstPercentage, sgstPercentage, discountOffer) {
-  let makingRate = metalRate * 0.01 * percentageMakingRate;
-  let diffUnit = metalRate * 0.01 * percentageDiffUnit;
+  let makingRate = metalRate * 0.01 * percentageMakingRate * purity;
+  let diffUnit = metalRate * 0.01 * percentageDiffUnit*purity;
 
   let offerMetalRate = calculateOfferPrice(metalRate, discountOffer != null ? discountOffer.metalRate : null);
   let discountOfferMakingCharge = null;
@@ -82,8 +82,8 @@ function calculatePriceByPercentageMaking(weight, metalRate, percentageMakingRat
       value: discountOffer.makingCharge.isFlatDiscount ? 0 : discountOffer.makingCharge.value
     };
   }
-  let offerMakingRate = calculateOfferPrice(offerMetalRate * 0.01 * percentageMakingRate, discountOfferMakingCharge);
-  let offerDiffUnit = calculateOfferPrice(offerMetalRate * 0.01 * percentageDiffUnit, discountOfferDiffUnit);
+  let offerMakingRate = calculateOfferPrice(offerMetalRate * 0.01 * percentageMakingRate * purity, discountOfferMakingCharge);
+  let offerDiffUnit = calculateOfferPrice(offerMetalRate * 0.01 * percentageDiffUnit*purity, discountOfferDiffUnit);
   return calculatePriceAndOfferPrice(weight, metalRate, offerMetalRate,
     makingRate, offerMakingRate, minimumMaking, purity, appliedGradeMakingDiff,
     newGradeMakingDiff, diffUnit, offerDiffUnit, mmDiffUnit, cgstPercentage, sgstPercentage, discountOffer);

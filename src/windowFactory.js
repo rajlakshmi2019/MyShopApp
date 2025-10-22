@@ -156,7 +156,7 @@ function getGradePickerWindow() {
 
 function createUpdateConfigsWindow() {
   updateConfigsWindow = new BrowserWindow({
-    width: 440,
+    width: 880,
     height: 340,
     frame: false,
     backgroundColor:'#363A42',
